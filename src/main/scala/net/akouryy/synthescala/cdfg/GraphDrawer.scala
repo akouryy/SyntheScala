@@ -77,15 +77,17 @@ class GraphDrawer:
           case Node.Input(n) => s"""${id(nd)} [label="$n: in"];"""
           case Node.Const(v, n) => s"""${id(nd)} [label="$n: $v"];"""
           case Node.Output(_) => s"""${id(nd)} [label="out"];"""
-          case Node.BinOp(op, _, _, a) => s"""${id(nd)} [label="$a: $op"];"""
+          case Node.BinOp(op, l, r, a) => s"""${id(nd)} [label="$a: $l$op$r"];"""
           case Node.Call(fn, args, ret) =>
             s"""${id(nd)} [label="$ret: $fn(${args.mkString(",")})"];"""
 
       for
+        to <- nodes
+        read = to.read
         from <- nodes
         a <- from.written
-        to <- nodes
-        if to.read.contains(a)
+        i = read.indexOf(a)
+        if i >= 0
       do
         current ++= s"""${id(from)} -> ${id(to)}; """
 
