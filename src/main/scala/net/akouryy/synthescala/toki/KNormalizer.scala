@@ -17,26 +17,26 @@ object KNormalizer:
     expr match
       case Num(_) | Ref(_) => insert(expr)
       case Let(Entry(x, t), expr, body) =>
-        convert(Some(x), expr) { _ =>
+        convert(Some(x), expr):
+         _ =>
           convert(name, body)(kont)
-        }
       case Bin(op, left, right) =>
-        convert(None, left) { x =>
-          convert(None, right) { y =>
+        convert(None, left):
+         x =>
+          convert(None, right):
+           y =>
             insert(Bin(op, Ref(x), Ref(y)))
-          }
-        }
       case Call(name, args) =>
         args.foldLeft { (xs: List[Expr]) => insert(Call(name, xs)) } { (gen, arg) =>
           xs => convert(None, arg)(x => gen(Ref(x) :: xs))
         } (Nil)
       case If(cond, tru, fls) =>
-        convert(None, cond) { x =>
+        convert(None, cond):
+         x =>
           insert(If(Ref(x),
             convert(None, tru)(Expr.Ref(_)),
             convert(None, fls)(Expr.Ref(_)),
           ))
-        }
   end convert
 
   def apply(expr: Expr) = convert(None, expr)(Expr.Ref(_))

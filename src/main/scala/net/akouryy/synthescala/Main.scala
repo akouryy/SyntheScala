@@ -46,6 +46,8 @@ object Main:
     PP.pprintln(k)
     val graph = cdfg.Specializer()(fun.copy(body=k))
     PP.pprintln(graph)
+    cdfg.Liveness.insertInOuts(graph)
+    PP.pprintln(graph)
     Files.write(Paths.get(s"dist/${fun.name}.dot"),
       cdfg.GraphDrawer()(graph).getBytes(StandardCharsets.UTF_8),
     )

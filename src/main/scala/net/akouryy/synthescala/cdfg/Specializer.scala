@@ -18,7 +18,6 @@ class Specializer:
       normalizationMap.getOrElse(x, x)
     else
       writtenID += x
-      currentNodes += Node.Input(x)
       x
 
   private def specializeExpr(dest: String, expr: toki.Expr): Unit =
@@ -27,18 +26,15 @@ class Specializer:
       case Num(i) =>
         writtenID += dest
         currentNodes += Node.Const(i, dest)
-        currentNodes += Node.Output(dest)
       case Ref(n) =>
         writtenID += dest
         normalizationMap(dest) = normalize(n)
       case Bin(op, Ref(l), Ref(r)) =>
         writtenID += dest
         currentNodes += Node.BinOp(op, normalize(l), normalize(r), dest)
-        currentNodes += Node.Output(dest)
       case Call(fn, args) =>
         writtenID += dest
         currentNodes += Node.Call(fn, args.map(a => normalize(a.asInstanceOf[Ref].name)), dest)
-        currentNodes += Node.Output(dest)
       case Let(toki.Entry(n, t), x, b) =>
         specializeExpr(n, x)
         specializeExpr(dest, b)
@@ -50,7 +46,7 @@ class Specializer:
 
         // ifの前のブロックを登録
         currentGraph.blocks(beginBI) =
-          Block(beginBI, currentNodes.toIndexedSeq, currentInputJumpIndex, branchJI)
+          Block(beginBI, currentNodes.toSet, currentInputJumpIndex, branchJI)
         currentNodes.clear()
         writtenID.clear()
         // if分岐を登録
@@ -63,7 +59,7 @@ class Specializer:
         // 真分岐の最後のブロックを登録
         val truLastBI = currentBlockIndex
         currentGraph.blocks(truLastBI) =
-          Block(truLastBI, currentNodes.toIndexedSeq, currentInputJumpIndex, mergeJI)
+          Block(truLastBI, currentNodes.toSet, currentInputJumpIndex, mergeJI)
         currentNodes.clear()
         writtenID.clear()
 
@@ -74,7 +70,7 @@ class Specializer:
         // 偽分岐の最後のブロックを登録
         val flsLastBI = currentBlockIndex
         currentGraph.blocks(flsLastBI) =
-          Block(flsLastBI, currentNodes.toIndexedSeq, currentInputJumpIndex, mergeJI)
+          Block(flsLastBI, currentNodes.toSet, currentInputJumpIndex, mergeJI)
         currentNodes.clear()
         writtenID.clear()
 
@@ -89,7 +85,6 @@ class Specializer:
         currentInputJumpIndex = mergeJI
         currentNodes.clear()
         writtenID.clear()
-        currentNodes += Node.Input(dest)
         writtenID += dest
       case _ => assert(false, expr)
   end specializeExpr
@@ -106,9 +101,8 @@ class Specializer:
 
     val normalizedDest = normalize(dest, checkWritten=false)
     val retJI = JumpIndex.generate()
-    currentNodes += Node.Output(normalizedDest)
     currentGraph.blocks(currentBlockIndex) =
-      Block(currentBlockIndex, currentNodes.toIndexedSeq, currentInputJumpIndex, retJI)
+      Block(currentBlockIndex, currentNodes.toSet, currentInputJumpIndex, retJI)
     currentNodes.clear()
     writtenID.clear()
     currentGraph.jumps(retJI) =

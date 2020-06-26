@@ -39,16 +39,22 @@ final case class JumpIndex(indices: List[Int]) extends Ordered[JumpIndex]:
 object JumpIndex:
   private[this] var cnt = -1
 
-  def generate(prefix: JumpIndex = JumpIndex(Nil)): JumpIndex = {
+  def generate(prefix: JumpIndex = JumpIndex(Nil)): JumpIndex =
     cnt += 1
     JumpIndex(prefix.indices :+ cnt) // O(n)
-  }
 
 case class Block(
   i: BlockIndex,
-  /*names: Map[String, Int /* node idx */],*/ nodes: IndexedSeq[Node],
+  /*names: Map[String, Int /* node idx */],*/ nodes: Set[Node],
   inJump: JumpIndex, outJump: JumpIndex,
-)
+):
+  def defs: Set[String] = nodes.flatMap:
+    case Node.Input(_) => Nil
+    case nd => nd.written
+
+  def uses: Set[String] = nodes.flatMap:
+    case Node.Output(_) => Nil
+    case nd => nd.read
 
 enum Node:
   case Input(name: String)
