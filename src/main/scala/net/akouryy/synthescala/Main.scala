@@ -48,6 +48,8 @@ object Main:
     PP.pprintln(graph)
     cdfg.Liveness.insertInOuts(graph)
     PP.pprintln(graph)
+    cdfg.optimize.Optimizer(graph)
+    PP.pprintln(graph)
     Files.write(Paths.get(s"dist/${fun.name}.dot"),
       cdfg.GraphDrawer()(graph).getBytes(StandardCharsets.UTF_8),
     )

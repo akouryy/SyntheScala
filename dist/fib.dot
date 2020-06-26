@@ -11,15 +11,13 @@ Jump3[
 Block1 -> Jump3;
 Jump3 -> Block2 [label="@8"];
 Jump3 -> Block3 [label="!@8"];
-Jump4[label = "Merge.4"; shape = invtrapezium; style = rounded];
-Block2 -> Jump4 [label="@9"];Block3 -> Jump4 [label="@13"];
-Jump4 -> Block4 [label="@14"];
-Jump5[label = "Return.5"; shape = lpromoter];
-Block4 -> Jump5 [label="@14"];
+Jump6[label = "Return.6"; shape = lpromoter];
+Block2 -> Jump6 [label="@9"];
+Jump7[label = "Return.7"; shape = lpromoter];
+Block3 -> Jump7 [label="@13"];
 Block1 [label = "Block1"];
 Block2 [label = "Block2"];
 Block3 [label = "Block3"];
-Block4 [label = "Block4"];
 subgraph cluster_dfg_Block1{
 node [shape = oval];
 label = "Block1";
@@ -29,7 +27,4 @@ label = "Block2";
 ndBlock2_0 [label="@9: 1"];ndBlock2_1 [label="out"];ndBlock2_0 -> ndBlock2_1; }subgraph cluster_dfg_Block3{
 node [shape = oval];
 label = "Block3";
-ndBlock3_0 [label="a: in"];ndBlock3_1 [label="b: in"];ndBlock3_2 [label="@10: a+b"];ndBlock3_3 [label="out"];ndBlock3_4 [label="@11: 1"];ndBlock3_5 [label="@12: n-@11"];ndBlock3_6 [label="@13: fib(@12,@10,a)"];ndBlock3_7 [label="n: in"];ndBlock3_4 -> ndBlock3_5; ndBlock3_7 -> ndBlock3_5; ndBlock3_0 -> ndBlock3_6; ndBlock3_2 -> ndBlock3_6; ndBlock3_5 -> ndBlock3_6; ndBlock3_0 -> ndBlock3_2; ndBlock3_1 -> ndBlock3_2; ndBlock3_6 -> ndBlock3_3; }subgraph cluster_dfg_Block4{
-node [shape = oval];
-label = "Block4";
-ndBlock4_0 [label="@14: in"];ndBlock4_1 [label="out"];ndBlock4_0 -> ndBlock4_1; }}
+ndBlock3_0 [label="a: in"];ndBlock3_1 [label="b: in"];ndBlock3_2 [label="@10: a+b"];ndBlock3_3 [label="out"];ndBlock3_4 [label="@11: 1"];ndBlock3_5 [label="@12: n-@11"];ndBlock3_6 [label="@13: fib(@12,@10,a)"];ndBlock3_7 [label="n: in"];ndBlock3_4 -> ndBlock3_5; ndBlock3_7 -> ndBlock3_5; ndBlock3_0 -> ndBlock3_6; ndBlock3_2 -> ndBlock3_6; ndBlock3_5 -> ndBlock3_6; ndBlock3_0 -> ndBlock3_2; ndBlock3_1 -> ndBlock3_2; ndBlock3_6 -> ndBlock3_3; }}
