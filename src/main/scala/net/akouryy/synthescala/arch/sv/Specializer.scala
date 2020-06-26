@@ -27,15 +27,18 @@ class Specializer:
       case Num(i) =>
         writtenID += dest
         currentNodes += Node.Const(i, dest)
+        currentNodes += Node.Output(dest)
       case Ref(n) =>
         writtenID += dest
         normalizationMap(dest) = normalize(n)
       case Bin(op, Ref(l), Ref(r)) =>
         writtenID += dest
         currentNodes += Node.BinOp(op, normalize(l), normalize(r), dest)
+        currentNodes += Node.Output(dest)
       case Call(fn, args) =>
         writtenID += dest
         currentNodes += Node.Call(fn, args.map(a => normalize(a.asInstanceOf[Ref].name)), dest)
+        currentNodes += Node.Output(dest)
       case Let(toki.Entry(n, t), x, b) =>
         specializeExpr(n, x)
         specializeExpr(dest, b)
@@ -86,6 +89,8 @@ class Specializer:
         currentInputJumpIndex = mergeJI
         currentNodes.clear()
         writtenID.clear()
+        currentNodes += Node.Input(dest)
+        writtenID += dest
       case _ => assert(false, expr)
   end specializeExpr
 
@@ -99,13 +104,15 @@ class Specializer:
 
     specializeExpr(dest, f.body)
 
+    val normalizedDest = normalize(dest, checkWritten=false)
     val retJI = JumpIndex.generate()
+    currentNodes += Node.Output(normalizedDest)
     currentGraph.blocks(currentBlockIndex) =
       Block(currentBlockIndex, currentNodes.toIndexedSeq, currentInputJumpIndex, retJI)
     currentNodes.clear()
     writtenID.clear()
     currentGraph.jumps(retJI) =
-      Jump.Return(retJI, normalize(dest, checkWritten=false), currentBlockIndex)
+      Jump.Return(retJI, normalizedDest, currentBlockIndex)
     currentGraph
   end apply
 

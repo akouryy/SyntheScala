@@ -14,9 +14,9 @@ val PP: PPrinter = pprint.copy(additionalHandlers = {
 
   case Node.Const(v, n) => Infix(Literal(n), "=Const", PP.treeify(v))
   case Node.BinOp(op, l, r, a) =>
-    Infix(PP.treeify(a), "=BinOP", Infix(Literal(l), op, Literal(r)))
+    Infix(Literal(a), "=BinOP", Infix(Literal(l), op, Literal(r)))
   case Node.Call(fn, args, ret) =>
-    Infix(PP.treeify(ret), "=Call", Apply(fn, args.iterator.map(PP.treeify)))
+    Infix(Literal(ret), "=Call", Apply(fn, args.iterator.map(PP.treeify)))
 
 }: PartialFunction[Any, Tree])
 

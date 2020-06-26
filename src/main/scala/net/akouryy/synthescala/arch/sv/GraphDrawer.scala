@@ -54,7 +54,45 @@ class GraphDrawer:
       })
     }
 
-    for (Block(i, nodes, _, _) <- f.blocks.valuesIterator) {
+    for Block(i, nodes, _, _) <- f.blocks.valuesIterator do
+      if nodes.isEmpty then
+        current ++= s"""$i [label = "$i\\l(0行)"]""" + "\n"
+      else
+        current ++= s"""$i [label = "$i"];""" + "\n"
+
+    for
+      Block(i, nodes, _, _) <- f.blocks.valuesIterator
+      if nodes.nonEmpty
+    do
+      val ids = mutable.Map.empty[Node, Int]
+      def id(node: Node) = s"nd${i}_${ids.getOrElseUpdate(node, ids.size)}"
+
+      current ++=
+        s"""|subgraph cluster_dfg_$i{
+            |node [shape = oval];
+            |label = "$i";
+            |""".stripMargin
+      for nd <- nodes do
+        current ++= nd.match
+          case Node.Input(n) => s"""${id(nd)} [label="$n: in"];"""
+          case Node.Const(v, n) => s"""${id(nd)} [label="$n: $v"];"""
+          case Node.Output(_) => s"""${id(nd)} [label="out"];"""
+          case Node.BinOp(op, _, _, a) => s"""${id(nd)} [label="$a: $op"];"""
+          case Node.Call(fn, args, ret) =>
+            s"""${id(nd)} [label="$ret: $fn(${args.mkString(",")})"];"""
+
+      for
+        from <- nodes
+        a <- from.written
+        to <- nodes
+        if to.read.contains(a)
+      do
+        current ++= s"""${id(from)} -> ${id(to)}; """
+
+      current ++= "}"
+    end for
+
+    /*for (Block(i, nodes, _, _) <- f.blocks.valuesIterator) {
       if (nodes.isEmpty) {
         current ++= s"""$i [label = "$i\\l(0行)"]""" + "\n"
       } else {
@@ -67,7 +105,8 @@ class GraphDrawer:
               |</table>
               |>];""".stripMargin
       }
-    }
+    }*/
+
     current ++= s"}\n"
     current.toString
   end apply
