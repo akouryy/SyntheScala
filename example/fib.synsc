@@ -1,0 +1,5 @@
+def fib(n: U[6], a: U[32], b: U[32]): U[32] =
+  if n == 0
+    1
+  else
+    fib(n - 1, a + b, a)

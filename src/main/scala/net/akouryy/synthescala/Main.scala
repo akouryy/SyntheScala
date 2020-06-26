@@ -1,5 +1,8 @@
 package net.akouryy.synthescala
 
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Paths, Files}
+import arch.sv.Specializer
 import toki._
 
 object Main:
@@ -37,6 +40,13 @@ object Main:
     )
 
   def main(args: Array[String]): Unit =
-    println("Hello world!")
-    println(KNormalizer(add7.body))
-    println(KNormalizer(fib.body))
+    Seq(add7, fib).map(f)
+
+  private def f(fun: Fun): Unit =
+    val k = KNormalizer(fun.body)
+    PP.pprintln(k)
+    val cdfg = Specializer()(fun.copy(body=k))
+    PP.pprintln(cdfg)
+    Files.write(Paths.get(s"dist/${fun.name}.dot"),
+      arch.sv.GraphDrawer()(cdfg).getBytes(StandardCharsets.UTF_8),
+    )

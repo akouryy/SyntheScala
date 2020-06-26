@@ -1,0 +1,35 @@
+digraph Program_ {
+graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];
+node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
+edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
+Jump2[label = "StartFun.2"; shape = component];
+Jump2 -> Block1;
+Jump3[
+  label = "Branch.3(~8)";
+  shape = trapezium; style = rounded;
+];
+Block1 -> Jump3;
+Jump3 -> Block2 [label=true];
+Jump3 -> Block3 [label=false];
+Jump4[label = "Merge.4"; shape = invtrapezium; style = rounded];
+Block2 -> Jump4 [label="~9"];Block3 -> Jump4 [label="~13"];
+Jump4 -> Block4 [label="~14"];
+Jump5[label = "Return.5"; shape = lpromoter];
+Block4 -> Jump5 [label="~14"];
+Block1 [shape = plain; label = <
+<table border="0" cellborder="1" cellspacing="0">
+  <tr><td align="left" balign="left" valign="top">Vector(~7 =Const 0L, Input(&quot;n&quot;), &quot;~8&quot; =BinOP n == ~7)</td></tr>
+</table>
+>];Block2 [shape = plain; label = <
+<table border="0" cellborder="1" cellspacing="0">
+  <tr><td align="left" balign="left" valign="top">Vector(~9 =Const 1L)</td></tr>
+</table>
+>];Block3 [shape = plain; label = <
+<table border="0" cellborder="1" cellspacing="0">
+  <tr><td align="left" balign="left" valign="top">Vector(<br />  Input(&quot;a&quot;),<br />  Input(&quot;b&quot;),<br />  &quot;~10&quot; =BinOP a + b,<br />  ~11 =Const 1L,<br />  Input(&quot;n&quot;),<br />  &quot;~12&quot; =BinOP n - ~11,<br />  &quot;~13&quot; =Call fib(&quot;~12&quot;, &quot;~10&quot;, &quot;a&quot;)<br />)</td></tr>
+</table>
+>];Block4 [shape = plain; label = <
+<table border="0" cellborder="1" cellspacing="0">
+  <tr><td align="left" balign="left" valign="top">Vector(Input(&quot;~14&quot;))</td></tr>
+</table>
+>];}

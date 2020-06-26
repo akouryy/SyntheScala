@@ -5,4 +5,4 @@ object ID:
 
   def temp(): String =
     maxTemp += 1
-    s"@temp$maxTemp"
+    s"~$maxTemp"

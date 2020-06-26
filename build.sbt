@@ -17,5 +17,8 @@ lazy val root = project
       "-Yindent-colons",
     ),
 
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %% "pprint" % "0.5.6" withDottyCompat scalaVersion.value,
+      "com.novocode" % "junit-interface" % "0.11" % "test",
+    )
   )
