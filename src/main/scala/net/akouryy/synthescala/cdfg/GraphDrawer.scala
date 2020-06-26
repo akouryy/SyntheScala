@@ -1,30 +1,29 @@
 // Forked from https://github.com/cpu2019-5/anscaml/blob/master/src/main/scala/net/akouryy/anscaml/arch/tig/GraphDrawer.scala (MIT License)
 
 package net.akouryy.synthescala
-package arch.sv
+package cdfg
 
 import scala.collection.mutable
 
 class GraphDrawer:
   private val current = new StringBuilder
 
-  private def unsafeEscape(str: String): String = {
+  private def unsafeEscape(str: String): String =
     str.replaceAll("&", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-      .replaceAll("\"", "&quot;").replaceAll("\n", "<br />")
-  }
+       .replaceAll("\"", "&quot;").replaceAll("\n", "<br />")
 
   //noinspection SpellCheckingInspection
   def apply(f: CDFG): String =
     current.clear()
     current ++=
-    s"""digraph Program_ {
-        |graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];
-        |node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
-        |edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
-        |""".stripMargin
+      s"""digraph Program_ {
+          |graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];
+          |node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
+          |edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
+          |""".stripMargin
 
-    for (j <- f.jumps.valuesIterator) {
-      current ++= (j match {
+    for j <- f.jumps.valuesIterator do
+      current ++= j.match
         case Jump.StartFun(i, ob) =>
           s"""$i[label = "StartFun.${i.indexString}"; shape = component];
               |$i -> $ob;
@@ -35,12 +34,12 @@ class GraphDrawer:
               |""".stripMargin
         case Jump.Branch(i, cond, ib, tob, fob) =>
           s"""$i[
-              |  label = "Branch.${i.indexString}(${cond})";
+              |  label = "Branch.${i.indexString}";
               |  shape = trapezium; style = rounded;
               |];
               |$ib -> $i;
-              |$i -> $tob [label=true];
-              |$i -> $fob [label=false];
+              |$i -> $tob [label="$cond"];
+              |$i -> $fob [label="!$cond"];
               |""".stripMargin
         case Jump.Merge(i, ibs, inss, ob, ons) =>
           val inputEdges =
@@ -51,8 +50,8 @@ class GraphDrawer:
               |$inputEdges
               |$i -> $ob [label="${ons.mkString(",")}"];
               |""".stripMargin
-      })
-    }
+      // end match
+    end for
 
     for Block(i, nodes, _, _) <- f.blocks.valuesIterator do
       if nodes.isEmpty then
@@ -72,6 +71,7 @@ class GraphDrawer:
             |node [shape = oval];
             |label = "$i";
             |""".stripMargin
+
       for nd <- nodes do
         current ++= nd.match
           case Node.Input(n) => s"""${id(nd)} [label="$n: in"];"""
@@ -91,21 +91,6 @@ class GraphDrawer:
 
       current ++= "}"
     end for
-
-    /*for (Block(i, nodes, _, _) <- f.blocks.valuesIterator) {
-      if (nodes.isEmpty) {
-        current ++= s"""$i [label = "$i\\l(0行)"]""" + "\n"
-      } else {
-        current ++=
-          s"""$i [shape = plain; label = <
-              |<table border="0" cellborder="1" cellspacing="0">
-              |  <tr><td align="left" balign="left" valign="top">${
-                   unsafeEscape(PPBlack.tokenize(nodes).mkString)
-                 }</td></tr>
-              |</table>
-              |>];""".stripMargin
-      }
-    }*/
 
     current ++= s"}\n"
     current.toString

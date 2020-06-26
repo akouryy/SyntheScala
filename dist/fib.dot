@@ -5,12 +5,12 @@ edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
 Jump2[label = "StartFun.2"; shape = component];
 Jump2 -> Block1;
 Jump3[
-  label = "Branch.3(~8)";
+  label = "Branch.3";
   shape = trapezium; style = rounded;
 ];
 Block1 -> Jump3;
-Jump3 -> Block2 [label=true];
-Jump3 -> Block3 [label=false];
+Jump3 -> Block2 [label="~8"];
+Jump3 -> Block3 [label="!~8"];
 Jump4[label = "Merge.4"; shape = invtrapezium; style = rounded];
 Block2 -> Jump4 [label="~9"];Block3 -> Jump4 [label="~13"];
 Jump4 -> Block4 [label="~14"];

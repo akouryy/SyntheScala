@@ -1,7 +1,7 @@
 // Forked from https://github.com/cpu2019-5/anscaml/blob/master/src/main/scala/net/akouryy/anscaml/arch/tig/asm/Program.scala (MIT License)
 
 package net.akouryy.synthescala
-package arch.sv
+package cdfg
 
 import scala.collection.mutable
 
