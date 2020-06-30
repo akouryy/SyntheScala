@@ -53,3 +53,5 @@ object Main:
     Files.write(Paths.get(s"dist/${fun.name}.dot"),
       cdfg.GraphDrawer()(graph).getBytes(StandardCharsets.UTF_8),
     )
+    val schedule = cdfg.schedule.GorgeousScheduler(graph).schedule
+    PP.pprintln(schedule)

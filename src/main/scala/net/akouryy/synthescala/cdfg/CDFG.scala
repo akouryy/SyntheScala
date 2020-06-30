@@ -56,12 +56,22 @@ case class Block(
     case Node.Output(_) => Nil
     case nd => nd.read
 
+  lazy val writeMap: Map[String, Node] = nodes.flatMap(nd => nd.written.map(_ -> nd)).toMap
+
+  lazy val readMap: Map[String, Seq[Node]] =
+    val res = mutable.Map.empty[String, List[Node]]
+    for nd <- nodes; id <- nd.read do
+      res(id) = nd :: res.getOrElse(id, Nil)
+    res.toMap
+
 enum Node:
   case Input(name: String)
   case Const(value: Long, name: String)
   case Output(name: String)
   case BinOp(op: String, left: String, right: String, ans: String)
   case Call(fn: String, args: Seq[String], ret: String)
+
+  override lazy val hashCode = scala.util.hashing.MurmurHash3.productHash(this)
 
   def read: Seq[String] = this match
     case Input(_) => Nil
