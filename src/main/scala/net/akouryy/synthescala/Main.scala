@@ -52,7 +52,8 @@ object Main:
     PP.pprintln(graph)
     val schedule = cdfg.schedule.GorgeousScheduler(graph).schedule
     PP.pprintln(schedule)
-    PP.pprintln(cdfg.bind.RegisterAllocator(graph, schedule).interferenceGraph.sets)
+    val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule).allocate
+    PP.pprintln(regAlloc)
     Files.write(Paths.get(s"dist/${fun.name}.dot"),
-      cdfg.GraphDrawer()(graph, schedule).getBytes(StandardCharsets.UTF_8),
+      cdfg.GraphDrawer(graph, schedule, regAlloc).draw.getBytes(StandardCharsets.UTF_8),
     )

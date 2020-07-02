@@ -9,6 +9,8 @@ final class CDFG:
   val blocks: mutable.SortedMap[BlockIndex, Block] = mutable.SortedMap[BlockIndex, Block]()
   val jumps: mutable.SortedMap[JumpIndex, Jump] = mutable.SortedMap[JumpIndex, Jump]()
 
+  def inJump(b: Block) = jumps(b.inJumpIndex)
+
 final case class BlockIndex(indices: List[Int]) extends Ordered[BlockIndex]:
   override def toString: String = s"Block$indexString"
 
@@ -46,7 +48,7 @@ object JumpIndex:
 case class Block(
   i: BlockIndex,
   /*names: Map[String, Int /* node idx */],*/ nodes: Set[Node],
-  inJump: JumpIndex, outJump: JumpIndex,
+  inJumpIndex: JumpIndex, outJump: JumpIndex,
 ):
   def defs: Set[String] = nodes.flatMap:
     case Node.Input(_) => Nil
@@ -63,6 +65,11 @@ case class Block(
     for nd <- nodes; id <- nd.read do
       res(id) = nd :: res.getOrElse(id, Nil)
     res.toMap
+
+  def stateToNodes(sche: schedule.Scheduler.Schedule): collection.MultiDict[State, Node] =
+    mutable.SortedMultiDict.from:
+      for node <- nodes yield sche(i, node) -> node
+end Block
 
 enum Node:
   case Input(name: String)

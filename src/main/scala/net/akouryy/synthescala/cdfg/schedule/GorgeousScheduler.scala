@@ -29,7 +29,7 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
       if !states.contains(bi, nd)
         nd match
           case _: (Node.Input | Node.Const) =>
-            states((bi, nd)) = states(block.inJump)
+            states((bi, nd)) = states(block.inJumpIndex)
           case _ =>
             states((bi, nd)) =
               nd.read.map(r => states(bi, block.writeMap(r))).max.succ

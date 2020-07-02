@@ -5,7 +5,7 @@ package cdfg
 
 import scala.collection.mutable
 
-class GraphDrawer:
+class GraphDrawer(f: CDFG, sche: schedule.Scheduler.Schedule, regs: bind.RegisterAllocator.Allocations):
   private val current = new StringBuilder
 
   private def unsafeEscape(str: String): String =
@@ -15,11 +15,14 @@ class GraphDrawer:
   private def stateStr(state: State): String =
     s"""<font color="#ff4411" point-size="8"><sup>$state</sup></font>"""
 
+  private def idStr(id: String): String =
+    s"""$id<font color="#3311ff" point-size="8"><sup>${regs.getOrElse(id, "r?")}</sup></font>"""
+
   private def (s: String).singleLine: String =
     s"""\n *""".r.replaceAllIn(s, "")
 
   //noinspection SpellCheckingInspection
-  def apply(f: CDFG, sche: schedule.Scheduler.Schedule): String =
+  def draw: String =
     current.clear()
     current ++=
       s"""digraph Program_ {
@@ -84,16 +87,16 @@ class GraphDrawer:
 
       for nd <- nodes do
         val labelBase = nd match
-          case Node.Input(n) => s"""$n:in"""
-          case Node.Const(v, n) => s"""$n:$v"""
+          case Node.Input(n) => s"""${idStr(n)}:in"""
+          case Node.Const(v, n) => s"""${idStr(n)}:$v"""
           case Node.Output(_) => "out"
-          case Node.BinOp(op, l, r, a) => s"""$a:$l$op$r"""
+          case Node.BinOp(op, l, r, a) => s"""${idStr(a)}:$l${unsafeEscape(op)}$r"""
           case Node.Call(fn, args, ret) =>
-            s"""$ret:$fn(${args.mkString(",")})"""
+            s"""${idStr(ret)}:$fn(${args.mkString(",")})"""
 
         current ++=
           s"""${id(nd)} [label=<
-                ${unsafeEscape(labelBase)}
+                $labelBase
                 ${stateStr(sche(bi, nd))}
               >];""".singleLine
 
@@ -112,5 +115,5 @@ class GraphDrawer:
 
     current ++= s"}\n"
     current.toString
-  end apply
+  end draw
 end GraphDrawer

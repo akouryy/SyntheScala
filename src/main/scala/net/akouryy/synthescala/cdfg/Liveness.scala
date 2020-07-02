@@ -20,7 +20,7 @@ object Liveness:
         for bi <- jump.inBlocks do
           val block = graph.blocks(bi)
           visited += bi
-          jis += block.inJump
+          jis += block.inJumpIndex
           val liveOut = jump match
             case Jump.Branch(_, cond, _, _, _) => liveOutBase + cond
             case Jump.Merge(_, ibs, ins, _, ons) => liveOutBase -- ons ++ ins(ibs.indexOf(bi))
@@ -50,13 +50,12 @@ object Liveness:
         case _ => // TODO: Merge
 
     for (bi -> b) <- graph.blocks do
-      val stateToNodes = mutable.SortedMultiDict.empty[State, Node]
+      val stateToNodes = b.stateToNodes(sche)
       val live = mutable.Set.empty[String]
       for node <- b.nodes do
         node match
           case Node.Output(id) => live += id
           case _ =>
-        stateToNodes += sche(bi, node) -> node
 
       for (state -> nodes) <- stateToNodes.sets.toSeq.reverseIterator do
         for node <- nodes do
