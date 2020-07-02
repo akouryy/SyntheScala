@@ -5,21 +5,25 @@ package cdfg
 
 import scala.collection.mutable
 
-class GraphDrawer(f: CDFG, sche: schedule.Scheduler.Schedule, regs: bind.RegisterAllocator.Allocations):
+class GraphDrawer(
+  f: CDFG, sche: schedule.Scheduler.Schedule,
+  regs: bind.RegisterAllocator.Allocations, bindings: bind.Binder.Bindings,
+):
   private val current = new StringBuilder
 
   private def unsafeEscape(str: String): String =
     str.replaceAll("&", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
        .replaceAll("\"", "&quot;").replaceAll("\n", "<br />")
 
-  private def stateStr(state: State): String =
-    s"""<font color="#ff4411" point-size="8"><sup>$state</sup></font>"""
+  private def sup(color: String, escapedText: Any): String =
+    s"""<font color="$color" point-size="8"><sup>$escapedText</sup></font>"""
+
+  private def stateStr(state: State): String = sup("#ff4411", state)
 
   private def idStr(id: String): String =
-    s"""$id<font color="#3311ff" point-size="8"><sup>${regs.getOrElse(id, "r?")}</sup></font>"""
+    s"""$id${sup("#3311ff", regs.getOrElse(id, "r?"))}"""
 
-  private def (s: String).singleLine: String =
-    s"""\n *""".r.replaceAllIn(s, "")
+  private def (s: String).singleLine: String = s"""\n *""".r.replaceAllIn(s, "")
 
   //noinspection SpellCheckingInspection
   def draw: String =
@@ -90,7 +94,9 @@ class GraphDrawer(f: CDFG, sche: schedule.Scheduler.Schedule, regs: bind.Registe
           case Node.Input(n) => s"""${idStr(n)}:in"""
           case Node.Const(v, n) => s"""${idStr(n)}:$v"""
           case Node.Output(_) => "out"
-          case Node.BinOp(op, l, r, a) => s"""${idStr(a)}:$l${unsafeEscape(op)}$r"""
+          case Node.BinOp(op, l, r, a) =>
+            val bound = sup("#3311ff", unsafeEscape(bindings(bi, nd).shortString))
+            s"""${idStr(a)}:$l${unsafeEscape(op)}$bound$r"""
           case Node.Call(fn, args, ret) =>
             s"""${idStr(ret)}:$fn(${args.mkString(",")})"""
 

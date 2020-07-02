@@ -28,13 +28,15 @@ object Main:
     Fun(
       "fib", Type.U[32],
       Seq(Entry("n", Type.U[6]), Entry("a", Type.U[32]), Entry("b", Type.U[32])),
-      If(Bin("==", Ref("n"), Num(0)),
-        Num(1),
-        Call("fib", Seq(
-          Bin("-", Ref("n"), Num(1)),
-          Bin("+", Ref("a"), Ref("b")),
-          Ref("a"),
-        )),
+      Let(Entry("n0", Type.U[6]), Bin("+", Ref("n"), Num(0)),
+        If(Bin("==", Ref("n0"), Num(0)),
+          Num(1),
+          Call("fib", Seq(
+            Bin("-", Ref("n0"), Num(1)),
+            Bin("+", Ref("a"), Ref("b")),
+            Ref("a"),
+          )),
+        ),
       ),
     )
 
@@ -54,6 +56,8 @@ object Main:
     PP.pprintln(schedule)
     val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule).allocate
     PP.pprintln(regAlloc)
+    val bindings = cdfg.bind.AllocatingBinder(graph, schedule).bind
+    println(bindings)
     Files.write(Paths.get(s"dist/${fun.name}.dot"),
-      cdfg.GraphDrawer(graph, schedule, regAlloc).draw.getBytes(StandardCharsets.UTF_8),
+      cdfg.GraphDrawer(graph, schedule, regAlloc, bindings).draw.getBytes(StandardCharsets.UTF_8),
     )
