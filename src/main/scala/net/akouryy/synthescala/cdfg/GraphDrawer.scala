@@ -84,12 +84,12 @@ class GraphDrawer:
 
       for nd <- nodes do
         val labelBase = nd match
-          case Node.Input(n) => s"""$n: in"""
-          case Node.Const(v, n) => s"""$n: $v"""
+          case Node.Input(n) => s"""$n:in"""
+          case Node.Const(v, n) => s"""$n:$v"""
           case Node.Output(_) => "out"
-          case Node.BinOp(op, l, r, a) => s"""$a: $l$op$r"""
+          case Node.BinOp(op, l, r, a) => s"""$a:$l$op$r"""
           case Node.Call(fn, args, ret) =>
-            s"""$ret: $fn(${args.mkString(",")})"""
+            s"""$ret:$fn(${args.mkString(",")})"""
 
         current ++=
           s"""${id(nd)} [label=<

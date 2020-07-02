@@ -52,6 +52,7 @@ object Main:
     PP.pprintln(graph)
     val schedule = cdfg.schedule.GorgeousScheduler(graph).schedule
     PP.pprintln(schedule)
+    PP.pprintln(cdfg.bind.RegisterAllocator(graph, schedule).interferenceGraph.sets)
     Files.write(Paths.get(s"dist/${fun.name}.dot"),
       cdfg.GraphDrawer()(graph, schedule).getBytes(StandardCharsets.UTF_8),
     )
