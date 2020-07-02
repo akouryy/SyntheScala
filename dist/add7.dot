@@ -2,12 +2,12 @@ digraph Program_ {
 graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];
 node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
 edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
-Jump0[label = "StartFun.0"; shape = component];
+Jump0[label = <StartFun.0<font color="#ff4411" point-size="8"><sup>q0</sup></font>>; shape = component];
 Jump0 -> Block0;
-Jump1[label = "Return.1"; shape = lpromoter];
+Jump1[label = <Return.1<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; shape = lpromoter];
 Block0 -> Jump1 [label="@5"];
 Block0 [label = "Block0"];
 subgraph cluster_dfg_Block0{
 node [shape = oval];
 label = "Block0";
-ndBlock0_0 [label="g: in"];ndBlock0_1 [label="f: in"];ndBlock0_2 [label="a: in"];ndBlock0_3 [label="b: in"];ndBlock0_4 [label="@5: a+@4"];ndBlock0_5 [label="@0: d+e"];ndBlock0_6 [label="d: in"];ndBlock0_7 [label="@1: f+g"];ndBlock0_8 [label="c: in"];ndBlock0_9 [label="out"];ndBlock0_10 [label="@4: b+@3"];ndBlock0_11 [label="@2: @0+@1"];ndBlock0_12 [label="e: in"];ndBlock0_13 [label="@3: c+@2"];ndBlock0_3 -> ndBlock0_10; ndBlock0_13 -> ndBlock0_10; ndBlock0_0 -> ndBlock0_7; ndBlock0_1 -> ndBlock0_7; ndBlock0_5 -> ndBlock0_11; ndBlock0_7 -> ndBlock0_11; ndBlock0_8 -> ndBlock0_13; ndBlock0_11 -> ndBlock0_13; ndBlock0_4 -> ndBlock0_9; ndBlock0_2 -> ndBlock0_4; ndBlock0_10 -> ndBlock0_4; ndBlock0_6 -> ndBlock0_5; ndBlock0_12 -> ndBlock0_5; }}
+ndBlock0_0 [label=<g: in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_1 [label=<f: in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_2 [label=<a: in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_3 [label=<b: in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_4 [label=<@5: a+@4<font color="#ff4411" point-size="8"><sup>q5</sup></font>>];ndBlock0_5 [label=<@0: d+e<font color="#ff4411" point-size="8"><sup>q1</sup></font>>];ndBlock0_6 [label=<d: in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_7 [label=<@1: f+g<font color="#ff4411" point-size="8"><sup>q1</sup></font>>];ndBlock0_8 [label=<c: in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_9 [label=<out<font color="#ff4411" point-size="8"><sup>q6</sup></font>>];ndBlock0_10 [label=<@4: b+@3<font color="#ff4411" point-size="8"><sup>q4</sup></font>>];ndBlock0_11 [label=<@2: @0+@1<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock0_12 [label=<e: in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_13 [label=<@3: c+@2<font color="#ff4411" point-size="8"><sup>q3</sup></font>>];ndBlock0_3 -> ndBlock0_10; ndBlock0_13 -> ndBlock0_10; ndBlock0_0 -> ndBlock0_7; ndBlock0_1 -> ndBlock0_7; ndBlock0_5 -> ndBlock0_11; ndBlock0_7 -> ndBlock0_11; ndBlock0_8 -> ndBlock0_13; ndBlock0_11 -> ndBlock0_13; ndBlock0_4 -> ndBlock0_9; ndBlock0_2 -> ndBlock0_4; ndBlock0_10 -> ndBlock0_4; ndBlock0_6 -> ndBlock0_5; ndBlock0_12 -> ndBlock0_5; }}

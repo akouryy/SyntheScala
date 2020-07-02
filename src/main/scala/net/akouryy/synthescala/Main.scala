@@ -50,8 +50,8 @@ object Main:
     PP.pprintln(graph)
     cdfg.optimize.Optimizer(graph)
     PP.pprintln(graph)
-    Files.write(Paths.get(s"dist/${fun.name}.dot"),
-      cdfg.GraphDrawer()(graph).getBytes(StandardCharsets.UTF_8),
-    )
     val schedule = cdfg.schedule.GorgeousScheduler(graph).schedule
     PP.pprintln(schedule)
+    Files.write(Paths.get(s"dist/${fun.name}.dot"),
+      cdfg.GraphDrawer()(graph, schedule).getBytes(StandardCharsets.UTF_8),
+    )

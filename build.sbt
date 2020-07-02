@@ -18,7 +18,8 @@ lazy val root = project
     ),
 
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %% "pprint" % "0.5.6" withDottyCompat scalaVersion.value,
+      "com.lihaoyi" %% "pprint" % "0.5.6" withDottyCompat dottyVersion,
       "com.novocode" % "junit-interface" % "0.11" % "test",
+      "org.scala-lang.modules" %% "scala-collection-contrib" % "0.1.0" withDottyCompat dottyVersion,
     )
   )

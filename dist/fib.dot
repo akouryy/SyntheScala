@@ -2,18 +2,18 @@ digraph Program_ {
 graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];
 node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
 edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
-Jump2[label = "StartFun.2"; shape = component];
+Jump2[label = <StartFun.2<font color="#ff4411" point-size="8"><sup>q0</sup></font>>; shape = component];
 Jump2 -> Block1;
 Jump3[
-  label = "Branch.3";
+  label = <Branch.3<font color="#ff4411" point-size="8"><sup>q3</sup></font>>;
   shape = trapezium; style = rounded;
 ];
 Block1 -> Jump3;
 Jump3 -> Block2 [label="@8"];
 Jump3 -> Block3 [label="!@8"];
-Jump6[label = "Return.6"; shape = lpromoter];
+Jump6[label = <Return.6<font color="#ff4411" point-size="8"><sup>q4</sup></font>>; shape = lpromoter];
 Block2 -> Jump6 [label="@9"];
-Jump7[label = "Return.7"; shape = lpromoter];
+Jump7[label = <Return.7<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; shape = lpromoter];
 Block3 -> Jump7 [label="@13"];
 Block1 [label = "Block1"];
 Block2 [label = "Block2"];
@@ -21,10 +21,10 @@ Block3 [label = "Block3"];
 subgraph cluster_dfg_Block1{
 node [shape = oval];
 label = "Block1";
-ndBlock1_0 [label="out"];ndBlock1_1 [label="@8: n==@7"];ndBlock1_2 [label="out"];ndBlock1_3 [label="a: in"];ndBlock1_4 [label="b: in"];ndBlock1_5 [label="out"];ndBlock1_6 [label="out"];ndBlock1_7 [label="@7: 0"];ndBlock1_8 [label="n: in"];ndBlock1_4 -> ndBlock1_2; ndBlock1_7 -> ndBlock1_1; ndBlock1_8 -> ndBlock1_1; ndBlock1_8 -> ndBlock1_5; ndBlock1_3 -> ndBlock1_6; ndBlock1_1 -> ndBlock1_0; }subgraph cluster_dfg_Block2{
+ndBlock1_0 [label=<out<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock1_1 [label=<@8: n==@7<font color="#ff4411" point-size="8"><sup>q1</sup></font>>];ndBlock1_2 [label=<out<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock1_3 [label=<a: in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock1_4 [label=<b: in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock1_5 [label=<out<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock1_6 [label=<out<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock1_7 [label=<@7: 0<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock1_8 [label=<n: in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock1_4 -> ndBlock1_2; ndBlock1_7 -> ndBlock1_1; ndBlock1_8 -> ndBlock1_1; ndBlock1_8 -> ndBlock1_5; ndBlock1_3 -> ndBlock1_6; ndBlock1_1 -> ndBlock1_0; }subgraph cluster_dfg_Block2{
 node [shape = oval];
 label = "Block2";
-ndBlock2_0 [label="@9: 1"];ndBlock2_1 [label="out"];ndBlock2_0 -> ndBlock2_1; }subgraph cluster_dfg_Block3{
+ndBlock2_0 [label=<@9: 1<font color="#ff4411" point-size="8"><sup>q3</sup></font>>];ndBlock2_1 [label=<out<font color="#ff4411" point-size="8"><sup>q4</sup></font>>];ndBlock2_0 -> ndBlock2_1; }subgraph cluster_dfg_Block3{
 node [shape = oval];
 label = "Block3";
-ndBlock3_0 [label="a: in"];ndBlock3_1 [label="b: in"];ndBlock3_2 [label="@10: a+b"];ndBlock3_3 [label="out"];ndBlock3_4 [label="@11: 1"];ndBlock3_5 [label="@12: n-@11"];ndBlock3_6 [label="@13: fib(@12,@10,a)"];ndBlock3_7 [label="n: in"];ndBlock3_4 -> ndBlock3_5; ndBlock3_7 -> ndBlock3_5; ndBlock3_0 -> ndBlock3_6; ndBlock3_2 -> ndBlock3_6; ndBlock3_5 -> ndBlock3_6; ndBlock3_0 -> ndBlock3_2; ndBlock3_1 -> ndBlock3_2; ndBlock3_6 -> ndBlock3_3; }}
+ndBlock3_0 [label=<a: in<font color="#ff4411" point-size="8"><sup>q3</sup></font>>];ndBlock3_1 [label=<b: in<font color="#ff4411" point-size="8"><sup>q3</sup></font>>];ndBlock3_2 [label=<@10: a+b<font color="#ff4411" point-size="8"><sup>q4</sup></font>>];ndBlock3_3 [label=<out<font color="#ff4411" point-size="8"><sup>q6</sup></font>>];ndBlock3_4 [label=<@11: 1<font color="#ff4411" point-size="8"><sup>q3</sup></font>>];ndBlock3_5 [label=<@12: n-@11<font color="#ff4411" point-size="8"><sup>q4</sup></font>>];ndBlock3_6 [label=<@13: fib(@12,@10,a)<font color="#ff4411" point-size="8"><sup>q5</sup></font>>];ndBlock3_7 [label=<n: in<font color="#ff4411" point-size="8"><sup>q3</sup></font>>];ndBlock3_4 -> ndBlock3_5; ndBlock3_7 -> ndBlock3_5; ndBlock3_0 -> ndBlock3_6; ndBlock3_2 -> ndBlock3_6; ndBlock3_5 -> ndBlock3_6; ndBlock3_0 -> ndBlock3_2; ndBlock3_1 -> ndBlock3_2; ndBlock3_6 -> ndBlock3_3; }}

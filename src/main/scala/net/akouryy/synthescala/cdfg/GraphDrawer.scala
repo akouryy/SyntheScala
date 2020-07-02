@@ -12,8 +12,14 @@ class GraphDrawer:
     str.replaceAll("&", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
        .replaceAll("\"", "&quot;").replaceAll("\n", "<br />")
 
+  private def stateStr(state: State): String =
+    s"""<font color="#ff4411" point-size="8"><sup>$state</sup></font>"""
+
+  private def (s: String).singleLine: String =
+    s"""\n *""".r.replaceAllIn(s, "")
+
   //noinspection SpellCheckingInspection
-  def apply(f: CDFG): String =
+  def apply(f: CDFG, sche: schedule.Scheduler.Schedule): String =
     current.clear()
     current ++=
       s"""digraph Program_ {
@@ -22,19 +28,23 @@ class GraphDrawer:
           |edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
           |""".stripMargin
 
-    for j <- f.jumps.valuesIterator do
+    for (ji -> j) <- f.jumps do
+      val label = s"""${j.productPrefix}.${ji.indexString}
+                      ${stateStr(sche(ji))}
+                      """.singleLine
+
       current ++= j.match
         case Jump.StartFun(i, ob) =>
-          s"""$i[label = "StartFun.${i.indexString}"; shape = component];
+          s"""$i[label = <$label>; shape = component];
               |$i -> $ob;
               |""".stripMargin
         case Jump.Return(i, v, ib) =>
-          s"""$i[label = "Return.${i.indexString}"; shape = lpromoter];
+          s"""$i[label = <$label>; shape = lpromoter];
               |$ib -> $i [label="$v"];
               |""".stripMargin
         case Jump.Branch(i, cond, ib, tob, fob) =>
           s"""$i[
-              |  label = "Branch.${i.indexString}";
+              |  label = <$label>;
               |  shape = trapezium; style = rounded;
               |];
               |$ib -> $i;
@@ -46,7 +56,7 @@ class GraphDrawer:
             ibs.zip(inss).map((ib, ins) =>
               s"""$ib -> $i [label="${ins.mkString(",")}"];"""
             ).mkString
-          s"""$i[label = "Merge.${i.indexString}"; shape = invtrapezium; style = rounded];
+          s"""$i[label = <$label>; shape = invtrapezium; style = rounded];
               |$inputEdges
               |$i -> $ob [label="${ons.mkString(",")}"];
               |""".stripMargin
@@ -60,26 +70,32 @@ class GraphDrawer:
         current ++= s"""$i [label = "$i"];""" + "\n"
 
     for
-      Block(i, nodes, _, _) <- f.blocks.valuesIterator
+      Block(bi, nodes, _, _) <- f.blocks.valuesIterator
       if nodes.nonEmpty
     do
       val ids = mutable.Map.empty[Node, Int]
-      def id(node: Node) = s"nd${i}_${ids.getOrElseUpdate(node, ids.size)}"
+      def id(node: Node) = s"nd${bi}_${ids.getOrElseUpdate(node, ids.size)}"
 
       current ++=
-        s"""|subgraph cluster_dfg_$i{
+        s"""|subgraph cluster_dfg_$bi{
             |node [shape = oval];
-            |label = "$i";
+            |label = "$bi";
             |""".stripMargin
 
       for nd <- nodes do
-        current ++= nd.match
-          case Node.Input(n) => s"""${id(nd)} [label="$n: in"];"""
-          case Node.Const(v, n) => s"""${id(nd)} [label="$n: $v"];"""
-          case Node.Output(_) => s"""${id(nd)} [label="out"];"""
-          case Node.BinOp(op, l, r, a) => s"""${id(nd)} [label="$a: $l$op$r"];"""
+        val labelBase = nd match
+          case Node.Input(n) => s"""$n: in"""
+          case Node.Const(v, n) => s"""$n: $v"""
+          case Node.Output(_) => "out"
+          case Node.BinOp(op, l, r, a) => s"""$a: $l$op$r"""
           case Node.Call(fn, args, ret) =>
-            s"""${id(nd)} [label="$ret: $fn(${args.mkString(",")})"];"""
+            s"""$ret: $fn(${args.mkString(",")})"""
+
+        current ++=
+          s"""${id(nd)} [label=<
+                ${unsafeEscape(labelBase)}
+                ${stateStr(sche(bi, nd))}
+              >];""".singleLine
 
       for
         to <- nodes
