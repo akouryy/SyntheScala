@@ -1,10 +1,7 @@
-*.class
-*.log
-
-# Dotty IDE
 /.dotty-ide*
 /lib/fansi_*.jar
 /lib/pprint_*.jar
-
-# sbt
+*.class
+*.log
+*.out
 target/
