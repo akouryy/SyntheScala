@@ -45,19 +45,22 @@ object Main:
 
   private def f(fun: Fun): Unit =
     val k = KNormalizer(fun.body)
-    PP.pprintln(k)
+    // PP.pprintln(k)
     val graph = cdfg.Specializer()(fun.copy(body=k))
-    PP.pprintln(graph)
+    // PP.pprintln(graph)
     cdfg.Liveness.insertInOuts(graph)
-    PP.pprintln(graph)
+    // PP.pprintln(graph)
     cdfg.optimize.Optimizer(graph)
     PP.pprintln(graph)
+    Files.write(Paths.get(s"dist/${fun.name}.dot"),
+      cdfg.GraphDrawer(graph).draw.getBytes(StandardCharsets.UTF_8),
+    )
     val schedule = cdfg.schedule.GorgeousScheduler(graph).schedule
-    PP.pprintln(schedule)
+    // PP.pprintln(schedule)
     val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule).allocate
-    PP.pprintln(regAlloc)
+    // PP.pprintln(regAlloc)
     val bindings = cdfg.bind.AllocatingBinder(graph, schedule).bind
-    PP.pprintln(bindings)
+    // PP.pprintln(bindings)
     val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
     PP.pprintln(fd)
 

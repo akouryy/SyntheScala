@@ -29,6 +29,9 @@ class Composer(
         case _: Jump.Return =>
           for q1 <- sche.jumpStates(j.i) do
             fsm(q1) = Transition.LinkReg
+        case _: Jump.TailCall =>
+          for q1 <- sche.jumpStates(j.i) do
+            fsm(q1) = Transition.Always(State(0))
         case _: (Jump.StartFun | Jump.Merge) =>
           val Seq(bi) = j.outBlocks: @unchecked
           for q1 <- sche.jumpStates(j.i) do

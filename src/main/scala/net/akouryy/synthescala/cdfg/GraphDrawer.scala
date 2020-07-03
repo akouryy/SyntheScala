@@ -6,8 +6,9 @@ package cdfg
 import scala.collection.mutable
 
 class GraphDrawer(
-  graph: CDFG, sche: schedule.Schedule,
-  regs: bind.RegisterAllocator.Allocations, bindings: bind.Binder.Bindings,
+  graph: CDFG, sche: schedule.Schedule = schedule.Schedule(Map.empty, Map.empty),
+  regs: bind.RegisterAllocator.Allocations = Map.empty,
+  bindings: bind.Binder.Bindings = Map.empty,
 ):
   private val current = new StringBuilder
 
@@ -18,10 +19,11 @@ class GraphDrawer(
   private def sup(color: String, escapedText: Any): String =
     s"""<font color="$color" point-size="8"><sup>$escapedText</sup></font>"""
 
-  private def stateStr(state: State | collection.Set[State]): String =
+  private def stateStr(state: Option[State | collection.Set[State]]): String =
     state match
-      case state: State => sup("#ff4411", state)
-      case state: collection.Set[?] => sup("#ff4411", state.mkString("|"))
+      case Some(state: State) => sup("#ff4411", state)
+      case Some(state: collection.Set[?]) => sup("#ff4411", state.mkString("|"))
+      case None => sup("#ff4411", "q?")
 
   private def idStr(id: String): String =
     s"""$id${sup("#3311ff", regs.getOrElse(id, "r?"))}"""
@@ -40,7 +42,7 @@ class GraphDrawer(
 
     for (ji -> j) <- graph.jumps do
       val label = s"""${j.productPrefix}.${ji.indexString}
-                      ${stateStr(sche.jumpStates(ji))}
+                      ${stateStr(sche.jumpStates.get(ji))}
                       """.singleLine
 
       current ++= j.match
@@ -51,6 +53,10 @@ class GraphDrawer(
         case Jump.Return(i, v, ib) =>
           s"""$i[label = <$label>; shape = lpromoter];
               |$ib -> $i [label="$v"];
+              |""".stripMargin
+        case Jump.TailCall(i, fn, args, ib) =>
+          s"""$i[label = <$label<br/>$fn(${args.mkString(",")})>; shape = component];
+              |$ib -> $i;
               |""".stripMargin
         case Jump.Branch(i, cond, ib, tob, fob) =>
           s"""$i[
@@ -96,9 +102,11 @@ class GraphDrawer(
         val labelBase = nd match
           case Node.Input(n) => s"""${idStr(n)}:in"""
           case Node.Const(v, n) => s"""${idStr(n)}:$v"""
-          case Node.Output(_) => "out"
+          case Node.Output(n) => s"""out($n)"""
           case Node.BinOp(op, l, r, a) =>
-            val bound = sup("#3311ff", unsafeEscape(bindings(bi, nd).shortString))
+            val bound = sup("#3311ff", unsafeEscape(
+              bindings.get(bi, nd).fold("?")(_.shortString)
+            ))
             s"""${idStr(a)}:$l${unsafeEscape(op)}$bound$r"""
           case Node.Call(fn, args, ret) =>
             s"""${idStr(ret)}:$fn(${args.mkString(",")})"""
@@ -106,7 +114,7 @@ class GraphDrawer(
         current ++=
           s"""${id(nd)} [label=<
                 $labelBase
-                ${stateStr(sche.stateOf(graph, bi, nd))}
+                ${stateStr(sche.getStateOf(graph, bi, nd))}
               >];""".singleLine
 
       for

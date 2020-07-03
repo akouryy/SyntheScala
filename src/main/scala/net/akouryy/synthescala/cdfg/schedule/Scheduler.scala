@@ -14,7 +14,10 @@ case class Schedule(
   nodeStates: collection.Map[(BlockIndex, Node), State],
 ):
   def stateOf(graph: CDFG, bi: BlockIndex, nd: Node): State | collection.Set[State] =
+    getStateOf(graph, bi, nd).get
+
+  def getStateOf(graph: CDFG, bi: BlockIndex, nd: Node): Option[State | collection.Set[State]] =
     if nd.isInput
-      jumpStates(graph.blocks(bi).inJumpIndex)
+      jumpStates.get(graph.blocks(bi).inJumpIndex)
     else
-      nodeStates(bi, nd)
+      nodeStates.get(bi, nd)

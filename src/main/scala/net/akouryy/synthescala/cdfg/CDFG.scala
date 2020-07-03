@@ -110,6 +110,8 @@ enum Jump:
 
   case Return(i: JumpIndex, value: String, inBlock: BlockIndex)
 
+  case TailCall(i: JumpIndex, fn: String, args: Seq[String], inBlock: BlockIndex)
+
   case Branch(
     i: JumpIndex, cond: String, inBlock: BlockIndex, truBlock: BlockIndex, flsBlock: BlockIndex,
   )
@@ -128,12 +130,13 @@ enum Jump:
   def inBlocks: Seq[BlockIndex] = this match
     case StartFun(_, _) => Nil
     case Return(_, _, ib) => Seq(ib)
+    case TailCall(_, _, _, ib) => Seq(ib)
     case Branch(_, _, ib, _, _) => Seq(ib)
     case Merge(_, ibs, _, _, _) => ibs
 
   def outBlocks: Seq[BlockIndex] = this match
     case StartFun(_, ob) => Seq(ob)
-    case Return(_, _, _) => Nil
+    case _: (Return | TailCall) => Nil
     case Branch(_, _, _, tb, fb) => Seq(tb, fb)
     case Merge(_, _, _, ob, _) => Seq(ob)
 
