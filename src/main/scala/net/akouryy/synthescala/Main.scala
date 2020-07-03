@@ -45,7 +45,7 @@ object Main:
 
   private def f(fun: Fun): Unit =
     reset()
-    val k = KNormalizer(fun.body)
+    val (typeEnv, k) = KNormalizer(fun).normalize
     // PP.pprintln(k)
     val graph = cdfg.Specializer()(fun.copy(body=k))
     // PP.pprintln(graph)
@@ -66,7 +66,7 @@ object Main:
     Files.write(Paths.get(s"dist/${fun.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))
 
     Files.write(Paths.get(s"dist/${fun.name}.dot"),
-      cdfg.GraphDrawer(graph, schedule, regAlloc, bindings).draw.getBytes(StandardCharsets.UTF_8),
+      cdfg.GraphDrawer(graph, typeEnv, schedule, regAlloc, bindings).draw.getBytes(StandardCharsets.UTF_8),
     )
 
   private def reset(): Unit =

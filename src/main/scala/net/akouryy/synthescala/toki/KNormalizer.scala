@@ -3,41 +3,61 @@
 package net.akouryy.synthescala
 package toki
 
-object KNormalizer:
-  private[this] def convert(lab: Option[Label], expr: Expr)(kont: Label => Expr): Expr =
+import scala.collection.mutable
+
+class KNormalizer(fun: Fun):
+  private val types = mutable.Map.empty[Label, Type]
+  private val retTypes = mutable.Map.empty[String, Type]
+
+  private def convert(lab: Option[Label], expr: Expr)(kont: Label => (Type, Expr)): (Type, Expr) =
     import Expr._
-    def insert(expr: Expr): Expr =
+    def insert(typ: Type)(expr: Expr): (Type, Expr) =
       expr match
         case Ref(x) => kont(x)
         case _ =>
           val x = lab.getOrElse(Label.temp())
-          val kontExpr = kont(x)
-          Let(Entry(x, Type.U(0)), expr, kontExpr)
+          types(x) = typ
+          val kt -> kx = kont(x)
+          kt -> Let(Entry(x, typ), expr, kx)
 
     expr match
-      case Num(_) | Ref(_) => insert(expr)
+      case Num(n) =>
+        def width(m: Long) = m.toBinaryString.length
+        insert(
+          if n >= 0 then Type.U(width(n)) else Type.S(1 + width(1 - n))
+        )(expr)
+      case Ref(v) => insert(types(v))(expr)
       case Let(Entry(x, t), expr, body) =>
+        types(x) = t
         convert(Some(x), expr):
-         _ =>
-          convert(lab, body)(kont)
+          _ =>
+            convert(lab, body)(kont)
       case Bin(op, left, right) =>
         convert(None, left):
-         x =>
-          convert(None, right):
-           y =>
-            insert(Bin(op, Ref(x), Ref(y)))
+          x =>
+            convert(None, right):
+              y =>
+                insert(Bin.calcTyp(op, types(x), types(y)))(Bin(op, Ref(x), Ref(y)))
       case Call(name, args) =>
-        args.foldLeft { (xs: List[Expr]) => insert(Call(name, xs)) } { (gen, arg) =>
+        args.foldLeft {
+          (xs: List[Expr]) => insert(retTypes(name))(Call(name, xs))
+        } { (gen, arg) =>
           xs => convert(None, arg)(x => gen(Ref(x) :: xs))
         } (Nil)
       case If(cond, tru, fls) =>
         convert(None, cond):
          x =>
-          insert(If(Ref(x),
-            convert(None, tru)(Expr.Ref(_)),
-            convert(None, fls)(Expr.Ref(_)),
-          ))
+          val tt -> tx = convert(None, tru)(l => types(l) -> Expr.Ref(l))
+          val ft -> fx = convert(None, fls)(l => types(l) -> Expr.Ref(l))
+          assert(tt == ft)
+          insert(tt)(If(Ref(x), tx, fx))
   end convert
 
-  def apply(expr: Expr) = convert(None, expr)(Expr.Ref(_))
+  def normalize: (TypeEnv, Expr) =
+    types.clear()
+    retTypes.clear()
+    fun.params.foreach(e => types(e.name) = e.typ)
+    retTypes(fun.name) = fun.ret
+    val (_, e) = convert(None, fun.body)(l => types(l) -> Expr.Ref(l))
+    types.toMap -> e
 end KNormalizer

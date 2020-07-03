@@ -13,15 +13,23 @@ enum Expr:
   // case Semi(x1: Expr, x2: Expr)
   case If(cond: Expr, tru: Expr, fls: Expr)
 
-enum Type(str: => String):
-  case Unsigned(width: Int) extends Type(s"U$width")
-  case Signed(width: Int) extends Type(s"S$width")
+object Expr:
+  object Bin:
+    def calcTyp(op: String, lt: Type, rt: Type): Type =
+      import Type._
+      (op, lt, rt) match
+        case ("+" | "-" | "*" | "/" | "%", U(lw), U(rw)) => U(lw.max(rw))
+        case ("+" | "-" | "*" | "/" | "%", S(lw), S(rw)) => S(lw.max(rw))
+        case ("==" | "<", _: (U | S), _: (U | S)) => U(1)
+        case _ => ???
+
+enum Type(str: => String) derives Eql:
+  case U(width: Int) extends Type(s"U$width")
+  case S(width: Int) extends Type(s"S$width")
 
   override def toString = str
 
-object Type:
-  def U(width: Int) = Unsigned(width)
-  def S(width: Int) = Signed(width)
+type TypeEnv = Map[Label, Type]
 
 case class Entry(name: Label, typ: Type):
   override def toString = s"$name:$typ"

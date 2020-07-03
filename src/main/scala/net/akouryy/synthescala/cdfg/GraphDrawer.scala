@@ -6,7 +6,8 @@ package cdfg
 import scala.collection.mutable
 
 class GraphDrawer(
-  graph: CDFG, sche: schedule.Schedule = schedule.Schedule(Map.empty, Map.empty),
+  graph: CDFG, typeEnv: toki.TypeEnv = Map.empty,
+  sche: schedule.Schedule = schedule.Schedule(Map.empty, Map.empty),
   regs: bind.RegisterAllocator.Allocations = Map.empty,
   bindings: bind.Binder.Bindings = Map.empty,
 ):
@@ -26,7 +27,9 @@ class GraphDrawer(
       case None => sup("#ff4411", "q?")
 
   private def idStr(id: Label): String =
-    s"""${id.str}${sup("#3311ff", regs.getOrElse(id, "r?"))}"""
+    id.str +
+      typeEnv.get(id).fold("")(t => sup("#00dd33", t.toString)) +
+      sup("#3311ff", regs.getOrElse(id, "r?"))
 
   private def (s: String).singleLine: String = s"""\n *""".r.replaceAllIn(s, "")
 
