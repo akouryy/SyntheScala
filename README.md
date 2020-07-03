@@ -8,4 +8,4 @@ Some part of the source codes in this project was taken from [anscaml](https://g
 
 ## Internals
 
-Scala → `AST` → `CDFG` → `ScheduledCDFG` → `ScheduledCDFG` with `Bindings` → `FSMD` → SystemVerilog
+Scala → `AST` → `CDFG` → `CDFG` with `Schedule` and `Bindings` → `FSMD` → SystemVerilog

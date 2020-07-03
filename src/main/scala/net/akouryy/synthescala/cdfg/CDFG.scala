@@ -5,7 +5,7 @@ package cdfg
 
 import scala.collection.mutable
 
-final class CDFG(val params: Seq[String]):
+final class CDFG(val fnName: String, val params: Seq[String]):
   val blocks: mutable.SortedMap[BlockIndex, Block] = mutable.SortedMap[BlockIndex, Block]()
   val jumps: mutable.SortedMap[JumpIndex, Jump] = mutable.SortedMap[JumpIndex, Jump]()
 

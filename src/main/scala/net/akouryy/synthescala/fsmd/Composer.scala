@@ -9,7 +9,7 @@ class Composer(
   regs: cdfg.bind.RegisterAllocator.Allocations, bindings: cdfg.bind.Binder.Bindings,
 ):
   val fsm = mutable.Map.empty[State, Transition]
-  val datapath = mutable.Map.empty[ConnPort.Dst, mutable.Map[State, Source]]
+  val datapath = mutable.Map.empty[ConnPort.Dst, mutable.SortedMap[State, Source]]
 
   def compose: FSMD =
     composeFSM()
@@ -50,7 +50,7 @@ class Composer(
     import Source._
 
     val newSrc =
-      (datapath.getOrElseUpdate(pin, mutable.Map.empty).get(q), src) match
+      (datapath.getOrElseUpdate(pin, mutable.SortedMap.empty).get(q), src) match
         case (None, _) => src
         case (Some(Conditional(reg, tru, Inherit)), Conditional(reg1, Inherit, fls))
         if reg == reg1 =>
@@ -119,6 +119,12 @@ class Composer(
               sche.jumpStates(ji).soleElement,
               Source.Always(new ConnPort.Reg(regs(param))),
             )
+        case Jump.Return(ji, ident, _) =>
+          mergeDatapath(
+            new ConnPort.Reg(Register(0)),
+            sche.jumpStates(ji).soleElement,
+            Source.Always(new ConnPort.Reg(regs(ident))),
+          )
         case _ =>
   end composeDatapath
 end Composer

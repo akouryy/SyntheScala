@@ -30,7 +30,7 @@ object Main:
       Seq(Entry("n", Type.U[6]), Entry("a", Type.U[32]), Entry("b", Type.U[32])),
       Let(Entry("n0", Type.U[6]), Bin("+", Ref("n"), Num(0)),
         If(Bin("==", Ref("n0"), Num(0)),
-          Num(1),
+          Ref("a"),
           Call("fib", Seq(
             Bin("-", Ref("n0"), Num(1)),
             Bin("+", Ref("a"), Ref("b")),
@@ -60,6 +60,9 @@ object Main:
     // PP.pprintln(bindings)
     val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
     PP.pprintln(fd)
+    val sv = emit.Emitter(graph, regAlloc, bindings, fd).emit
+    println(sv)
+    Files.write(Paths.get(s"dist/${fun.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))
 
     Files.write(Paths.get(s"dist/${fun.name}.dot"),
       cdfg.GraphDrawer(graph, schedule, regAlloc, bindings).draw.getBytes(StandardCharsets.UTF_8),

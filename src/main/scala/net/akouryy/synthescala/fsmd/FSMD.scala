@@ -28,4 +28,4 @@ object ConnPort:
   sealed trait Dst
   sealed trait Src
 
-case class Datapath(map: collection.Map[ConnPort.Dst, collection.Map[State, Source]])
+case class Datapath(map: collection.Map[ConnPort.Dst, collection.SortedMap[State, Source]])
