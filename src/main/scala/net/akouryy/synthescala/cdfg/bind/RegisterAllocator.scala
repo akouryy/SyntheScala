@@ -2,7 +2,7 @@ package net.akouryy.synthescala
 package cdfg
 package bind
 
-import schedule.Scheduler.Schedule
+import schedule.Schedule
 import scala.collection.{immutable, mutable}
 
 class RegisterAllocator(graph: CDFG, sche: Schedule):
@@ -35,7 +35,7 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
         case Jump.Branch(_, cond, _, _, _) => getOrAlloc(cond)
         case _ =>
 
-      for node <- b.stateToNodes(sche).values
+      for node <- b.inputs.iterator ++ b.stateToNodes(sche).values
           w <- node.written
       do getOrAlloc(w)
 

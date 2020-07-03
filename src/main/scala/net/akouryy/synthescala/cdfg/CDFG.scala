@@ -66,9 +66,12 @@ case class Block(
       res(id) = nd :: res.getOrElse(id, Nil)
     res.toMap
 
-  def stateToNodes(sche: schedule.Scheduler.Schedule): collection.MultiDict[State, Node] =
+  lazy val inputs: Set[Node] = nodes.filter(_.isInput)
+
+  def stateToNodes(sche: schedule.Schedule): collection.MultiDict[State, Node] =
     mutable.SortedMultiDict.from:
-      for node <- nodes yield sche(i, node) -> node
+      for node <- nodes if !node.isInput yield
+        sche.nodeStates(i, node) -> node
 end Block
 
 enum Node:
@@ -79,6 +82,10 @@ enum Node:
   case Call(fn: String, args: Seq[String], ret: String)
 
   override lazy val hashCode = scala.util.hashing.MurmurHash3.productHash(this)
+
+  def isInput: Boolean = this match
+    case _: (Input | Const) => true
+    case _ => false
 
   def read: Seq[String] = this match
     case Input(_) => Nil

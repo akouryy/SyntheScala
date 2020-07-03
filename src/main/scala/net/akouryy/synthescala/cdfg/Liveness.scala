@@ -34,34 +34,35 @@ object Liveness:
           )
   end insertInOuts
 
-  def liveInsForState(graph: CDFG, sche: schedule.Scheduler.Schedule)
+  def liveInsForState(graph: CDFG, sche: schedule.Schedule)
   : collection.Map[State, Set[String]] =
 
     val ret = mutable.Map.empty[State, Set[String]]
 
-    for (ji -> j) <- graph.jumps do
+    /*for (ji -> j) <- graph.jumps do
       j match
         case Jump.Branch(_, cond, _, _, obi) =>
-          val sc = sche(ji)
+          val sc = sche.jumpStates(ji)
           ret(sc) = graph.blocks(obi).nodes.flatMap:
             case Node.Input(id) => Some(id)
             case _ => None
           ret(sc) += cond
-        case _ => // TODO: Merge
+        case _ => // TODO: Merge*/
 
     for (bi -> b) <- graph.blocks do
-      val stateToNodes = b.stateToNodes(sche)
       val live = mutable.Set.empty[String]
       for node <- b.nodes do
         node match
           case Node.Output(id) => live += id
           case _ =>
 
-      for (state -> nodes) <- stateToNodes.sets.toSeq.reverseIterator do
+      for (state -> nodes) <- b.stateToNodes(sche).sets.toSeq.reverseIterator do
         for node <- nodes do
           live ++= node.read
           live --= node.written
         ret(state) = live.toSet
+
+      // ignore input nodes
 
     ret
   end liveInsForState

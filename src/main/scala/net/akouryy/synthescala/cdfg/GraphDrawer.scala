@@ -6,7 +6,7 @@ package cdfg
 import scala.collection.mutable
 
 class GraphDrawer(
-  f: CDFG, sche: schedule.Scheduler.Schedule,
+  graph: CDFG, sche: schedule.Schedule,
   regs: bind.RegisterAllocator.Allocations, bindings: bind.Binder.Bindings,
 ):
   private val current = new StringBuilder
@@ -18,7 +18,10 @@ class GraphDrawer(
   private def sup(color: String, escapedText: Any): String =
     s"""<font color="$color" point-size="8"><sup>$escapedText</sup></font>"""
 
-  private def stateStr(state: State): String = sup("#ff4411", state)
+  private def stateStr(state: State | collection.Set[State]): String =
+    state match
+      case state: State => sup("#ff4411", state)
+      case state: collection.Set[?] => sup("#ff4411", state.mkString("|"))
 
   private def idStr(id: String): String =
     s"""$id${sup("#3311ff", regs.getOrElse(id, "r?"))}"""
@@ -35,9 +38,9 @@ class GraphDrawer(
           |edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
           |""".stripMargin
 
-    for (ji -> j) <- f.jumps do
+    for (ji -> j) <- graph.jumps do
       val label = s"""${j.productPrefix}.${ji.indexString}
-                      ${stateStr(sche(ji))}
+                      ${stateStr(sche.jumpStates(ji))}
                       """.singleLine
 
       current ++= j.match
@@ -70,14 +73,14 @@ class GraphDrawer(
       // end match
     end for
 
-    for Block(i, nodes, _, _) <- f.blocks.valuesIterator do
+    for Block(i, nodes, _, _) <- graph.blocks.valuesIterator do
       if nodes.isEmpty then
         current ++= s"""$i [label = "$i\\l(0行)"]""" + "\n"
       else
         current ++= s"""$i [label = "$i"];""" + "\n"
 
     for
-      Block(bi, nodes, _, _) <- f.blocks.valuesIterator
+      Block(bi, nodes, _, _) <- graph.blocks.valuesIterator
       if nodes.nonEmpty
     do
       val ids = mutable.Map.empty[Node, Int]
@@ -103,7 +106,7 @@ class GraphDrawer(
         current ++=
           s"""${id(nd)} [label=<
                 $labelBase
-                ${stateStr(sche(bi, nd))}
+                ${stateStr(sche.stateOf(graph, bi, nd))}
               >];""".singleLine
 
       for

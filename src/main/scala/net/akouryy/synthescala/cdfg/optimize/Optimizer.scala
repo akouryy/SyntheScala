@@ -4,4 +4,4 @@ package optimize
 
 object Optimizer:
   def apply(graph: CDFG): Unit =
-    EarlyReturn(graph)
+    ()// EarlyReturn(graph)

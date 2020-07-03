@@ -3,7 +3,7 @@ package cdfg
 package bind
 
 import Binder.Calculator
-import schedule.Scheduler.Schedule
+import schedule.Schedule
 import scala.collection.{immutable, mutable}
 
 class AllocatingBinder(graph: CDFG, sche: Schedule):
