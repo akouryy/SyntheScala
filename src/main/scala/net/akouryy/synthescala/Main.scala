@@ -9,8 +9,8 @@ object Main:
   val add7 =
     import Expr._
     Fun(
-      "add7", Type.U[13],
-      "abcdefg".map(c => Entry(Label(c.toString), Type.U[10])),
+      "add7", Type.U(13),
+      "abcdefg".map(c => Entry(Label(c.toString), Type.U(10))),
       Bin("+", Ref(Label("a")),
         Bin("+", Ref(Label("b")),
           Bin("+", Ref(Label("c")),
@@ -26,9 +26,9 @@ object Main:
   val fib =
     import Expr._
     Fun(
-      "fib", Type.U[32],
-      Seq(Entry(Label("n"), Type.U[6]), Entry(Label("a"), Type.U[32]), Entry(Label("b"), Type.U[32])),
-      Let(Entry(Label("n0"), Type.U[6]), Bin("+", Ref(Label("n")), Num(0)),
+      "fib", Type.U(32),
+      Seq(Entry(Label("n"), Type.U(6)), Entry(Label("a"), Type.U(32)), Entry(Label("b"), Type.U(32))),
+      Let(Entry(Label("n0"), Type.U(6)), Bin("+", Ref(Label("n")), Num(0)),
         If(Bin("==", Ref(Label("n0")), Num(0)),
           Ref(Label("a")),
           Call("fib", Seq(

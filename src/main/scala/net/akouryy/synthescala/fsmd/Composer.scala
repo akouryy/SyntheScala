@@ -35,11 +35,11 @@ class Composer(
           for q1 <- sche.jumpStates(j.i) do
             fsm(q1) = Transition.Always(State(0))
         case _: (Jump.StartFun | Jump.Merge) =>
-          val Seq(bi) = j.outBlocks: @unchecked
+          val bi = j.outBlocks.soleElement
           for q1 <- sche.jumpStates(j.i) do
             fsm(q1) = Transition.Always(blockFirstState(bi))
         case Jump.Branch(ji, cond, _, tbi, fbi) =>
-          val Seq(q1) = sche.jumpStates(ji).toSeq: @unchecked
+          val q1 = sche.jumpStates(ji).soleElement
           fsm(q1) = Transition.Conditional(
             regs(cond), blockFirstState(tbi), blockFirstState(fbi),
           )

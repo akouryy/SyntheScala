@@ -14,14 +14,14 @@ enum Expr:
   case If(cond: Expr, tru: Expr, fls: Expr)
 
 enum Type(str: => String):
-  case Unsigned[T <: Int : ValueOf]() extends Type(s"U${valueOf[T]}")
-  case Signed[T <: Int : ValueOf]() extends Type(s"S${valueOf[T]}")
+  case Unsigned(width: Int) extends Type(s"U$width")
+  case Signed(width: Int) extends Type(s"S$width")
 
   override def toString = str
 
 object Type:
-  def U[T <: Int : ValueOf] = Unsigned[T]()
-  def S[T <: Int : ValueOf] = Signed[T]()
+  def U(width: Int) = Unsigned(width)
+  def S(width: Int) = Signed(width)
 
 case class Entry(name: Label, typ: Type):
   override def toString = s"$name:$typ"

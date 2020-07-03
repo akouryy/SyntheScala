@@ -27,7 +27,7 @@ module main (
     state == 4'd2 ? reg0 :
     'x;
   assign in1_Equal1 =
-    state == 4'd2 ? reg4 :
+    state == 4'd2 ? reg3 :
     'x;
   assign in0_Sub2 =
     state == 4'd6 ? reg0 :
@@ -40,7 +40,7 @@ module main (
     state == 4'd6 ? reg1 :
     'x;
   assign in1_Add0 =
-    state == 4'd1 ? reg3 :
+    state == 4'd1 ? reg4 :
     state == 4'd6 ? reg2 :
     'x;
 
@@ -69,14 +69,14 @@ module main (
       case(state)
         4'd1: reg0 <= out0_Add0;
         4'd5: reg0 <= reg1;
-        4'd6: reg0 <= out0_Sub2;
-        4'd7: reg0 <= reg0;
+        4'd6: reg0 <= out0_Add0;
+        4'd7: reg0 <= reg2;
       endcase
       case(state)
-        4'd7: reg1 <= reg2;
+        4'd7: reg1 <= reg0;
       endcase
       case(state)
-        4'd6: reg2 <= out0_Add0;
+        4'd6: reg2 <= out0_Sub2;
         4'd7: reg2 <= reg1;
       endcase
       case(state)

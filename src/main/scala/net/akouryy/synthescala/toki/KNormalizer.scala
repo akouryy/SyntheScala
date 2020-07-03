@@ -12,7 +12,7 @@ object KNormalizer:
         case _ =>
           val x = lab.getOrElse(Label.temp())
           val kontExpr = kont(x)
-          Let(Entry(x, Type.U[0]), expr, kontExpr)
+          Let(Entry(x, Type.U(0)), expr, kontExpr)
 
     expr match
       case Num(_) | Ref(_) => insert(expr)
