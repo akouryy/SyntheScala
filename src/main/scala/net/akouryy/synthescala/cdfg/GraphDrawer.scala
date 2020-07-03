@@ -25,8 +25,8 @@ class GraphDrawer(
       case Some(state: collection.Set[?]) => sup("#ff4411", state.mkString("|"))
       case None => sup("#ff4411", "q?")
 
-  private def idStr(id: String): String =
-    s"""$id${sup("#3311ff", regs.getOrElse(id, "r?"))}"""
+  private def idStr(id: Label): String =
+    s"""${id.str}${sup("#3311ff", regs.getOrElse(id, "r?"))}"""
 
   private def (s: String).singleLine: String = s"""\n *""".r.replaceAllIn(s, "")
 
@@ -47,15 +47,15 @@ class GraphDrawer(
 
       current ++= j.match
         case Jump.StartFun(i, ob) =>
-          s"""$i[label = <$label<br/>${graph.params.mkString(",")}>; shape = component];
+          s"""$i[label = <$label<br/>${graph.params.map(_.str).mkString(",")}>; shape = component];
               |$i -> $ob;
               |""".stripMargin
         case Jump.Return(i, v, ib) =>
           s"""$i[label = <$label>; shape = lpromoter];
-              |$ib -> $i [label="$v"];
+              |$ib -> $i [label="${v.str}"];
               |""".stripMargin
         case Jump.TailCall(i, fn, args, ib) =>
-          s"""$i[label = <$label<br/>$fn(${args.mkString(",")})>; shape = component];
+          s"""$i[label = <$label<br/>$fn(${args.map(_.str).mkString(",")})>; shape = component];
               |$ib -> $i;
               |""".stripMargin
         case Jump.Branch(i, cond, ib, tob, fob) =>
@@ -64,17 +64,17 @@ class GraphDrawer(
               |  shape = trapezium; style = rounded;
               |];
               |$ib -> $i;
-              |$i -> $tob [label="$cond"];
-              |$i -> $fob [label="!$cond"];
+              |$i -> $tob [label="${cond.str}"];
+              |$i -> $fob [label="!${cond.str}"];
               |""".stripMargin
         case Jump.Merge(i, ibs, inss, ob, ons) =>
           val inputEdges =
             ibs.zip(inss).map((ib, ins) =>
-              s"""$ib -> $i [label="${ins.mkString(",")}"];"""
+              s"""$ib -> $i [label="${ins.map(_.str).mkString(",")}"];"""
             ).mkString
           s"""$i[label = <$label>; shape = invtrapezium; style = rounded];
               |$inputEdges
-              |$i -> $ob [label="${ons.mkString(",")}"];
+              |$i -> $ob [label="${ons.map(_.str).mkString(",")}"];
               |""".stripMargin
       // end match
     end for
@@ -102,14 +102,14 @@ class GraphDrawer(
         val labelBase = nd match
           case Node.Input(n) => s"""${idStr(n)}:in"""
           case Node.Const(v, n) => s"""${idStr(n)}:$v"""
-          case Node.Output(n) => s"""out($n)"""
+          case Node.Output(n) => s"""out(${n.str})"""
           case Node.BinOp(op, l, r, a) =>
             val bound = sup("#3311ff", unsafeEscape(
               bindings.get(bi, nd).fold("?")(_.shortString)
             ))
-            s"""${idStr(a)}:$l${unsafeEscape(op)}$bound$r"""
+            s"""${idStr(a)}:${l.str}${unsafeEscape(op)}$bound${r.str}"""
           case Node.Call(fn, args, ret) =>
-            s"""${idStr(ret)}:$fn(${args.mkString(",")})"""
+            s"""${idStr(ret)}:$fn(${args.map(_.str).mkString(",")})"""
 
         current ++=
           s"""${id(nd)} [label=<

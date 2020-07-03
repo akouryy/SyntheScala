@@ -13,35 +13,35 @@ module main (
   reg[31:0] reg3;
   reg[31:0] reg1;
   reg[31:0] reg0;
-  wire[31:0] in0_Add2;
-  wire[31:0] in1_Add2;
-  wire[31:0] out0_Add2 = in0_Add2 + in1_Add2;
-  wire[31:0] in0_Equal3;
-  wire[31:0] in1_Equal3;
-  wire[0:0] out0_Equal3 = in0_Equal3 == in1_Equal3;
-  wire[31:0] in0_Sub4;
-  wire[31:0] in1_Sub4;
-  wire[31:0] out0_Sub4 = in0_Sub4 - in1_Sub4;
+  wire[31:0] in0_Add0;
+  wire[31:0] in1_Add0;
+  wire[31:0] out0_Add0 = in0_Add0 + in1_Add0;
+  wire[31:0] in0_Equal1;
+  wire[31:0] in1_Equal1;
+  wire[0:0] out0_Equal1 = in0_Equal1 == in1_Equal1;
+  wire[31:0] in0_Sub2;
+  wire[31:0] in1_Sub2;
+  wire[31:0] out0_Sub2 = in0_Sub2 - in1_Sub2;
 
-  assign in1_Equal3 =
-    state == 4'd2 ? reg3 :
+  assign in0_Equal1 =
+    state == 4'd2 ? reg0 :
     'x;
-  assign in0_Add2 =
+  assign in1_Equal1 =
+    state == 4'd2 ? reg4 :
+    'x;
+  assign in0_Sub2 =
+    state == 4'd6 ? reg0 :
+    'x;
+  assign in1_Sub2 =
+    state == 4'd6 ? reg3 :
+    'x;
+  assign in0_Add0 =
     state == 4'd1 ? reg0 :
     state == 4'd6 ? reg1 :
     'x;
-  assign in1_Add2 =
-    state == 4'd1 ? reg4 :
+  assign in1_Add0 =
+    state == 4'd1 ? reg3 :
     state == 4'd6 ? reg2 :
-    'x;
-  assign in1_Sub4 =
-    state == 4'd6 ? reg3 :
-    'x;
-  assign in0_Equal3 =
-    state == 4'd2 ? reg0 :
-    'x;
-  assign in0_Sub4 =
-    state == 4'd6 ? reg0 :
     'x;
 
   always @(posedge clk) begin
@@ -67,21 +67,21 @@ module main (
         4'd0: state <= 4'd1;
       endcase
       case(state)
-        4'd1: reg0 <= out0_Add2;
+        4'd1: reg0 <= out0_Add0;
         4'd5: reg0 <= reg1;
-        4'd6: reg0 <= out0_Add2;
-        4'd7: reg0 <= reg2;
+        4'd6: reg0 <= out0_Sub2;
+        4'd7: reg0 <= reg0;
       endcase
       case(state)
-        4'd7: reg1 <= reg0;
+        4'd7: reg1 <= reg2;
       endcase
       case(state)
-        4'd6: reg2 <= out0_Sub4;
+        4'd6: reg2 <= out0_Add0;
         4'd7: reg2 <= reg1;
       endcase
       case(state)
         4'd0: reg3 <= 32'd0;
-        4'd2: reg3 <= out0_Equal3;
+        4'd2: reg3 <= out0_Equal1;
         4'd3: reg3 <= reg3 ? reg3 : 32'd1;
       endcase
       case(state)

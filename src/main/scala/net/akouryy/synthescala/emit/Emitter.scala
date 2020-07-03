@@ -2,7 +2,8 @@ package net.akouryy.synthescala
 package emit
 
 import cdfg.CDFG
-import cdfg.bind.Binder.{Bindings, Calculator}
+import cdfg.bind.Binder.Bindings
+import cdfg.bind.Calculator
 import cdfg.bind.RegisterAllocator.Allocations
 import fsmd._
 import scala.collection.immutable
@@ -11,8 +12,8 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
   val calculators = immutable.SortedMap.from:
     bindings.valuesIterator.toSeq.distinct.map(c => c.id -> c)
 
-  private def sv(id: String): String =
-    id.replace("_", "__").replace("@", "_a_")
+  private def lab2sv(lab: Label): String =
+    lab.str.replace("_", "__").replace("@", "_a_")
 
   private def in(cal: Calculator, i: Int): String = s"in${i}_${cal.shortString}"
   private def out(cal: Calculator, i: Int): String = s"out${i}_${cal.shortString}"
@@ -44,7 +45,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     r.indent:
       r ++= "input wire clk, r_enable,"
       for p <- cdfg.params do
-        r ++= s"input wire[31:0] init_${sv(p)},"
+        r ++= s"input wire[31:0] init_${lab2sv(p)},"
       r ++= "output reg w_enable,"
       r ++= "output reg[31:0] result"
     r.indent(");", "endmodule // main"):
@@ -96,7 +97,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
           r ++= "linkreg <= '1;"
           r ++= "w_enable <= 1'd0;"
           for (p, i) <- cdfg.params.zipWithIndex do
-            r ++= s"${reg2sv(Register(i))} <= init_${sv(p)};"
+            r ++= s"${reg2sv(Register(i))} <= init_${lab2sv(p)};"
         r.indent("end else begin", "end"):
           // states
           r.indent("case(state)", "endcase"):

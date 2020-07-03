@@ -10,13 +10,13 @@ object Main:
     import Expr._
     Fun(
       "add7", Type.U[13],
-      "abcdefg".map(c => Entry(c.toString, Type.U[10])),
-      Bin("+", Ref("a"),
-        Bin("+", Ref("b"),
-          Bin("+", Ref("c"),
+      "abcdefg".map(c => Entry(Label(c.toString), Type.U[10])),
+      Bin("+", Ref(Label("a")),
+        Bin("+", Ref(Label("b")),
+          Bin("+", Ref(Label("c")),
             Bin("+",
-              Bin("+", Ref("d"), Ref("e")),
-              Bin("+", Ref("f"), Ref("g")),
+              Bin("+", Ref(Label("d")), Ref(Label("e"))),
+              Bin("+", Ref(Label("f")), Ref(Label("g"))),
             )
           )
         )
@@ -27,14 +27,14 @@ object Main:
     import Expr._
     Fun(
       "fib", Type.U[32],
-      Seq(Entry("n", Type.U[6]), Entry("a", Type.U[32]), Entry("b", Type.U[32])),
-      Let(Entry("n0", Type.U[6]), Bin("+", Ref("n"), Num(0)),
-        If(Bin("==", Ref("n0"), Num(0)),
-          Ref("a"),
+      Seq(Entry(Label("n"), Type.U[6]), Entry(Label("a"), Type.U[32]), Entry(Label("b"), Type.U[32])),
+      Let(Entry(Label("n0"), Type.U[6]), Bin("+", Ref(Label("n")), Num(0)),
+        If(Bin("==", Ref(Label("n0")), Num(0)),
+          Ref(Label("a")),
           Call("fib", Seq(
-            Bin("-", Ref("n0"), Num(1)),
-            Bin("+", Ref("a"), Ref("b")),
-            Ref("a"),
+            Bin("-", Ref(Label("n0")), Num(1)),
+            Bin("+", Ref(Label("a")), Ref(Label("b"))),
+            Ref(Label("a")),
           )),
         ),
       ),
@@ -44,6 +44,7 @@ object Main:
     Seq(add7, fib).map(f)
 
   private def f(fun: Fun): Unit =
+    reset()
     val k = KNormalizer(fun.body)
     // PP.pprintln(k)
     val graph = cdfg.Specializer()(fun.copy(body=k))
@@ -59,11 +60,17 @@ object Main:
     val bindings = cdfg.bind.AllocatingBinder(graph, schedule).bind
     // PP.pprintln(bindings)
     val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
-    PP.pprintln(fd)
+    // PP.pprintln(fd)
     val sv = emit.Emitter(graph, regAlloc, bindings, fd).emit
-    println(sv)
+    // println(sv)
     Files.write(Paths.get(s"dist/${fun.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))
 
     Files.write(Paths.get(s"dist/${fun.name}.dot"),
       cdfg.GraphDrawer(graph, schedule, regAlloc, bindings).draw.getBytes(StandardCharsets.UTF_8),
     )
+
+  private def reset(): Unit =
+    Label.reset()
+    cdfg.BlockIndex.reset()
+    cdfg.JumpIndex.reset()
+    cdfg.bind.Calculator.reset()

@@ -10,30 +10,30 @@ class Specializer:
   private var currentBlockIndex: BlockIndex = _
   private var currentInputJumpIndex: JumpIndex = _
   private val currentNodes = mutable.IndexedBuffer.empty[Node]
-  private val writtenID = mutable.Set.empty[String]
-  private var normalizationMap = mutable.Map.empty[String, String]
+  private val writtenLabel = mutable.Set.empty[Label]
+  private var normalizationMap = mutable.Map.empty[Label, Label]
 
-  private def normalize(x: String, checkWritten: Boolean = true) =
-    if !checkWritten || writtenID(x)
+  private def normalize(x: Label, checkWritten: Boolean = true): Label =
+    if !checkWritten || writtenLabel(x)
       normalizationMap.getOrElse(x, x)
     else
-      writtenID += x
+      writtenLabel += x
       x
 
-  private def specializeExpr(dest: String, expr: toki.Expr): Unit =
+  private def specializeExpr(dest: Label, expr: toki.Expr): Unit =
     import toki.Expr._
     expr match
       case Num(i) =>
-        writtenID += dest
+        writtenLabel += dest
         currentNodes += Node.Const(i, dest)
       case Ref(n) =>
-        writtenID += dest
+        writtenLabel += dest
         normalizationMap(dest) = normalize(n)
       case Bin(op, Ref(l), Ref(r)) =>
-        writtenID += dest
+        writtenLabel += dest
         currentNodes += Node.BinOp(op, normalize(l), normalize(r), dest)
       case Call(fn, args) =>
-        writtenID += dest
+        writtenLabel += dest
         currentNodes += Node.Call(fn, args.map(a => normalize(a.asInstanceOf[Ref].name)), dest)
       case Let(toki.Entry(n, t), x, b) =>
         specializeExpr(n, x)
@@ -42,13 +42,13 @@ class Specializer:
         val beginBI = currentBlockIndex
         val branchJI, mergeJI = JumpIndex.generate()
         val truBI, flsBI, kontBI = BlockIndex.generate()
-        val truDest, flsDest = ID.temp()
+        val truDest, flsDest = Label.temp()
 
         // ifの前のブロックを登録
         currentGraph.blocks(beginBI) =
           Block(beginBI, currentNodes.toSet, currentInputJumpIndex, branchJI)
         currentNodes.clear()
-        writtenID.clear()
+        writtenLabel.clear()
         // if分岐を登録
         currentGraph.jumps(branchJI) = Jump.Branch(branchJI, c, beginBI, truBI, flsBI)
 
@@ -61,7 +61,7 @@ class Specializer:
         currentGraph.blocks(truLastBI) =
           Block(truLastBI, currentNodes.toSet, currentInputJumpIndex, mergeJI)
         currentNodes.clear()
-        writtenID.clear()
+        writtenLabel.clear()
 
         // 偽分岐
         currentBlockIndex = flsBI
@@ -72,7 +72,7 @@ class Specializer:
         currentGraph.blocks(flsLastBI) =
           Block(flsLastBI, currentNodes.toSet, currentInputJumpIndex, mergeJI)
         currentNodes.clear()
-        writtenID.clear()
+        writtenLabel.clear()
 
         // 併合を登録
         currentGraph.jumps(mergeJI) = Jump.Merge(
@@ -84,14 +84,14 @@ class Specializer:
         currentBlockIndex = kontBI
         currentInputJumpIndex = mergeJI
         currentNodes.clear()
-        writtenID.clear()
-        writtenID += dest
+        writtenLabel.clear()
+        writtenLabel += dest
       case _ => assert(false, expr)
   end specializeExpr
 
   def apply(f: toki.Fun): CDFG = // synchronized:
     currentGraph = CDFG(f.name, f.params.map(_.name))
-    val dest = ID.temp()
+    val dest = Label.temp()
     currentInputJumpIndex = JumpIndex.generate()
     currentBlockIndex = BlockIndex.generate()
     currentGraph.jumps(currentInputJumpIndex) =
@@ -104,7 +104,7 @@ class Specializer:
     currentGraph.blocks(currentBlockIndex) =
       Block(currentBlockIndex, currentNodes.toSet, currentInputJumpIndex, retJI)
     currentNodes.clear()
-    writtenID.clear()
+    writtenLabel.clear()
     currentGraph.jumps(retJI) =
       Jump.Return(retJI, normalizedDest, currentBlockIndex)
     currentGraph

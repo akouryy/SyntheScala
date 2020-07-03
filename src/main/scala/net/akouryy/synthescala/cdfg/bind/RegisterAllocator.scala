@@ -21,9 +21,9 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
   end interferenceGraph
 
   def allocate: Allocations =
-    val ret = mutable.Map.empty[String, Register]
+    val ret = mutable.Map.empty[Label, Register]
 
-    def getOrAlloc(id: String): Register =
+    def getOrAlloc(id: Label): Register =
       ret.getOrElseUpdate(id, {
         val used = interferenceGraph.get(id).flatMap(ret.get)
 
@@ -46,6 +46,6 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
 end RegisterAllocator
 
 object RegisterAllocator:
-  type IGraph = collection.MultiDict[String, String]
+  type IGraph = collection.MultiDict[Label, Label]
 
-  type Allocations = collection.Map[String, Register]
+  type Allocations = collection.Map[Label, Register]

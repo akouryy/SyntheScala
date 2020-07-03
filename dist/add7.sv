@@ -27,21 +27,21 @@ module main (
   wire[31:0] out0_Add1 = in0_Add1 + in1_Add1;
 
   assign in0_Add1 =
-    state == 3'd1 ? reg3 :
+    state == 3'd1 ? reg5 :
     'x;
   assign in1_Add1 =
-    state == 3'd1 ? reg4 :
+    state == 3'd1 ? reg6 :
     'x;
   assign in0_Add0 =
-    state == 3'd1 ? reg5 :
-    state == 3'd2 ? reg4 :
+    state == 3'd1 ? reg3 :
+    state == 3'd2 ? reg3 :
     state == 3'd3 ? reg2 :
     state == 3'd4 ? reg1 :
     state == 3'd5 ? reg0 :
     'x;
   assign in1_Add0 =
-    state == 3'd1 ? reg6 :
-    state == 3'd2 ? reg3 :
+    state == 3'd1 ? reg4 :
+    state == 3'd2 ? reg4 :
     state == 3'd3 ? reg3 :
     state == 3'd4 ? reg2 :
     state == 3'd5 ? reg1 :

@@ -5,7 +5,7 @@ package cdfg
 
 import scala.collection.mutable
 
-final class CDFG(val fnName: String, val params: Seq[String]):
+final class CDFG(val fnName: String, val params: Seq[Label]):
   val blocks: mutable.SortedMap[BlockIndex, Block] = mutable.SortedMap[BlockIndex, Block]()
   val jumps: mutable.SortedMap[JumpIndex, Jump] = mutable.SortedMap[JumpIndex, Jump]()
 
@@ -29,6 +29,8 @@ object BlockIndex:
     BlockIndex(prefix.indices :+ cnt) // O(n)
   }
 
+  def reset() = cnt = -1
+
 final case class JumpIndex(indices: List[Int]) extends Ordered[JumpIndex] derives Eql:
   override def toString: String = s"Jump$indexString"
 
@@ -45,23 +47,25 @@ object JumpIndex:
     cnt += 1
     JumpIndex(prefix.indices :+ cnt) // O(n)
 
+  def reset() = cnt = -1
+
 case class Block(
   i: BlockIndex,
   /*names: Map[String, Int /* node idx */],*/ nodes: Set[Node],
   inJumpIndex: JumpIndex, outJump: JumpIndex,
 ):
-  def defs: Set[String] = nodes.flatMap:
+  def defs: Set[Label] = nodes.flatMap:
     case Node.Input(_) => Nil
     case nd => nd.written
 
-  def uses: Set[String] = nodes.flatMap:
+  def uses: Set[Label] = nodes.flatMap:
     case Node.Output(_) => Nil
     case nd => nd.read
 
-  lazy val writeMap: Map[String, Node] = nodes.flatMap(nd => nd.written.map(_ -> nd)).toMap
+  lazy val writeMap: Map[Label, Node] = nodes.flatMap(nd => nd.written.map(_ -> nd)).toMap
 
-  lazy val readMap: Map[String, Seq[Node]] =
-    val res = mutable.Map.empty[String, List[Node]]
+  lazy val readMap: Map[Label, Seq[Node]] =
+    val res = mutable.Map.empty[Label, List[Node]]
     for nd <- nodes; id <- nd.read do
       res(id) = nd :: res.getOrElse(id, Nil)
     res.toMap
@@ -75,11 +79,11 @@ case class Block(
 end Block
 
 enum Node derives Eql:
-  case Input(name: String)
-  case Const(value: Long, name: String)
-  case Output(name: String)
-  case BinOp(op: String, left: String, right: String, ans: String)
-  case Call(fn: String, args: Seq[String], ret: String)
+  case Input(name: Label)
+  case Const(value: Long, name: Label)
+  case Output(name: Label)
+  case BinOp(op: String, left: Label, right: Label, ans: Label)
+  case Call(fn: String, args: Seq[Label], ret: Label)
 
   override lazy val hashCode = scala.util.hashing.MurmurHash3.productHash(this)
 
@@ -87,14 +91,14 @@ enum Node derives Eql:
     case _: (Input | Const) => true
     case _ => false
 
-  def read: Seq[String] = this match
+  def read: Seq[Label] = this match
     case Input(_) => Nil
     case Const(_, _) => Nil
     case Output(n) => Seq(n)
     case BinOp(_, l, r, _) => Seq(l, r)
     case Call(_, as, _) => as
 
-  def written: Option[String] = this match
+  def written: Option[Label] = this match
     case Input(n) => Some(n)
     case Const(_, n) => Some(n)
     case Output(_) => None
@@ -108,12 +112,12 @@ enum Jump:
 
   case StartFun(i: JumpIndex, outBlock: BlockIndex)
 
-  case Return(i: JumpIndex, value: String, inBlock: BlockIndex)
+  case Return(i: JumpIndex, value: Label, inBlock: BlockIndex)
 
-  case TailCall(i: JumpIndex, fn: String, args: Seq[String], inBlock: BlockIndex)
+  case TailCall(i: JumpIndex, fn: String, args: Seq[Label], inBlock: BlockIndex)
 
   case Branch(
-    i: JumpIndex, cond: String, inBlock: BlockIndex, truBlock: BlockIndex, flsBlock: BlockIndex,
+    i: JumpIndex, cond: Label, inBlock: BlockIndex, truBlock: BlockIndex, flsBlock: BlockIndex,
   )
     // assert(input < tru && input < fls)
 
@@ -122,8 +126,8 @@ enum Jump:
   */
   case Merge(
     i: JumpIndex, override val inBlocks: IndexedSeq[BlockIndex],
-    inNames: IndexedSeq[IndexedSeq[String]],
-    outBlock: BlockIndex, outNames: IndexedSeq[String],
+    inNames: IndexedSeq[IndexedSeq[Label]],
+    outBlock: BlockIndex, outNames: IndexedSeq[Label],
   )
     // assert(inputs.forall(_.bi < output))
 

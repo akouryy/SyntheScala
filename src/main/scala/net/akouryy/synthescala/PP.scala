@@ -14,11 +14,11 @@ val PP: PPrinter = pprint.copy(additionalHandlers = {
   case cdfg.BlockIndex(i) => Literal(s"B${i.mkString("-")}")
   case cdfg.JumpIndex(i) => Literal(s"J${i.mkString("-")}")
 
-  case Node.Const(v, n) => Infix(Literal(n), "=N", PP.treeify(v))
+  case Node.Const(v, n) => Infix(Literal(n.str), "=N", PP.treeify(v))
   case Node.BinOp(op, l, r, a) =>
-    Infix(Literal(a), "=B", Infix(Literal(l), op, Literal(r)))
+    Infix(Literal(a.str), "=B", Infix(Literal(l.str), op, Literal(r.str)))
   case Node.Call(fn, args, ret) =>
-    Infix(Literal(ret), "=C", Apply(fn, args.iterator.map(PP.treeify)))
+    Infix(Literal(ret.str), "=C", Apply(fn, args.iterator.map(PP.treeify)))
 
   case fsmd.Datapath(map) =>
     Apply("Datapath", map.iterator.map((k, v) => Infix(PP.treeify(k), ":=", PP.treeify(v))))

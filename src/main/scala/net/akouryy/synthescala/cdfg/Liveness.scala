@@ -10,7 +10,7 @@ object Liveness:
       mutable.Stack
 
     val visited = mutable.Set.empty[BlockIndex]
-    val liveIns = mutable.Map.empty[BlockIndex, Set[String]]
+    val liveIns = mutable.Map.empty[BlockIndex, Set[Label]]
 
     while jis.nonEmpty do
       val ji = jis.pop()
@@ -35,9 +35,9 @@ object Liveness:
   end insertInOuts
 
   def liveInsForState(graph: CDFG, sche: schedule.Schedule)
-  : collection.Map[State, Set[String]] =
+  : collection.Map[State, Set[Label]] =
 
-    val ret = mutable.Map.empty[State, Set[String]]
+    val ret = mutable.Map.empty[State, Set[Label]]
 
     /*for (ji -> j) <- graph.jumps do
       j match
@@ -50,7 +50,7 @@ object Liveness:
         case _ => // TODO: Merge*/
 
     for (bi -> b) <- graph.blocks do
-      val live = mutable.Set.empty[String]
+      val live = mutable.Set.empty[Label]
       for node <- b.nodes do
         node match
           case Node.Output(id) => live += id

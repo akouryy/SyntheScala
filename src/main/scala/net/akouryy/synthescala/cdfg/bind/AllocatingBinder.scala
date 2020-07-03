@@ -2,7 +2,6 @@ package net.akouryy.synthescala
 package cdfg
 package bind
 
-import Binder.Calculator
 import schedule.Schedule
 import scala.collection.{immutable, mutable}
 

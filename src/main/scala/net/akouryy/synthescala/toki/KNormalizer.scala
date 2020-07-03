@@ -4,13 +4,13 @@ package net.akouryy.synthescala
 package toki
 
 object KNormalizer:
-  private[this] def convert(name: Option[String], expr: Expr)(kont: String => Expr): Expr =
+  private[this] def convert(lab: Option[Label], expr: Expr)(kont: Label => Expr): Expr =
     import Expr._
     def insert(expr: Expr): Expr =
       expr match
         case Ref(x) => kont(x)
         case _ =>
-          val x = name.getOrElse(ID.temp())
+          val x = lab.getOrElse(Label.temp())
           val kontExpr = kont(x)
           Let(Entry(x, Type.U[0]), expr, kontExpr)
 
@@ -19,7 +19,7 @@ object KNormalizer:
       case Let(Entry(x, t), expr, body) =>
         convert(Some(x), expr):
          _ =>
-          convert(name, body)(kont)
+          convert(lab, body)(kont)
       case Bin(op, left, right) =>
         convert(None, left):
          x =>
