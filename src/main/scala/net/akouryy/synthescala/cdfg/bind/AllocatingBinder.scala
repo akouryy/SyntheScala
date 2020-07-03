@@ -5,24 +5,35 @@ package bind
 import schedule.Schedule
 import scala.collection.{immutable, mutable}
 
-class AllocatingBinder(graph: CDFG, sche: Schedule):
+class AllocatingBinder(graph: CDFG, typeEnv: toki.TypeEnv, sche: Schedule):
   def bind: Binder.Bindings =
-    val ret = mutable.Map.empty[(BlockIndex, Node), Calculator]
-    val calculators = mutable.Set.empty[Calculator]
+    val ids = mutable.Map.empty[(BlockIndex, Node), Int]
+    val calculators = mutable.Map.empty[Int, Calculator]
     val used = mutable.Set.empty[Int]
 
     def bindCalc(bi: BlockIndex, node: Node, ifNone: => Calculator)
-                (filter: PartialFunction[Calculator, Boolean]): Calculator =
-      val calc = calculators.find(c =>
-        !used(c.id) && filter.lift(c).exists(identity)
-      ).getOrElse:
-        val calc = ifNone
-        calculators += calc
-        calc
+                (perfectFilter: PartialFunction[Calculator, Boolean])
+                (mendingFilter: PartialFunction[Calculator, Option[Calculator]]): Unit =
+      val id -> _ =
+        calculators.find((i, c) =>
+          !used(i) && perfectFilter.lift(c).exists(identity)
+        ).getOrElse:
+          calculators.find { (i, c) =>
+            !used(i) && {
+              val c2 = mendingFilter.lift(c).flatten
+              c2.foreach(calculators(i) = _)
+              c2.nonEmpty
+            }
+          } match
+            case Some(i -> _) if i >= 0 => i -> () // c2
+            case _ =>
+              val calc = ifNone
+              calculators(calc.id) = calc
+              calc.id -> ()
 
-      ret((bi, node)) = calc
-      used += calc.id
-      calc
+      ids((bi, node)) = id
+      used += id
+      // calc
     end bindCalc
 
     for b <- graph.blocks.valuesIterator
@@ -30,21 +41,40 @@ class AllocatingBinder(graph: CDFG, sche: Schedule):
       used.clear()
 
       nodes.foreach:
-        case node @ Node.BinOp(op, _, _, _) =>
+        case node @ Node.BinOp(op, l, r, _) =>
+          val lt = typeEnv(l)
+          val rt = typeEnv(r)
           (op: @unchecked) match
             case "+" =>
-              bindCalc(b.i, node, Calculator.Add(32, 32)):
-                case Calculator.Add(_, lb, rb) if lb >= 32 && rb >= 32 => true
+              bindCalc(b.i, node, Calculator.Add(lt, rt)) {
+                case Calculator.Add(_, clt, crt) =>
+                  clt.getMax(lt) == Some(clt) && crt.getMax(rt) == Some(crt)
+              } {
+                case Calculator.Add(id, clt, crt) =>
+                  for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
+                    Calculator.Add(id, mlt, mrt)
+              }
             case "-" =>
-              bindCalc(b.i, node, Calculator.Sub(32, 32)):
-                case Calculator.Sub(_, lb, rb) if lb >= 32 && rb >= 32 => true
+              bindCalc(b.i, node, Calculator.Sub(lt, rt)) {
+                case Calculator.Sub(_, clt, crt) =>
+                  clt.getMax(lt) == Some(clt) && crt.getMax(rt) == Some(crt)
+              } {
+                case Calculator.Sub(id, clt, crt) =>
+                  for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
+                    Calculator.Sub(id, mlt, mrt)
+              }
             case "==" =>
-              bindCalc(b.i, node, Calculator.Equal(32, 32)):
-                case Calculator.Equal(_, lb, rb) if lb >= 32 && rb >= 32 => true
+              bindCalc(b.i, node, Calculator.Equal(lt, rt)) {
+                case Calculator.Equal(_, clt, crt) =>
+                  clt.getMax(lt) == Some(clt) && crt.getMax(rt) == Some(crt)
+              } {
+                case Calculator.Equal(id, clt, crt) =>
+                  for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
+                    Calculator.Equal(id, mlt, mrt)
+              }
         case _ =>
     end for
 
-    ret
-
+    ids.view.mapValues(calculators).toMap
   end bind
 end AllocatingBinder

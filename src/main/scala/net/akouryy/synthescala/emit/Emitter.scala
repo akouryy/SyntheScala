@@ -18,6 +18,10 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
   private def in(cal: Calculator, i: Int): String = s"in${i}_${cal.shortString}"
   private def out(cal: Calculator, i: Int): String = s"out${i}_${cal.shortString}"
 
+  private def typ2sv(typ: toki.Type): String = typ match
+    case toki.Type.U(w) => s"""[${w - 1}:0]"""
+    case toki.Type.S(w) => s""" signed[${w - 1}:0]"""
+
   private def reg2sv(reg: Register): String = s"reg${reg.id}"
 
   private def connSrc2sv(src: ConnPort.Src, dst: ConnPort.Dst): String = src match
@@ -51,8 +55,8 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     r.indent(");", "endmodule // main"):
 
       // definitions
-      r ++= s"reg[${stateBitLen-1}:0] state;"
-      r ++= s"reg[${stateBitLen-1}:0] linkreg;"
+      r ++= s"reg[${stateBitLen - 1}:0] state;"
+      r ++= s"reg[${stateBitLen - 1}:0] linkreg;"
       for reg <- regSet do
         r ++= s"reg[31:0] ${reg2sv(reg)};"
 
@@ -61,12 +65,12 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
         val inputTypes =
           import Calculator._
           cal match
-            case Add(_, lb, rb) =>
-              Seq(s"wire[${lb-1}:0]", s"wire[${rb-1}:0]")
-            case Sub(_, lb, rb) =>
-              Seq(s"wire[${lb-1}:0]", s"wire[${rb-1}:0]")
-            case Equal(_, lb, rb) =>
-              Seq(s"wire[${lb-1}:0]", s"wire[${rb-1}:0]")
+            case Add(_, lt, rt) =>
+              Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
+            case Sub(_, lt, rt) =>
+              Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
+            case Equal(_, lt, rt) =>
+              Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
         val outputs =
           import Calculator._
           cal match

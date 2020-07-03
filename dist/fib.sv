@@ -16,11 +16,11 @@ module main (
   wire[31:0] in0_Add0;
   wire[31:0] in1_Add0;
   wire[31:0] out0_Add0 = in0_Add0 + in1_Add0;
-  wire[31:0] in0_Equal1;
-  wire[31:0] in1_Equal1;
+  wire[5:0] in0_Equal1;
+  wire[0:0] in1_Equal1;
   wire[0:0] out0_Equal1 = in0_Equal1 == in1_Equal1;
-  wire[31:0] in0_Sub2;
-  wire[31:0] in1_Sub2;
+  wire[5:0] in0_Sub2;
+  wire[0:0] in1_Sub2;
   wire[31:0] out0_Sub2 = in0_Sub2 - in1_Sub2;
 
   assign in0_Equal1 =

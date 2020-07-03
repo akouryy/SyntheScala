@@ -11,3 +11,5 @@ final case class Register(id: Int) extends Ordered[Register] derives Eql:
   override def toString = s"r$id"
 
   def compare(that: Register) = this.id.compare(that.id)
+
+given[T](using Eql[T, T]) as Eql[Option[T], Option[T]] = Eql.derived

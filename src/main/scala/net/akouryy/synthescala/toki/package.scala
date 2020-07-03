@@ -29,6 +29,12 @@ enum Type(str: => String) derives Eql:
 
   override def toString = str
 
+  def getMax(that: Type): Option[Type] = (this, that) match
+    case (U(a), U(b)) => Some(U(a max b))
+    case (S(a), S(b)) => Some(S(a max b))
+    case _ => None
+end Type
+
 type TypeEnv = Map[Label, Type]
 
 case class Entry(name: Label, typ: Type):

@@ -57,7 +57,7 @@ object Main:
     // PP.pprintln(schedule)
     val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule).allocate
     // PP.pprintln(regAlloc)
-    val bindings = cdfg.bind.AllocatingBinder(graph, schedule).bind
+    val bindings = cdfg.bind.AllocatingBinder(graph, typeEnv, schedule).bind
     // PP.pprintln(bindings)
     val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
     // PP.pprintln(fd)

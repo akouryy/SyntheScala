@@ -19,11 +19,11 @@ module main (
   reg[31:0] reg3;
   reg[31:0] reg1;
   reg[31:0] reg0;
-  wire[31:0] in0_Add0;
-  wire[31:0] in1_Add0;
+  wire[9:0] in0_Add0;
+  wire[9:0] in1_Add0;
   wire[31:0] out0_Add0 = in0_Add0 + in1_Add0;
-  wire[31:0] in0_Add1;
-  wire[31:0] in1_Add1;
+  wire[9:0] in0_Add1;
+  wire[9:0] in1_Add1;
   wire[31:0] out0_Add1 = in0_Add1 + in1_Add1;
 
   assign in0_Add1 =
