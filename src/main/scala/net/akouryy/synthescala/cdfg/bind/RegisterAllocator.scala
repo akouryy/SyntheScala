@@ -30,6 +30,8 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
         Register(0.to(used.size).find(i => !used(Register(i))).get)
       })
 
+    graph.params.foreach(getOrAlloc)
+
     for (bi -> b) <- graph.blocks do
       graph.inJump(b) match
         case Jump.Branch(_, cond, _, _, _) => getOrAlloc(cond)

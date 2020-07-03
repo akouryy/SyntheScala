@@ -9,15 +9,17 @@ class Composer(
   regs: cdfg.bind.RegisterAllocator.Allocations, bindings: cdfg.bind.Binder.Bindings,
 ):
   val fsm = mutable.Map.empty[State, Transition]
+  val datapath = mutable.Map.empty[ConnPort.Dst, mutable.Map[State, Source]]
 
   def compose: FSMD =
     composeFSM()
-    FSMD(fsm, DataPath())
+    composeDatapath()
+    FSMD(fsm, Datapath(datapath))
 
   private def blockFirstState(bi: cdfg.BlockIndex) =
     graph.blocks(bi).stateToNodes(sche).keySet.head
 
-  def composeFSM(): Unit =
+  private def composeFSM(): Unit =
     for
       b <- graph.blocks.valuesIterator
       Seq(q1, q2) <- b.stateToNodes(sche).keySet.toList.sliding(2)
@@ -41,3 +43,82 @@ class Composer(
           fsm(q1) = Transition.Conditional(
             regs(cond), blockFirstState(tbi), blockFirstState(fbi),
           )
+  end composeFSM
+
+  private def mergeDatapath(pin: ConnPort.Dst, q: State, src: Source): Unit =
+    import ConnPort._
+    import Source._
+
+    val newSrc =
+      (datapath.getOrElseUpdate(pin, mutable.Map.empty).get(q), src) match
+        case (None, _) => src
+        case (Some(Conditional(reg, tru, Inherit)), Conditional(reg1, Inherit, fls))
+        if reg == reg1 =>
+          Conditional(reg, tru, fls)
+        case (Some(Conditional(reg, Inherit, fls)), Conditional(reg1, tru, Inherit))
+        if reg == reg1 =>
+          Conditional(reg, tru, fls)
+        case _ => ???
+
+    datapath(pin)(q) = newSrc
+
+  private def composeDatapath(): Unit =
+    for b <- graph.blocks.valuesIterator
+        node <- b.nodes
+    do
+      import cdfg.Node._
+      node match
+        case _: (Input | Output) => // nothing to do
+        case Const(num, ident) =>
+          import Jump._
+          graph.jumps(b.inJumpIndex) match
+            case Branch(ji1, cond, _, tru, fls) =>
+              mergeDatapath(
+                new ConnPort.Reg(regs(ident)),
+                sche.jumpStates(ji1).soleElement,
+                Source.Conditional(
+                  regs(cond),
+                  if tru == b.i then new ConnPort.Const(num) else ConnPort.Inherit,
+                  if fls == b.i then new ConnPort.Const(num) else ConnPort.Inherit,
+                )
+              )
+            case j1 =>
+              for q <- sche.jumpStates(j1.i) do
+                mergeDatapath(
+                  new ConnPort.Reg(regs(ident)),
+                  q,
+                  Source.Always(new ConnPort.Const(num))
+                )
+        case BinOp(_, l, r, a) =>
+          val calc = bindings(b.i, node)
+          val q = sche.nodeStates(b.i, node)
+          mergeDatapath(
+            new ConnPort.CalcIn(calc.id, 0),
+            q,
+            Source.Always(new ConnPort.Reg(regs(l))),
+          )
+          mergeDatapath(
+            new ConnPort.CalcIn(calc.id, 1),
+            q,
+            Source.Always(new ConnPort.Reg(regs(r))),
+          )
+          mergeDatapath(
+            new ConnPort.Reg(regs(a)),
+            q,
+            Source.Always(new ConnPort.CalcOut(calc.id, 0)),
+          )
+        case _: Call => ???
+    end for
+
+    for j <- graph.jumps.valuesIterator do
+      j match
+        case Jump.TailCall(ji, _, params, _) =>
+          for (param, i) <- params.zipWithIndex do
+            mergeDatapath(
+              new ConnPort.Reg(Register(i)),
+              sche.jumpStates(ji).soleElement,
+              Source.Always(new ConnPort.Reg(regs(param))),
+            )
+        case _ =>
+  end composeDatapath
+end Composer

@@ -47,7 +47,7 @@ class GraphDrawer(
 
       current ++= j.match
         case Jump.StartFun(i, ob) =>
-          s"""$i[label = <$label>; shape = component];
+          s"""$i[label = <$label<br/>${graph.params.mkString(",")}>; shape = component];
               |$i -> $ob;
               |""".stripMargin
         case Jump.Return(i, v, ib) =>

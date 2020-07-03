@@ -41,7 +41,7 @@ object Main:
     )
 
   def main(args: Array[String]): Unit =
-    Seq(/*add7,*/ fib).map(f)
+    Seq(add7, fib).map(f)
 
   private def f(fun: Fun): Unit =
     val k = KNormalizer(fun.body)
@@ -51,10 +51,7 @@ object Main:
     cdfg.Liveness.insertInOuts(graph)
     // PP.pprintln(graph)
     cdfg.optimize.Optimizer(graph)
-    PP.pprintln(graph)
-    Files.write(Paths.get(s"dist/${fun.name}.dot"),
-      cdfg.GraphDrawer(graph).draw.getBytes(StandardCharsets.UTF_8),
-    )
+    // PP.pprintln(graph)
     val schedule = cdfg.schedule.GorgeousScheduler(graph).schedule
     // PP.pprintln(schedule)
     val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule).allocate

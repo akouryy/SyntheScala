@@ -5,8 +5,11 @@ import pprint.{PPrinter, Tree}
 import Tree.{Apply, Infix, Literal}
 
 val PP: PPrinter = pprint.copy(additionalHandlers = {
+  case Register(r) => Literal(s"%r$r")
+  case State(q) => Literal(s"q$q")
+
   case g: cdfg.CDFG =>
-    Apply("CDFG", Seq(g.blocks, g.jumps).iterator.map(PP.treeify))
+    Apply("CDFG", Seq(g.params, g.blocks, g.jumps).iterator.map(PP.treeify))
 
   case cdfg.BlockIndex(i) => Literal(s"B${i.mkString("-")}")
   case cdfg.JumpIndex(i) => Literal(s"J${i.mkString("-")}")
@@ -16,6 +19,9 @@ val PP: PPrinter = pprint.copy(additionalHandlers = {
     Infix(Literal(a), "=B", Infix(Literal(l), op, Literal(r)))
   case Node.Call(fn, args, ret) =>
     Infix(Literal(ret), "=C", Apply(fn, args.iterator.map(PP.treeify)))
+
+  case fsmd.Datapath(map) =>
+    Apply("Datapath", map.iterator.map((k, v) => Infix(PP.treeify(k), ":=", PP.treeify(v))))
 
 }: PartialFunction[Any, Tree])
 

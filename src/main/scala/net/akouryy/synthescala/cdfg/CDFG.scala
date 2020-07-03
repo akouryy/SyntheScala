@@ -5,13 +5,13 @@ package cdfg
 
 import scala.collection.mutable
 
-final class CDFG:
+final class CDFG(val params: Seq[String]):
   val blocks: mutable.SortedMap[BlockIndex, Block] = mutable.SortedMap[BlockIndex, Block]()
   val jumps: mutable.SortedMap[JumpIndex, Jump] = mutable.SortedMap[JumpIndex, Jump]()
 
   def inJump(b: Block) = jumps(b.inJumpIndex)
 
-final case class BlockIndex(indices: List[Int]) extends Ordered[BlockIndex]:
+final case class BlockIndex(indices: List[Int]) extends Ordered[BlockIndex] derives Eql:
   override def toString: String = s"Block$indexString"
 
   def indexString: String = indices.mkString("_")
@@ -29,7 +29,7 @@ object BlockIndex:
     BlockIndex(prefix.indices :+ cnt) // O(n)
   }
 
-final case class JumpIndex(indices: List[Int]) extends Ordered[JumpIndex]:
+final case class JumpIndex(indices: List[Int]) extends Ordered[JumpIndex] derives Eql:
   override def toString: String = s"Jump$indexString"
 
   def indexString: String = indices.mkString("_")
@@ -74,7 +74,7 @@ case class Block(
         sche.nodeStates(i, node) -> node
 end Block
 
-enum Node:
+enum Node derives Eql:
   case Input(name: String)
   case Const(value: Long, name: String)
   case Output(name: String)
