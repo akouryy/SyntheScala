@@ -58,6 +58,8 @@ object Main:
     PP.pprintln(regAlloc)
     val bindings = cdfg.bind.AllocatingBinder(graph, schedule).bind
     PP.pprintln(bindings)
+    val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
+    PP.pprintln(fd)
 
     Files.write(Paths.get(s"dist/${fun.name}.dot"),
       cdfg.GraphDrawer(graph, schedule, regAlloc, bindings).draw.getBytes(StandardCharsets.UTF_8),
