@@ -10,6 +10,7 @@ enum Calculator:
 
   case Add(id: Int, lt: toki.Type, rt: toki.Type)
   case Sub(id: Int, lt: toki.Type, rt: toki.Type)
+  case Mul(id: Int, lt: toki.Type, rt: toki.Type)
   case Equal(id: Int, lt: toki.Type, rt: toki.Type)
 
   def shortString: String = s"""$productPrefix$id"""
@@ -28,6 +29,11 @@ object Calculator:
     def apply(lt: toki.Type, rt: toki.Type): Calculator =
       maxCalculatorID += 1
       Calculator.Sub(maxCalculatorID, lt, rt)
+
+  object Mul:
+    def apply(lt: toki.Type, rt: toki.Type): Calculator =
+      maxCalculatorID += 1
+      Calculator.Mul(maxCalculatorID, lt, rt)
 
   object Equal:
     def apply(lt: toki.Type, rt: toki.Type): Calculator =

@@ -63,6 +63,15 @@ class AllocatingBinder(graph: CDFG, typeEnv: toki.TypeEnv, sche: Schedule):
                   for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
                     Calculator.Sub(id, mlt, mrt)
               }
+            case "*" =>
+              bindCalc(b.i, node, Calculator.Mul(lt, rt)) {
+                case Calculator.Mul(_, clt, crt) =>
+                  clt.getMax(lt) == Some(clt) && crt.getMax(rt) == Some(crt)
+              } {
+                case Calculator.Mul(id, clt, crt) =>
+                  for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
+                    Calculator.Mul(id, mlt, mrt)
+              }
             case "==" =>
               bindCalc(b.i, node, Calculator.Equal(lt, rt)) {
                 case Calculator.Equal(_, clt, crt) =>
@@ -72,6 +81,7 @@ class AllocatingBinder(graph: CDFG, typeEnv: toki.TypeEnv, sche: Schedule):
                   for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
                     Calculator.Equal(id, mlt, mrt)
               }
+            case _ => ???
         case _ =>
     end for
 

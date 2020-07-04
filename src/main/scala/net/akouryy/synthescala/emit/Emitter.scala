@@ -18,6 +18,9 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
   private def in(cal: Calculator, i: Int): String = s"in${i}_${cal.shortString}"
   private def out(cal: Calculator, i: Int): String = s"out${i}_${cal.shortString}"
 
+  private def readIndex(arr: Label): String = s"arrRaddr_${lab2sv(arr)}"
+  private def readData(arr: Label): String = s"arrRdata_${lab2sv(arr)}"
+
   private def typ2sv(typ: toki.Type): String = typ match
     case toki.Type.U(w) => s"""[${w - 1}:0]"""
     case toki.Type.S(w) => s""" signed[${w - 1}:0]"""
@@ -26,12 +29,14 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
 
   private def connSrc2sv(src: ConnPort.Src, dst: ConnPort.Dst): String = src match
     case ConnPort.CalcOut(cid, port) => out(calculators(cid), port)
+    case ConnPort.ArrReadValue(arr) => readData(arr)
     case ConnPort.Reg(reg) => reg2sv(reg)
     case ConnPort.Const(num) => s"32'd$num"
     case ConnPort.Inherit => connDst2sv(dst)
 
   private def connDst2sv(dst: ConnPort.Dst): String = dst match
     case ConnPort.CalcIn(cid, port) => in(calculators(cid), port)
+    case ConnPort.ArrReadIndex(arr) => readIndex(arr)
     case dest: ConnPort.Reg => connSrc2sv(dest, dest)
 
   private def source2sv(source: Source, dst: ConnPort.Dst): String = source match
@@ -41,17 +46,18 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
 
   def emit: String =
     val r = util.IndentedStringBuilder()
-    val stateBitLen = (fsmd.fsm.keys.map(_.id).max + 1).toBinaryString.length
+    val stateBitLen = (fsmd.fsm.keys.map(_.id).max + 1).width
     val regSet = regs.valuesIterator.toSet
 
     // header
+    r ++= "`default_nettype none"
     r ++= s"module main ("
     r.indent:
       r ++= "input wire clk, r_enable,"
       for p <- cdfg.main.params do
-        r ++= s"input wire[31:0] init_${lab2sv(p)},"
+        r ++= s"input wire[63:0] init_${lab2sv(p)},"
       r ++= "output reg w_enable,"
-      r ++= "output reg[31:0] result"
+      r ++= "output reg[63:0] result"
     r.indent(");", "endmodule // main"):
 
       // definitions
@@ -59,6 +65,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
       r ++= s"reg[${stateBitLen - 1}:0] linkreg;"
       for reg <- regSet do
         r ++= s"reg[31:0] ${reg2sv(reg)};"
+      r ++= ""
 
       // definitions: calculator ports
       for cal <- calculators.valuesIterator do
@@ -69,13 +76,16 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
               Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
             case Sub(_, lt, rt) =>
               Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
+            case Mul(_, lt, rt) =>
+              Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
             case Equal(_, lt, rt) =>
               Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
         val outputs =
           import Calculator._
           cal match
-            case _: Add => Seq("wire[31:0]" -> s"${in(cal, 0)} + ${in(cal, 1)}")
-            case _: Sub => Seq("wire[31:0]" -> s"${in(cal, 0)} - ${in(cal, 1)}")
+            case _: Add => Seq("wire[63:0]" -> s"${in(cal, 0)} + ${in(cal, 1)}")
+            case _: Sub => Seq("wire[63:0]" -> s"${in(cal, 0)} - ${in(cal, 1)}")
+            case _: Mul => Seq("wire[63:0]" -> s"${in(cal, 0)} * ${in(cal, 1)}")
             case _: Equal => Seq("wire[0:0]" -> s"${in(cal, 0)} == ${in(cal, 1)}")
         for (t, i) <- inputTypes.zipWithIndex do
           r ++= s"$t ${in(cal, i)};"
@@ -84,15 +94,20 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
       end for
       r ++= ""
 
-      // calculator input port selectors
-      locally:
-        import ConnPort._
-        for (dst @ CalcIn(cid, port), paths) <- fsmd.datapath.map do
-          r.indent(s"assign ${in(calculators(cid), port)} =", ""):
-            for (state -> source) <- paths do
-              r ++= f"state == $stateBitLen'd${state.id} ? ${source2sv(source, dst)} :"
-            r ++= s"'x;"
-        r ++= ""
+      // definitions: array instances
+      for toki.ArrayDef(arr, elemTyp, len) <- cdfg.arrayDefs.valuesIterator do
+        r ++= s"wire[${len.width - 1}:0] ${readIndex(arr)};"
+        r ++= s"wire${typ2sv(elemTyp)} ${readData(arr)};"
+        r ++= s"arr_${lab2sv(arr)} arr_${lab2sv(arr)}(.*);"
+      r ++= ""
+
+      // (calculator input and array index) port selectors
+      for (dst: (ConnPort.CalcIn | ConnPort.ArrReadIndex), paths) <- fsmd.datapath.map do
+        r.indent(s"assign ${connDst2sv(dst)} =", ""):
+          for (state -> source) <- paths do
+            r ++= f"state == $stateBitLen'd${state.id} ? ${source2sv(source, dst)} :"
+          r ++= s"'x;"
+      r ++= ""
 
       r.indent("always @(posedge clk) begin", "end"):
         // initializations
@@ -126,6 +141,27 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
               for (state -> source) <- paths do
                 r ++= s"$stateBitLen'd${s"${state.id}:"} ${reg2sv(reg)} <= " +
                       s"${source2sv(source, new ConnPort.Reg(reg))};"
+
+    // array modules
+    for toki.ArrayDef(arr, elemTyp, len) <- cdfg.arrayDefs.valuesIterator do
+      r ++= ""
+      r ++= s"module arr_${lab2sv(arr)} ("
+      r.indent:
+        r ++= "input wire clk,"
+        r ++= s"input wire[${len.width - 1}:0] ${readIndex(arr)},"
+        r ++= s"output wire${typ2sv(elemTyp)} ${readData(arr)}"
+      r.indent(");", "endmodule"):
+        r ++= s"reg${typ2sv(elemTyp)} mem [0:${len - 1}];";
+
+        r ++= "integer i;"
+        r.indent("initial begin", "end"):
+          r.indent(s"for(i = 0; i < $len; i = i + 1)", ""):
+            r ++= "mem[i] = i;"
+
+        // r.indent("always @(posedge clk) begin", "end"):
+        r ++= s"assign ${readData(arr)} = mem[${readIndex(arr)}];"
+
+    r ++= "`default_nettype wire"
     r.toString
   end emit
 end Emitter

@@ -20,3 +20,6 @@ def (self: String).tr(from: String, to: String): String =
 
   val convs = trChars(from).zipStrict(trChars(to)).toMap
   self.map(c => convs.getOrElse(c, c))
+
+def (i: Int).width: Int = i.toBinaryString.length
+def (i: Long).width: Int = i.toBinaryString.length

@@ -67,23 +67,18 @@ object Main:
     val schedule = cdfg.schedule.GorgeousScheduler(graph).schedule
     // PP.pprintln(schedule)
     val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule).allocate(graph.main)
-    PP.pprintln(regAlloc)
-    Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
-      cdfg.GraphDrawer(graph, typeEnv, schedule, regAlloc)
-          .draw.getBytes(StandardCharsets.UTF_8),
-    )
+    // PP.pprintln(regAlloc)
     val bindings = cdfg.bind.AllocatingBinder(graph, typeEnv, schedule).bind
     // PP.pprintln(bindings)
-    val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
-    // PP.pprintln(fd)
-    val sv = emit.Emitter(graph, regAlloc, bindings, fd).emit
-    // println(sv)
-    Files.write(Paths.get(s"dist/${prog.main.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))
-
     Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
       cdfg.GraphDrawer(graph, typeEnv, schedule, regAlloc, bindings)
           .draw.getBytes(StandardCharsets.UTF_8),
     )
+    val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
+    PP.pprintln(fd)
+    val sv = emit.Emitter(graph, regAlloc, bindings, fd).emit
+    // println(sv)
+    Files.write(Paths.get(s"dist/${prog.main.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))
 
   private def reset(): Unit =
     Label.reset()

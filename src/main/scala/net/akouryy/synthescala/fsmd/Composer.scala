@@ -67,6 +67,8 @@ class Composer(
         node <- b.nodes
     do
       import cdfg.Node._
+      lazy val q = sche.nodeStates(b.i, node)
+
       node match
         case _: (Input | Output) => // nothing to do
         case Const(num, ident) =>
@@ -91,23 +93,28 @@ class Composer(
                 )
         case BinOp(_, l, r, a) =>
           val calc = bindings(b.i, node)
-          val q = sche.nodeStates(b.i, node)
           mergeDatapath(
-            new ConnPort.CalcIn(calc.id, 0),
-            q,
+            new ConnPort.CalcIn(calc.id, 0), q,
             Source.Always(new ConnPort.Reg(regs(l))),
           )
           mergeDatapath(
-            new ConnPort.CalcIn(calc.id, 1),
-            q,
+            new ConnPort.CalcIn(calc.id, 1), q,
             Source.Always(new ConnPort.Reg(regs(r))),
           )
           mergeDatapath(
-            new ConnPort.Reg(regs(a)),
-            q,
+            new ConnPort.Reg(regs(a)), q,
             Source.Always(new ConnPort.CalcOut(calc.id, 0)),
           )
-        case _: Call => ???
+        case Get(arr, index, res) =>
+          mergeDatapath(
+            new ConnPort.ArrReadIndex(arr), q,
+            Source.Always(new ConnPort.Reg(regs(index))),
+          )
+          mergeDatapath(
+            new ConnPort.Reg(regs(res)), q,
+            Source.Always(new ConnPort.ArrReadValue(arr)),
+          )
+        case _: Call => !!!!(node)
     end for
 
     for j <- fn.jumps.valuesIterator do

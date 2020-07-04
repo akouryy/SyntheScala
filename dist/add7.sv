@@ -1,14 +1,15 @@
+`default_nettype none
 module main (
   input wire clk, r_enable,
-  input wire[31:0] init_a,
-  input wire[31:0] init_b,
-  input wire[31:0] init_c,
-  input wire[31:0] init_d,
-  input wire[31:0] init_e,
-  input wire[31:0] init_f,
-  input wire[31:0] init_g,
+  input wire[63:0] init_a,
+  input wire[63:0] init_b,
+  input wire[63:0] init_c,
+  input wire[63:0] init_d,
+  input wire[63:0] init_e,
+  input wire[63:0] init_f,
+  input wire[63:0] init_g,
   output reg w_enable,
-  output reg[31:0] result
+  output reg[63:0] result
 );
   reg[2:0] state;
   reg[2:0] linkreg;
@@ -19,12 +20,14 @@ module main (
   reg[31:0] reg3;
   reg[31:0] reg1;
   reg[31:0] reg0;
+
   wire[9:0] in0_Add0;
   wire[9:0] in1_Add0;
-  wire[31:0] out0_Add0 = in0_Add0 + in1_Add0;
+  wire[63:0] out0_Add0 = in0_Add0 + in1_Add0;
   wire[9:0] in0_Add1;
   wire[9:0] in1_Add1;
-  wire[31:0] out0_Add1 = in0_Add1 + in1_Add1;
+  wire[63:0] out0_Add1 = in0_Add1 + in1_Add1;
+
 
   assign in0_Add1 =
     state == 3'd1 ? reg3 :
@@ -93,3 +96,4 @@ module main (
     end
   end
 endmodule // main
+`default_nettype wire
