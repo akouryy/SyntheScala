@@ -13,38 +13,38 @@ module main (
 );
   reg[2:0] state;
   reg[2:0] linkreg;
-  reg[31:0] reg2;
-  reg[31:0] reg5;
-  reg[31:0] reg4;
-  reg[31:0] reg6;
-  reg[31:0] reg3;
-  reg[31:0] reg1;
   reg[31:0] reg0;
+  reg[31:0] reg1;
+  reg[31:0] reg2;
+  reg[31:0] reg3;
+  reg[31:0] reg4;
+  reg[31:0] reg5;
+  reg[31:0] reg6;
 
-  wire[9:0] in0_Bin0;
-  wire[9:0] in1_Bin0;
-  wire[9:0] out0_Bin0 = in0_Bin0 + in1_Bin0;
+  wire[12:0] in0_Bin0;
+  wire[12:0] in1_Bin0;
+  wire[12:0] out0_Bin0 = in0_Bin0 + in1_Bin0;
   wire[9:0] in0_Bin1;
-  wire[9:0] in1_Bin1;
-  wire[9:0] out0_Bin1 = in0_Bin1 + in1_Bin1;
+  wire[12:0] in1_Bin1;
+  wire[12:0] out0_Bin1 = in0_Bin1 + in1_Bin1;
 
 
   assign in0_Bin1 =
-    state == 3'd1 ? reg5 :
+    state == 3'd1 ? reg3 :
     'x;
   assign in1_Bin1 =
-    state == 3'd1 ? reg6 :
+    state == 3'd1 ? reg4 :
     'x;
   assign in0_Bin0 =
-    state == 3'd1 ? reg3 :
-    state == 3'd2 ? reg3 :
+    state == 3'd1 ? reg5 :
+    state == 3'd2 ? reg4 :
     state == 3'd3 ? reg2 :
     state == 3'd4 ? reg1 :
     state == 3'd5 ? reg0 :
     'x;
   assign in1_Bin0 =
-    state == 3'd1 ? reg4 :
-    state == 3'd2 ? reg4 :
+    state == 3'd1 ? reg6 :
+    state == 3'd2 ? reg3 :
     state == 3'd3 ? reg3 :
     state == 3'd4 ? reg2 :
     state == 3'd5 ? reg1 :

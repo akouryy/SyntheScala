@@ -21,11 +21,10 @@ object Liveness:
           val block = prog.main.blocks(bi)
           visited += bi
           jis += block.inJumpIndex
-          val liveOut = jump match
+          val liveOut = (jump: @unchecked) match
             case Jump.Branch(_, cond, _, _, _) => liveOutBase + cond
             case Jump.Merge(_, ibs, ins, _, ons) => liveOutBase -- ons ++ ins(ibs.indexOf(bi))
             case Jump.Return(_, v, _) => liveOutBase + v
-            case _ => assert(false)
 
           liveIns(bi) = liveOut ++ block.uses -- block.defs
 

@@ -18,8 +18,10 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
   private def in(cal: Calculator, i: Int): String = s"in${i}_${cal.shortString}"
   private def out(cal: Calculator, i: Int): String = s"out${i}_${cal.shortString}"
 
-  private def readIndex(arr: Label): String = s"arrRaddr_${lab2sv(arr)}"
-  private def readData(arr: Label): String = s"arrRdata_${lab2sv(arr)}"
+  private def writeEnable(arr: Label): String = s"arrWEnable_${lab2sv(arr)}"
+  private def index(arr: Label): String = s"arrAddr_${lab2sv(arr)}"
+  private def readData(arr: Label): String = s"arrRData_${lab2sv(arr)}"
+  private def writeData(arr: Label): String = s"arrWData_${lab2sv(arr)}"
 
   private def typ2sv(typ: toki.Type): String = typ match
     case toki.Type.U(w) => s"""[${w - 1}:0]"""
@@ -36,7 +38,9 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
 
   private def connDst2sv(dst: ConnPort.Dst): String = dst match
     case ConnPort.CalcIn(cid, port) => in(calculators(cid), port)
-    case ConnPort.ArrReadIndex(arr) => readIndex(arr)
+    case ConnPort.ArrWriteEnable(arr) => writeEnable(arr)
+    case ConnPort.ArrIndex(arr) => index(arr)
+    case ConnPort.ArrWriteValue(arr) => writeData(arr)
     case dest: ConnPort.Reg => connSrc2sv(dest, dest)
 
   private def source2sv(source: Source, dst: ConnPort.Dst): String = source match
@@ -47,7 +51,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
   def emit: String =
     val r = util.IndentedStringBuilder()
     val stateBitLen = (fsmd.fsm.keys.map(_.id).max + 1).width
-    val regSet = regs.valuesIterator.toSet
+    val regSet = immutable.SortedSet.from(regs.valuesIterator)
 
     // header
     r ++= "`default_nettype none"
@@ -91,13 +95,17 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
 
       // definitions: array instances
       for toki.ArrayDef(arr, elemTyp, len) <- cdfg.arrayDefs.valuesIterator do
-        r ++= s"wire[${len.width - 1}:0] ${readIndex(arr)};"
+        r ++= s"wire ${writeEnable(arr)};"
+        r ++= s"wire[${len.width - 1}:0] ${index(arr)};"
         r ++= s"wire${typ2sv(elemTyp)} ${readData(arr)};"
+        r ++= s"wire${typ2sv(elemTyp)} ${writeData(arr)};"
         r ++= s"arr_${lab2sv(arr)} arr_${lab2sv(arr)}(.*);"
       r ++= ""
 
       // (calculator input and array index) port selectors
-      for (dst: (ConnPort.CalcIn | ConnPort.ArrReadIndex), paths) <- fsmd.datapath.map do
+      for (dst: (
+        ConnPort.CalcIn | ConnPort.ArrWriteEnable | ConnPort.ArrIndex | ConnPort.ArrWriteValue
+      ), paths) <- fsmd.datapath.map do
         r.indent(s"assign ${connDst2sv(dst)} =", ""):
           for (state -> source) <- paths do
             r ++= f"state == $stateBitLen'd${state.id} ? ${source2sv(source, dst)} :"
@@ -138,23 +146,33 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
                       s"${source2sv(source, new ConnPort.Reg(reg))};"
 
     // array modules
+    /**
+      * Using the result of
+      *   https://github.com/PyHDI/veriloggen/blob/1465c93fef/examples/thread_matmul/Makefile.
+      * Original: Copyright 2015, Shinya Takamaeda-Yamazaki and Contributors
+      *   (Apache License 2.0 https://github.com/PyHDI/veriloggen/blob/1465c93fef/LICENSE)).
+      * Modified by akouryy.
+      */
     for toki.ArrayDef(arr, elemTyp, len) <- cdfg.arrayDefs.valuesIterator do
       r ++= ""
       r ++= s"module arr_${lab2sv(arr)} ("
       r.indent:
-        r ++= "input wire clk,"
-        r ++= s"input wire[${len.width - 1}:0] ${readIndex(arr)},"
-        r ++= s"output wire${typ2sv(elemTyp)} ${readData(arr)}"
+        r ++= s"input wire clk, ${writeEnable(arr)},"
+        r ++= s"input wire[${len.width - 1}:0] ${index(arr)},"
+        r ++= s"output wire${typ2sv(elemTyp)} ${readData(arr)},"
+        r ++= s"input wire${typ2sv(elemTyp)} ${writeData(arr)}"
       r.indent(");", "endmodule"):
-        r ++= s"reg${typ2sv(elemTyp)} mem [0:${len - 1}];";
 
         r ++= "integer i;"
         r.indent("initial begin", "end"):
           r.indent(s"for(i = 0; i < $len; i = i + 1)", ""):
             r ++= "mem[i] = i;"
 
-        // r.indent("always @(posedge clk) begin", "end"):
-        r ++= s"assign ${readData(arr)} = mem[${readIndex(arr)}];"
+        r ++= s"reg${typ2sv(elemTyp)} mem [0:${len - 1}];";
+        r.indent("always @(posedge clk) begin", "end"):
+          r.indent(s"if(${writeEnable(arr)}) begin", "end"):
+            r ++= s"mem[${index(arr)}] <= ${writeData(arr)};"
+        r ++= s"assign ${readData(arr)} = /*${writeEnable(arr)} ? 'x :*/ mem[${index(arr)}];"
 
     r ++= "`default_nettype wire"
     r.toString

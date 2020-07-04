@@ -30,6 +30,13 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
     val block = fn.blocks(bi)
     visited += bi
 
+    def nodeVisited(node: Node): Boolean = stateOf(bi, node).nonEmpty
+
+    def parents(node: Node) =
+      node match
+        case _: (Node.Get | Node.Put) => block.arrayDeps.goBackward(node)
+        case _ => Set.empty
+
     val q =
       import scala.language.implicitConversions
       block.nodes.filter(_.isInstanceOf[Node.Input | Node.Const]).to(mutable.Queue)
@@ -38,7 +45,11 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
       val nd = q.dequeue()
       if !nodeStates.contains(bi, nd)
         if !nd.isInput
-          var state = nd.read.map(r => stateOf(bi, block.writeMap(r)).get).max.succ
+          var state =
+            (
+              nd.read.map(r => stateOf(bi, block.writeMap(r)).get).maxOption.toList ++
+              parents(nd).map(par => stateOf(bi, par).get).maxOption
+            ).max.succ
           nd match
             case Node.Get(arr, _, _) =>
               while arrayAccessed(state, arr) do
@@ -50,7 +61,8 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
         for
           w <- nd.written
           nd2 <- block.readMap(w)
-          if nd2.read.forall(r => stateOf(bi, block.writeMap(r)).nonEmpty)
+          if nd2.read.forall(r => nodeVisited(block.writeMap(r))) &&
+             parents(nd2).forall(nodeVisited)
         do
           q.enqueue(nd2)
     end while

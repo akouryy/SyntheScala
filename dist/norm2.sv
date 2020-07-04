@@ -9,8 +9,8 @@ module main (
   reg[3:0] state;
   reg[3:0] linkreg;
   reg[31:0] reg0;
-  reg[31:0] reg2;
   reg[31:0] reg1;
+  reg[31:0] reg2;
   reg[31:0] reg3;
 
   wire[9:0] in0_Bin0;
@@ -26,15 +26,25 @@ module main (
   wire signed[63:0] in1_Bin3;
   wire signed[63:0] out0_Bin3 = in0_Bin3 + in1_Bin3;
 
-  wire[9:0] arrRaddr_a;
-  wire signed[31:0] arrRdata_a;
+  wire arrWEnable_a;
+  wire[9:0] arrAddr_a;
+  wire signed[31:0] arrRData_a;
+  wire signed[31:0] arrWData_a;
   arr_a arr_a(.*);
 
+  assign arrWEnable_a =
+    state == 4'd5 ? 32'd0 :
+    state == 4'd6 ? 32'd0 :
+    'x;
   assign in0_Bin1 =
     state == 4'd5 ? reg0 :
     'x;
   assign in1_Bin1 =
     state == 4'd5 ? reg2 :
+    'x;
+  assign arrAddr_a =
+    state == 4'd5 ? reg0 :
+    state == 4'd6 ? reg0 :
     'x;
   assign in0_Bin2 =
     state == 4'd7 ? reg3 :
@@ -50,10 +60,6 @@ module main (
     'x;
   assign in0_Bin3 =
     state == 4'd8 ? reg1 :
-    'x;
-  assign arrRaddr_a =
-    state == 4'd5 ? reg0 :
-    state == 4'd6 ? reg0 :
     'x;
   assign in1_Bin3 =
     state == 4'd8 ? reg0 :
@@ -84,7 +90,7 @@ module main (
       endcase
       case(state)
         4'd4: reg0 <= reg1;
-        4'd6: reg0 <= arrRdata_a;
+        4'd6: reg0 <= arrRData_a;
         4'd7: reg0 <= out0_Bin2;
         4'd8: reg0 <= out0_Bin3;
         4'd9: reg0 <= reg2;
@@ -99,23 +105,29 @@ module main (
         4'd5: reg2 <= out0_Bin1;
       endcase
       case(state)
-        4'd5: reg3 <= arrRdata_a;
+        4'd5: reg3 <= arrRData_a;
       endcase
     end
   end
 endmodule // main
 
 module arr_a (
-  input wire clk,
-  input wire[9:0] arrRaddr_a,
-  output wire signed[31:0] arrRdata_a
+  input wire clk, arrWEnable_a,
+  input wire[9:0] arrAddr_a,
+  output wire signed[31:0] arrRData_a,
+  input wire signed[31:0] arrWData_a
 );
-  reg signed[31:0] mem [0:999];
   integer i;
   initial begin
     for(i = 0; i < 1000; i = i + 1)
       mem[i] = i;
   end
-  assign arrRdata_a = mem[arrRaddr_a];
+  reg signed[31:0] mem [0:999];
+  always @(posedge clk) begin
+    if(arrWEnable_a) begin
+      mem[arrAddr_a] <= arrWData_a;
+    end
+  end
+  assign arrRData_a = /*arrWEnable_a ? 'x :*/ mem[arrAddr_a];
 endmodule
 `default_nettype wire

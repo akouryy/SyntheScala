@@ -9,11 +9,11 @@ module main (
 );
   reg[3:0] state;
   reg[3:0] linkreg;
-  reg[31:0] reg2;
-  reg[31:0] reg4;
-  reg[31:0] reg3;
-  reg[31:0] reg1;
   reg[31:0] reg0;
+  reg[31:0] reg1;
+  reg[31:0] reg2;
+  reg[31:0] reg3;
+  reg[31:0] reg4;
 
   wire[31:0] in0_Bin0;
   wire[31:0] in1_Bin0;
@@ -72,14 +72,14 @@ module main (
       case(state)
         4'd1: reg0 <= out0_Bin0;
         4'd5: reg0 <= reg1;
-        4'd6: reg0 <= out0_Bin2;
-        4'd7: reg0 <= reg0;
+        4'd6: reg0 <= out0_Bin0;
+        4'd7: reg0 <= reg2;
       endcase
       case(state)
-        4'd7: reg1 <= reg2;
+        4'd7: reg1 <= reg0;
       endcase
       case(state)
-        4'd6: reg2 <= out0_Bin0;
+        4'd6: reg2 <= out0_Bin2;
         4'd7: reg2 <= reg1;
       endcase
       case(state)

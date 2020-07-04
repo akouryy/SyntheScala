@@ -107,12 +107,29 @@ class Composer(
           )
         case Get(arr, index, res) =>
           mergeDatapath(
-            new ConnPort.ArrReadIndex(arr), q,
+            new ConnPort.ArrWriteEnable(arr), q,
+            Source.Always(new ConnPort.Const(0)),
+          )
+          mergeDatapath(
+            new ConnPort.ArrIndex(arr), q,
             Source.Always(new ConnPort.Reg(regs(index))),
           )
           mergeDatapath(
             new ConnPort.Reg(regs(res)), q,
             Source.Always(new ConnPort.ArrReadValue(arr)),
+          )
+        case Put(arr, index, value) =>
+          mergeDatapath(
+            new ConnPort.ArrWriteEnable(arr), q,
+            Source.Always(new ConnPort.Const(1)),
+          )
+          mergeDatapath(
+            new ConnPort.ArrIndex(arr), q,
+            Source.Always(new ConnPort.Reg(regs(index))),
+          )
+          mergeDatapath(
+            new ConnPort.ArrWriteValue(arr), q,
+            Source.Always(new ConnPort.Reg(regs(value))),
           )
         case _: Call => !!!(node)
     end for

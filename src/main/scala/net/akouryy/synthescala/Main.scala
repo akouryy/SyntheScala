@@ -9,7 +9,7 @@ object Main:
   lazy val add7: Program =
     import dsl._
     TastyReflector.reflect:
-      def add7(a: U[10], b: U[10], c: U[10], d: U[10], e: U[10], f: U[10], g: U[10]): U[13] =
+      def add7(a: U[10], b: U[10], c: U[10], d: U[10], e: U[13], f: U[10], g: U[13]): U[13] =
         a + (b + (c + ((d + e) + (f + g))))
 
   lazy val fib: Program =
@@ -52,31 +52,33 @@ object Main:
     TastyReflector.reflect:
       val a = new Array[S[32]](1000)
 
-      def accumulate(i: U[10], acc: S[64]): U[1] =
+      def accumulate(i: U[10], acc: S[64]): S[32] =
         if i == 1000
-          0
+          a(800)
         else
           val b: S[64] = acc + a(i)
           a(i) = b
           accumulate(i + 1, b)
 
   def main(args: Array[String]): Unit =
+    var ok, ng = 0
     Seq(add7, fib, norm2, dotProd, accumulate).map:
       prog =>
-        try f(prog)
-        catch err => err.printStackTrace()
+        try
+          f(prog)
+          ok += 1
+        catch err =>
+          err.printStackTrace()
+          ng += 1
+    println(s"$ok succeeded, $ng failed.")
 
   private def f(prog: Program): Unit =
     reset()
-    PP.pprintln(prog)
+    // PP.pprintln(prog)
     val (typeEnv, kProg) = KNormalizer(prog).normalize
     // PP.pprintln(kProg)
     val graph = cdfg.Specializer()(kProg)
-    PP.pprintln(graph)
-    Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
-      cdfg.GraphDrawer(graph, typeEnv)
-          .draw.getBytes(StandardCharsets.UTF_8),
-    )
+    // PP.pprintln(graph)
     cdfg.Liveness.insertInOuts(graph)
     // PP.pprintln(graph)
     cdfg.optimize.Optimizer(graph)
@@ -92,7 +94,7 @@ object Main:
           .draw.getBytes(StandardCharsets.UTF_8),
     )
     val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
-    PP.pprintln(fd)
+    // PP.pprintln(fd)
     val sv = emit.Emitter(graph, regAlloc, bindings, fd).emit
     // println(sv)
     Files.write(Paths.get(s"dist/${prog.main.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))

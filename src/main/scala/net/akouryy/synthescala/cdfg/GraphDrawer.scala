@@ -135,7 +135,7 @@ class GraphDrawer(
         current ++= s"""${id(from)} -> ${id(to)};""" + "\n"
 
       for
-        from <- nodes
+        (from: (Node.Get | Node.Put)) <- nodes
         to <- arrayDeps.goForward(from)
       do
         current ++= s"""${id(from)} -> ${id(to)} [style = dotted];""" + "\n"

@@ -1,15 +1,15 @@
 module top();
 
   reg clk, r_enable;
-  wire[31:0] init_a = 32'd123;
-  wire[31:0] init_b = 32'd234;
-  wire[31:0] init_c = 32'd345;
-  wire[31:0] init_d = 32'd456;
-  wire[31:0] init_e = 32'd567;
-  wire[31:0] init_f = 32'd678;
-  wire[31:0] init_g = 32'd789;
+  wire[63:0] init_a = 64'd123;
+  wire[63:0] init_b = 64'd234;
+  wire[63:0] init_c = 64'd345;
+  wire[63:0] init_d = 64'd456;
+  wire[63:0] init_e = 64'd567;
+  wire[63:0] init_f = 64'd678;
+  wire[63:0] init_g = 64'd789;
   wire w_enable;
-  wire[31:0] result;
+  wire[63:0] result;
 
   main main(clk, r_enable, init_a, init_b, init_c, init_d, init_e, init_f, init_g, w_enable, result);
 
