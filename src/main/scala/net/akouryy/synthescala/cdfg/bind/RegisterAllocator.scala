@@ -9,7 +9,7 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
   import RegisterAllocator._
 
   val interferenceGraph: IGraph =
-    val liveInsForState = Liveness.liveInsForState(graph, sche)
+    val liveInsForState = Liveness.liveInsForState(graph.main, sche)
 
     mutable.MultiDict.from:
       for liveIn <- liveInsForState.valuesIterator
@@ -20,7 +20,7 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
       yield intf
   end interferenceGraph
 
-  def allocate: Allocations =
+  def allocate(fn: CDFGFun): Allocations =
     val ret = mutable.Map.empty[Label, Register]
 
     def getOrAlloc(id: Label): Register =
@@ -30,10 +30,10 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
         Register(0.to(used.size).find(i => !used(Register(i))).get)
       })
 
-    graph.params.foreach(getOrAlloc)
+    fn.params.foreach(getOrAlloc)
 
-    for (bi -> b) <- graph.blocks do
-      graph.inJump(b) match
+    for (bi -> b) <- fn.blocks do
+      fn.inJump(b) match
         case Jump.Branch(_, cond, _, _, _) => getOrAlloc(cond)
         case _ =>
 

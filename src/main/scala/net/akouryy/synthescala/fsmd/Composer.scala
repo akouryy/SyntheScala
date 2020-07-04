@@ -1,32 +1,32 @@
 package net.akouryy.synthescala
 package fsmd
 
-import cdfg.Jump
+import cdfg.{bind, CDFG, CDFGFun, Jump}
 import scala.collection.mutable
 
 class Composer(
-  graph: cdfg.CDFG, sche: cdfg.schedule.Schedule,
-  regs: cdfg.bind.RegisterAllocator.Allocations, bindings: cdfg.bind.Binder.Bindings,
+  graph: CDFG, sche: cdfg.schedule.Schedule,
+  regs: bind.RegisterAllocator.Allocations, bindings: bind.Binder.Bindings,
 ):
   val fsm = mutable.Map.empty[State, Transition]
   val datapath = mutable.Map.empty[ConnPort.Dst, mutable.SortedMap[State, Source]]
 
   def compose: FSMD =
-    composeFSM()
-    composeDatapath()
+    composeFSM(graph.main)
+    composeDatapath(graph.main)
     FSMD(fsm, Datapath(datapath))
 
-  private def blockFirstState(bi: cdfg.BlockIndex) =
-    graph.blocks(bi).stateToNodes(sche).keySet.head
+  private def blockFirstState(fn: CDFGFun, bi: cdfg.BlockIndex) =
+    fn.blocks(bi).stateToNodes(sche).keySet.head
 
-  private def composeFSM(): Unit =
+  private def composeFSM(fn: CDFGFun): Unit =
     for
-      b <- graph.blocks.valuesIterator
+      b <- fn.blocks.valuesIterator
       Seq(q1, q2) <- b.stateToNodes(sche).keySet.toList.sliding(2)
     do
       fsm(q1) = Transition.Always(q2)
 
-    for j <- graph.jumps.valuesIterator do
+    for j <- fn.jumps.valuesIterator do
       j match
         case _: Jump.Return =>
           for q1 <- sche.jumpStates(j.i) do
@@ -37,11 +37,11 @@ class Composer(
         case _: (Jump.StartFun | Jump.Merge) =>
           val bi = j.outBlocks.soleElement
           for q1 <- sche.jumpStates(j.i) do
-            fsm(q1) = Transition.Always(blockFirstState(bi))
+            fsm(q1) = Transition.Always(blockFirstState(fn, bi))
         case Jump.Branch(ji, cond, _, tbi, fbi) =>
           val q1 = sche.jumpStates(ji).soleElement
           fsm(q1) = Transition.Conditional(
-            regs(cond), blockFirstState(tbi), blockFirstState(fbi),
+            regs(cond), blockFirstState(fn, tbi), blockFirstState(fn, fbi),
           )
   end composeFSM
 
@@ -62,8 +62,8 @@ class Composer(
 
     datapath(pin)(q) = newSrc
 
-  private def composeDatapath(): Unit =
-    for b <- graph.blocks.valuesIterator
+  private def composeDatapath(fn: CDFGFun): Unit =
+    for b <- fn.blocks.valuesIterator
         node <- b.nodes
     do
       import cdfg.Node._
@@ -71,7 +71,7 @@ class Composer(
         case _: (Input | Output) => // nothing to do
         case Const(num, ident) =>
           import Jump._
-          graph.jumps(b.inJumpIndex) match
+          fn.jumps(b.inJumpIndex) match
             case Branch(ji1, cond, _, tru, fls) =>
               mergeDatapath(
                 new ConnPort.Reg(regs(ident)),
@@ -110,7 +110,7 @@ class Composer(
         case _: Call => ???
     end for
 
-    for j <- graph.jumps.valuesIterator do
+    for j <- fn.jumps.valuesIterator do
       j match
         case Jump.TailCall(ji, _, params, _) =>
           for (param, i) <- params.zipWithIndex do

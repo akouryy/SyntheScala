@@ -9,14 +9,16 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
   private val jumpStates = mutable.MultiDict.empty[JumpIndex, State]
   private val nodeStates = mutable.Map.empty[(BlockIndex, Node), State]
   private val visited = mutable.Set.empty[BlockIndex]
+  private val arrayAccessed = mutable.Set.empty[(State, Label)]
   private var maxState: State = _
 
   override def schedule: Schedule =
     jumpStates.clear()
     nodeStates.clear()
     visited.clear()
+    arrayAccessed.clear()
     maxState = State(0)
-    scheduleJump(graph.jumps.firstKey)
+    scheduleJump(graph.main, graph.main.jumps.firstKey)
     Schedule(jumpStates.sets, nodeStates.toMap)
 
   private def stateOf(bi: BlockIndex, node: Node): Option[State] =
@@ -24,8 +26,8 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
       case _: (Node.Input | Node.Const) => Some(maxState)
       case _ => nodeStates.get(bi, node)
 
-  private def scheduleBlock(bi: BlockIndex): Unit =
-    val block = graph.blocks(bi)
+  private def scheduleBlock(fn: CDFGFun, bi: BlockIndex): Unit =
+    val block = fn.blocks(bi)
     visited += bi
 
     val q =
@@ -36,8 +38,14 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
       val nd = q.dequeue()
       if !nodeStates.contains(bi, nd)
         if !nd.isInput
-          nodeStates((bi, nd)) =
-            nd.read.map(r => stateOf(bi, block.writeMap(r)).get).max.succ
+          var state = nd.read.map(r => stateOf(bi, block.writeMap(r)).get).max.succ
+          nd match
+            case Node.Get(arr, _, _) =>
+              while arrayAccessed(state, arr) do
+                state = state.succ
+              arrayAccessed += state -> arr
+            case _ =>
+          nodeStates((bi, nd)) = state
 
         for
           w <- nd.written
@@ -56,16 +64,16 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
     for util.Identity(node: Node.Output) <- block.nodes do
       nodeStates((bi, node)) = maxState
 
-    scheduleJump(block.outJump)
+    scheduleJump(fn, block.outJump)
   end scheduleBlock
 
-  private def scheduleJump(ji: JumpIndex): Unit =
-    val jump = graph.jumps(ji)
+  private def scheduleJump(fn: CDFGFun, ji: JumpIndex): Unit =
+    val jump = fn.jumps(ji)
     jumpStates += ji -> maxState
     if jump.inBlocks.forall(visited)
       jump match
         case _: Jump.Branch =>
           maxState = maxState.succ
         case _ =>
-      jump.outBlocks.foreach(scheduleBlock)
+      jump.outBlocks.foreach(scheduleBlock(fn, _))
   end scheduleJump

@@ -18,6 +18,6 @@ case class Schedule(
 
   def getStateOf(graph: CDFG, bi: BlockIndex, nd: Node): Option[State | collection.Set[State]] =
     if nd.isInput
-      jumpStates.get(graph.blocks(bi).inJumpIndex)
+      jumpStates.get(graph.main.blocks(bi).inJumpIndex)
     else
       nodeStates.get(bi, nd)

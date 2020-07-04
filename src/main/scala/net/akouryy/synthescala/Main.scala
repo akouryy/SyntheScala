@@ -22,6 +22,18 @@ object Main:
         else
           fib(n0 - 1, a + b, a)
 
+  lazy val norm2: Program =
+    import dsl._
+    TastyReflector.reflect:
+      val a = new Array[S[32]](1000)
+
+      def norm2(i: U[10], acc: S[64]): S[64] =
+        if i == 1000
+          acc
+        else
+          val a64: S[64] = a(i)
+          norm2(i + 1, acc + a64 * a(i))
+
   lazy val dotProd: Program =
     import dsl._
     TastyReflector.reflect:
@@ -36,14 +48,17 @@ object Main:
           dotProd(i + 1, acc + a64 * b(i))
 
   def main(args: Array[String]): Unit =
-    Seq(add7, fib, dotProd).map(f)
+    Seq(add7, fib, norm2, dotProd).map:
+      prog =>
+        try f(prog)
+        catch err => err.printStackTrace()
 
   private def f(prog: Program): Unit =
     reset()
     PP.pprintln(prog)
     val (typeEnv, kProg) = KNormalizer(prog).normalize
-    PP.pprintln(kProg)
-    val graph = cdfg.Specializer()(kProg.main)
+    // PP.pprintln(kProg)
+    val graph = cdfg.Specializer()(kProg)
     // PP.pprintln(graph)
     cdfg.Liveness.insertInOuts(graph)
     // PP.pprintln(graph)
@@ -51,8 +66,12 @@ object Main:
     // PP.pprintln(graph)
     val schedule = cdfg.schedule.GorgeousScheduler(graph).schedule
     // PP.pprintln(schedule)
-    val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule).allocate
-    // PP.pprintln(regAlloc)
+    val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule).allocate(graph.main)
+    PP.pprintln(regAlloc)
+    Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
+      cdfg.GraphDrawer(graph, typeEnv, schedule, regAlloc)
+          .draw.getBytes(StandardCharsets.UTF_8),
+    )
     val bindings = cdfg.bind.AllocatingBinder(graph, typeEnv, schedule).bind
     // PP.pprintln(bindings)
     val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
@@ -62,7 +81,8 @@ object Main:
     Files.write(Paths.get(s"dist/${prog.main.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))
 
     Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
-      cdfg.GraphDrawer(graph, typeEnv, schedule, regAlloc, bindings).draw.getBytes(StandardCharsets.UTF_8),
+      cdfg.GraphDrawer(graph, typeEnv, schedule, regAlloc, bindings)
+          .draw.getBytes(StandardCharsets.UTF_8),
     )
 
   private def reset(): Unit =

@@ -6,7 +6,7 @@ package cdfg
 import scala.collection.mutable
 
 class Specializer:
-  private var currentGraph: CDFG = _
+  private var currentGraph: CDFGFun = _
   private var currentBlockIndex: BlockIndex = _
   private var currentInputJumpIndex: JumpIndex = _
   private val currentNodes = mutable.IndexedBuffer.empty[Node]
@@ -35,6 +35,9 @@ class Specializer:
       case Call(fn, args) =>
         writtenLabel += dest
         currentNodes += Node.Call(fn, args.map(a => normalize(a.asInstanceOf[Ref].name)), dest)
+      case Get(arr, Ref(index)) =>
+        writtenLabel += dest
+        currentNodes += Node.Get(arr, normalize(index), dest)
       case Let(toki.Entry(n, t), x, b) =>
         specializeExpr(n, x)
         specializeExpr(dest, b)
@@ -89,15 +92,15 @@ class Specializer:
       case _ => assert(false, expr)
   end specializeExpr
 
-  def apply(f: toki.Fun): CDFG = // synchronized:
-    currentGraph = CDFG(f.name, f.params.map(_.name))
+  def apply(prog: toki.Program): CDFG = // synchronized:
+    currentGraph = CDFGFun(prog.main.name, prog.main.params.map(_.name))
     val dest = Label.temp()
     currentInputJumpIndex = JumpIndex.generate()
     currentBlockIndex = BlockIndex.generate()
     currentGraph.jumps(currentInputJumpIndex) =
       Jump.StartFun(currentInputJumpIndex, currentBlockIndex)
 
-    specializeExpr(dest, f.body)
+    specializeExpr(dest, prog.main.body)
 
     val normalizedDest = normalize(dest, checkWritten=false)
     val retJI = JumpIndex.generate()
@@ -107,7 +110,8 @@ class Specializer:
     writtenLabel.clear()
     currentGraph.jumps(retJI) =
       Jump.Return(retJI, normalizedDest, currentBlockIndex)
-    currentGraph
+
+    CDFG(prog.arrayDefs, currentGraph)
   end apply
 
 end Specializer

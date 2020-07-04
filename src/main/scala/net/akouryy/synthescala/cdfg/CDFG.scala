@@ -5,7 +5,9 @@ package cdfg
 
 import scala.collection.mutable
 
-final class CDFG(val fnName: String, val params: Seq[Label]):
+final case class CDFG(val arrayDefs: toki.ArrayDefMap, val main: CDFGFun)
+
+final class CDFGFun(val fnName: String, val params: Seq[Label]):
   val blocks: mutable.SortedMap[BlockIndex, Block] = mutable.SortedMap[BlockIndex, Block]()
   val jumps: mutable.SortedMap[JumpIndex, Jump] = mutable.SortedMap[JumpIndex, Jump]()
 
@@ -84,6 +86,7 @@ enum Node derives Eql:
   case Output(name: Label)
   case BinOp(op: String, left: Label, right: Label, ans: Label)
   case Call(fn: String, args: Seq[Label], ret: Label)
+  case Get(arr: Label, index: Label, ret: Label)
 
   override lazy val hashCode = scala.util.hashing.MurmurHash3.productHash(this)
 
@@ -97,6 +100,7 @@ enum Node derives Eql:
     case Output(n) => Seq(n)
     case BinOp(_, l, r, _) => Seq(l, r)
     case Call(_, as, _) => as
+    case Get(_, index, _) => Seq(index)
 
   def written: Option[Label] = this match
     case Input(n) => Some(n)
@@ -104,6 +108,7 @@ enum Node derives Eql:
     case Output(_) => None
     case BinOp(_, _, _, a) => Some(a)
     case Call(_, _, r) => Some(r)
+    case Get(_, _, ret) => Some(ret)
 
 end Node
 

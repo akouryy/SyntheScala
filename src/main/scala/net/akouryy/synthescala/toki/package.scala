@@ -1,7 +1,9 @@
 package net.akouryy.synthescala
 package toki
 
-case class Program(arrayDefs: Map[Label, ArrayDef], main: Fun)
+case class Program(arrayDefs: ArrayDefMap, main: Fun)
+
+type ArrayDefMap = Map[Label, ArrayDef]
 
 case class ArrayDef(name: Label, elemTyp: Type, length: Int)
 

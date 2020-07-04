@@ -43,14 +43,14 @@ class GraphDrawer(
           |edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
           |""".stripMargin
 
-    for (ji -> j) <- graph.jumps do
+    for (ji -> j) <- graph.main.jumps do
       val label = s"""${j.productPrefix}.${ji.indexString}
                       ${stateStr(sche.jumpStates.get(ji))}
                       """.singleLine
 
       current ++= j.match
         case Jump.StartFun(i, ob) =>
-          s"""$i[label = <$label<br/>${graph.params.map(_.str).mkString(",")}>; shape = component];
+          s"""$i[label = <$label<br/>${graph.main.params.map(_.str).mkString(",")}>; shape = component];
               |$i -> $ob;
               |""".stripMargin
         case Jump.Return(i, v, ib) =>
@@ -82,14 +82,14 @@ class GraphDrawer(
       // end match
     end for
 
-    for Block(i, nodes, _, _) <- graph.blocks.valuesIterator do
+    for Block(i, nodes, _, _) <- graph.main.blocks.valuesIterator do
       if nodes.isEmpty then
         current ++= s"""$i [label = "$i\\l(0行)"]""" + "\n"
       else
         current ++= s"""$i [label = "$i"];""" + "\n"
 
     for
-      Block(bi, nodes, _, _) <- graph.blocks.valuesIterator
+      Block(bi, nodes, _, _) <- graph.main.blocks.valuesIterator
       if nodes.nonEmpty
     do
       val ids = mutable.Map.empty[Node, Int]
@@ -113,6 +113,8 @@ class GraphDrawer(
             s"""${idStr(a)}:${l.str}${unsafeEscape(op)}$bound${r.str}"""
           case Node.Call(fn, args, ret) =>
             s"""${idStr(ret)}:$fn(${args.map(_.str).mkString(",")})"""
+          case Node.Get(arr, index, ret) =>
+            s"""${idStr(ret)}:${arr.str}[${index.str}]"""
 
         current ++=
           s"""${id(nd)} [label=<

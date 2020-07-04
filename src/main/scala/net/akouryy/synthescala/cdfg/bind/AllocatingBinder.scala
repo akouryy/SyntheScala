@@ -36,7 +36,7 @@ class AllocatingBinder(graph: CDFG, typeEnv: toki.TypeEnv, sche: Schedule):
       // calc
     end bindCalc
 
-    for b <- graph.blocks.valuesIterator
+    for b <- graph.main.blocks.valuesIterator
         (_, nodes) <- b.stateToNodes(sche).sets do
       used.clear()
 

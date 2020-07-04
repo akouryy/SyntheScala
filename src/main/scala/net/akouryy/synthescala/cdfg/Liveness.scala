@@ -4,8 +4,8 @@ package cdfg
 import scala.collection.mutable
 
 object Liveness:
-  def insertInOuts(graph: CDFG): Unit =
-    val jis = graph.jumps.filter(_._2.isInstanceOf[Jump.Return]).keysIterator.to:
+  def insertInOuts(prog: CDFG): Unit =
+    val jis = prog.main.jumps.filter(_._2.isInstanceOf[Jump.Return]).keysIterator.to:
       import scala.language.implicitConversions
       mutable.Stack
 
@@ -14,11 +14,11 @@ object Liveness:
 
     while jis.nonEmpty do
       val ji = jis.pop()
-      val jump = graph.jumps(ji)
+      val jump = prog.main.jumps(ji)
       if jump.outBlocks.forall(visited)
         val liveOutBase = jump.outBlocks.toSet.flatMap(liveIns)
         for bi <- jump.inBlocks do
-          val block = graph.blocks(bi)
+          val block = prog.main.blocks(bi)
           visited += bi
           jis += block.inJumpIndex
           val liveOut = jump match
@@ -29,12 +29,12 @@ object Liveness:
 
           liveIns(bi) = liveOut ++ block.uses -- block.defs
 
-          graph.blocks(bi) = block.copy(
+          prog.main.blocks(bi) = block.copy(
             nodes = block.nodes ++ liveIns(bi).map(Node.Input(_)) ++ liveOut.map(Node.Output(_))
           )
   end insertInOuts
 
-  def liveInsForState(graph: CDFG, sche: schedule.Schedule)
+  def liveInsForState(graph: CDFGFun, sche: schedule.Schedule)
   : collection.Map[State, Set[Label]] =
 
     val ret = mutable.Map.empty[State, Set[Label]]

@@ -48,7 +48,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     r ++= s"module main ("
     r.indent:
       r ++= "input wire clk, r_enable,"
-      for p <- cdfg.params do
+      for p <- cdfg.main.params do
         r ++= s"input wire[31:0] init_${lab2sv(p)},"
       r ++= "output reg w_enable,"
       r ++= "output reg[31:0] result"
@@ -100,7 +100,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
           r ++= "state <= '0;"
           r ++= "linkreg <= '1;"
           r ++= "w_enable <= 1'd0;"
-          for (p, i) <- cdfg.params.zipWithIndex do
+          for (p, i) <- cdfg.main.params.zipWithIndex do
             r ++= s"${reg2sv(Register(i))} <= init_${lab2sv(p)};"
         r.indent("end else begin", "end"):
           // states

@@ -18,8 +18,8 @@ val PP: PPrinter = pprint.copy(additionalHandlers = { obj =>
         Seq(PP.treeify(kont))
     )
 
-  case g: cdfg.CDFG =>
-    Apply("CDFG", Seq(g.params, g.blocks, g.jumps).iterator.map(PP.treeify))
+  case g: cdfg.CDFGFun =>
+    Apply("CDFGFun", Seq(g.params, g.blocks, g.jumps).iterator.map(PP.treeify))
 
   case cdfg.BlockIndex(i) => Literal(s"B${i.mkString("-")}")
   case cdfg.JumpIndex(i) => Literal(s"J${i.mkString("-")}")
