@@ -72,21 +72,16 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
         val inputTypes =
           import Calculator._
           cal match
-            case Add(_, lt, rt) =>
-              Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
-            case Sub(_, lt, rt) =>
-              Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
-            case Mul(_, lt, rt) =>
-              Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
-            case Equal(_, lt, rt) =>
-              Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
+            case Bin(_, _, lt, rt) => Seq(s"wire${typ2sv(lt)}", s"wire${typ2sv(rt)}")
         val outputs =
           import Calculator._
           cal match
-            case _: Add => Seq("wire[63:0]" -> s"${in(cal, 0)} + ${in(cal, 1)}")
-            case _: Sub => Seq("wire[63:0]" -> s"${in(cal, 0)} - ${in(cal, 1)}")
-            case _: Mul => Seq("wire[63:0]" -> s"${in(cal, 0)} * ${in(cal, 1)}")
-            case _: Equal => Seq("wire[0:0]" -> s"${in(cal, 0)} == ${in(cal, 1)}")
+            case cal @ Bin(_, op @ (BinOp.Add | BinOp.Sub | BinOp.Mul | BinOp.Eq), _, _) =>
+              Seq(
+                s"wire${typ2sv(Bin.retTyp(cal))}" ->
+                s"${in(cal, 0)} ${op.operatorString} ${in(cal, 1)}"
+              )
+            case _ => !!!(cal)
         for (t, i) <- inputTypes.zipWithIndex do
           r ++= s"$t ${in(cal, i)};"
         for ((t, expr), i) <- outputs.zipWithIndex do

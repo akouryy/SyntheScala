@@ -39,11 +39,13 @@ object TastyReflector:
                 case _ =>
                   error(s"invalid array application\n${expr.showExtractors}", left.pos)
                   '{ ??? }
-            case "+" | "-" | "*" | "/" | "%" | "==" | "<" | "<=" | ">" | ">=" =>
-              '{ EX.Bin($op, ${convEX(left)}, ${convEX(right)}) }
             case _ =>
-              error(s"invalid operator\n${expr.showExtractors}", select.pos)
-              '{ ??? }
+              BinOp.from(op) match
+                case Some(_) =>
+                  '{ EX.Bin(BinOp.from($op).get, ${convEX(left)}, ${convEX(right)}) }
+                case None =>
+                  error(s"invalid operator\n${expr.showExtractors}", select.pos)
+                  '{ ??? }
         case Apply(Ident(fn), args) =>
           '{ EX.Call($fn, ${listToExpr(args.map(convEX))}) }
         case Block(Nil, kont) =>

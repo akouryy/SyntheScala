@@ -37,7 +37,7 @@ class KNormalizer(prog: Program):
           x =>
             convert(None, right):
               y =>
-                insert(Bin.calcTyp(op, types(x), types(y)))(Bin(op, Ref(x), Ref(y)))
+                insert(op.calcTyp(types(x), types(y)))(Bin(op, Ref(x), Ref(y)))
       case Call(name, args) =>
         args.foldLeft {
           (xs: List[Expr]) => insert(retTypes(name))(Call(name, xs))

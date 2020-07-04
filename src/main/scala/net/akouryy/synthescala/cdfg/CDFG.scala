@@ -3,6 +3,7 @@
 package net.akouryy.synthescala
 package cdfg
 
+import net.akouryy.{synthescala => base}
 import scala.collection.mutable
 
 final case class CDFG(val arrayDefs: toki.ArrayDefMap, val main: CDFGFun)
@@ -84,7 +85,7 @@ enum Node derives Eql:
   case Input(name: Label)
   case Const(value: Long, name: Label)
   case Output(name: Label)
-  case BinOp(op: String, left: Label, right: Label, ans: Label)
+  case BinOp(op: base.BinOp, left: Label, right: Label, ans: Label)
   case Call(fn: String, args: Seq[Label], ret: Label)
   case Get(arr: Label, index: Label, ret: Label)
 

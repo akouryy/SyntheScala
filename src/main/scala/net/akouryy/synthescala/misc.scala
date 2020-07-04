@@ -13,3 +13,34 @@ final case class Register(id: Int) extends Ordered[Register] derives Eql:
   def compare(that: Register) = this.id.compare(that.id)
 
 given[T](using Eql[T, T]) as Eql[Option[T], Option[T]] = Eql.derived
+
+enum BinOp:
+  case Add, Sub, Mul, Div, Mod, Eq, Lt, Le, Gt, Ge
+
+  def operatorString = this match
+    case Add => "+"
+    case Sub => "-"
+    case Mul => "*"
+    case Div => "/"
+    case Mod => "%"
+    case Eq => "=="
+    case Lt => "<"
+    case Le => "<="
+    case Gt => ">"
+    case Ge => ">="
+
+  def calcTyp(lt: toki.Type, rt: toki.Type): toki.Type =
+    import toki.Type._
+    (this, lt, rt) match
+      case (Add | Sub | Mul | Div | Mod, U(lw), U(rw)) => U(lw.max(rw))
+      case (Add | Sub | Mul | Div | Mod, S(lw), S(rw)) => S(lw.max(rw))
+      case (Eq | Lt | Le | Gt | Ge, _: (U | S), _: (U | S)) => U(1)
+      case _ => !!!((this, lt, rt))
+
+end BinOp
+
+object BinOp:
+  def from(str: String): Option[BinOp] =
+    Seq(Add, Sub, Mul, Div, Mod, Eq, Lt, Le, Gt, Ge).find(_.operatorString == str)
+
+end BinOp

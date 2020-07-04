@@ -114,7 +114,7 @@ class Composer(
             new ConnPort.Reg(regs(res)), q,
             Source.Always(new ConnPort.ArrReadValue(arr)),
           )
-        case _: Call => !!!!(node)
+        case _: Call => !!!(node)
     end for
 
     for j <- fn.jumps.valuesIterator do

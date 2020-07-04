@@ -110,7 +110,7 @@ class GraphDrawer(
             val bound = sup("#3311ff", unsafeEscape(
               bindings.get(bi, nd).fold("?")(_.shortString)
             ))
-            s"""${idStr(a)}:${l.str}${unsafeEscape(op)}$bound${r.str}"""
+            s"""${idStr(a)}:${l.str}${unsafeEscape(op.operatorString)}$bound${r.str}"""
           case Node.Call(fn, args, ret) =>
             s"""${idStr(ret)}:$fn(${args.map(_.str).mkString(",")})"""
           case Node.Get(arr, index, ret) =>

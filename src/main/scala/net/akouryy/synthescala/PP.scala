@@ -26,7 +26,7 @@ val PP: PPrinter = pprint.copy(additionalHandlers = { obj =>
 
   case Node.Const(v, n) => Infix(Literal(n.str), "=N", PP.treeify(v))
   case Node.BinOp(op, l, r, a) =>
-    Infix(Literal(a.str), "=B", Infix(Literal(l.str), op, Literal(r.str)))
+    Infix(Literal(a.str), "=B", Infix(Literal(l.str), op.operatorString, Literal(r.str)))
   case Node.Call(fn, args, ret) =>
     Infix(Literal(ret.str), "=C", Apply(fn, args.iterator.map(PP.treeify)))
 

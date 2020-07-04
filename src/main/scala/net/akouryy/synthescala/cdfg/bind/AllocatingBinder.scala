@@ -44,44 +44,14 @@ class AllocatingBinder(graph: CDFG, typeEnv: toki.TypeEnv, sche: Schedule):
         case node @ Node.BinOp(op, l, r, _) =>
           val lt = typeEnv(l)
           val rt = typeEnv(r)
-          (op: @unchecked) match
-            case "+" =>
-              bindCalc(b.i, node, Calculator.Add(lt, rt)) {
-                case Calculator.Add(_, clt, crt) =>
-                  clt.getMax(lt) == Some(clt) && crt.getMax(rt) == Some(crt)
-              } {
-                case Calculator.Add(id, clt, crt) =>
-                  for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
-                    Calculator.Add(id, mlt, mrt)
-              }
-            case "-" =>
-              bindCalc(b.i, node, Calculator.Sub(lt, rt)) {
-                case Calculator.Sub(_, clt, crt) =>
-                  clt.getMax(lt) == Some(clt) && crt.getMax(rt) == Some(crt)
-              } {
-                case Calculator.Sub(id, clt, crt) =>
-                  for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
-                    Calculator.Sub(id, mlt, mrt)
-              }
-            case "*" =>
-              bindCalc(b.i, node, Calculator.Mul(lt, rt)) {
-                case Calculator.Mul(_, clt, crt) =>
-                  clt.getMax(lt) == Some(clt) && crt.getMax(rt) == Some(crt)
-              } {
-                case Calculator.Mul(id, clt, crt) =>
-                  for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
-                    Calculator.Mul(id, mlt, mrt)
-              }
-            case "==" =>
-              bindCalc(b.i, node, Calculator.Equal(lt, rt)) {
-                case Calculator.Equal(_, clt, crt) =>
-                  clt.getMax(lt) == Some(clt) && crt.getMax(rt) == Some(crt)
-              } {
-                case Calculator.Equal(id, clt, crt) =>
-                  for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
-                    Calculator.Equal(id, mlt, mrt)
-              }
-            case _ => ???
+          bindCalc(b.i, node, Calculator.Bin(op, lt, rt)) {
+            case Calculator.Bin(_, `op`, clt, crt) =>
+              clt.getMax(lt) == Some(clt) && crt.getMax(rt) == Some(crt)
+          } {
+            case Calculator.Bin(id, `op`, clt, crt) =>
+              for mlt <- clt.getMax(lt); mrt <- crt.getMax(rt) yield
+                Calculator.Bin(id, op, mlt, mrt)
+          }
         case _ =>
     end for
 

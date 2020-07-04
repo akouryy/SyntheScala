@@ -8,10 +8,7 @@ object Binder:
 enum Calculator:
   val id: Int
 
-  case Add(id: Int, lt: toki.Type, rt: toki.Type)
-  case Sub(id: Int, lt: toki.Type, rt: toki.Type)
-  case Mul(id: Int, lt: toki.Type, rt: toki.Type)
-  case Equal(id: Int, lt: toki.Type, rt: toki.Type)
+  case Bin(id: Int, op: BinOp, lt: toki.Type, rt: toki.Type)
 
   def shortString: String = s"""$productPrefix$id"""
 
@@ -20,23 +17,12 @@ object Calculator:
 
   def reset() = maxCalculatorID = -1
 
-  object Add:
-    def apply(lt: toki.Type, rt: toki.Type): Calculator =
+  object Bin:
+    def apply(op: BinOp, lt: toki.Type, rt: toki.Type): Calculator =
       maxCalculatorID += 1
-      Calculator.Add(maxCalculatorID, lt, rt)
+      Calculator.Bin(maxCalculatorID, op, lt, rt)
 
-  object Sub:
-    def apply(lt: toki.Type, rt: toki.Type): Calculator =
-      maxCalculatorID += 1
-      Calculator.Sub(maxCalculatorID, lt, rt)
+    def retTyp(bin: Bin): toki.Type =
+      bin.op.calcTyp(bin.lt, bin.rt)
 
-  object Mul:
-    def apply(lt: toki.Type, rt: toki.Type): Calculator =
-      maxCalculatorID += 1
-      Calculator.Mul(maxCalculatorID, lt, rt)
-
-  object Equal:
-    def apply(lt: toki.Type, rt: toki.Type): Calculator =
-      maxCalculatorID += 1
-      Calculator.Equal(maxCalculatorID, lt, rt)
 end Calculator

@@ -21,30 +21,30 @@ module main (
   reg[31:0] reg1;
   reg[31:0] reg0;
 
-  wire[9:0] in0_Add0;
-  wire[9:0] in1_Add0;
-  wire[63:0] out0_Add0 = in0_Add0 + in1_Add0;
-  wire[9:0] in0_Add1;
-  wire[9:0] in1_Add1;
-  wire[63:0] out0_Add1 = in0_Add1 + in1_Add1;
+  wire[9:0] in0_Bin0;
+  wire[9:0] in1_Bin0;
+  wire[9:0] out0_Bin0 = in0_Bin0 + in1_Bin0;
+  wire[9:0] in0_Bin1;
+  wire[9:0] in1_Bin1;
+  wire[9:0] out0_Bin1 = in0_Bin1 + in1_Bin1;
 
 
-  assign in0_Add1 =
-    state == 3'd1 ? reg3 :
-    'x;
-  assign in1_Add1 =
-    state == 3'd1 ? reg4 :
-    'x;
-  assign in0_Add0 =
+  assign in0_Bin1 =
     state == 3'd1 ? reg5 :
-    state == 3'd2 ? reg4 :
+    'x;
+  assign in1_Bin1 =
+    state == 3'd1 ? reg6 :
+    'x;
+  assign in0_Bin0 =
+    state == 3'd1 ? reg3 :
+    state == 3'd2 ? reg3 :
     state == 3'd3 ? reg2 :
     state == 3'd4 ? reg1 :
     state == 3'd5 ? reg0 :
     'x;
-  assign in1_Add0 =
-    state == 3'd1 ? reg6 :
-    state == 3'd2 ? reg3 :
+  assign in1_Bin0 =
+    state == 3'd1 ? reg4 :
+    state == 3'd2 ? reg4 :
     state == 3'd3 ? reg3 :
     state == 3'd4 ? reg2 :
     state == 3'd5 ? reg1 :
@@ -77,21 +77,21 @@ module main (
         3'd0: state <= 3'd1;
       endcase
       case(state)
-        3'd5: reg0 <= out0_Add0;
+        3'd5: reg0 <= out0_Bin0;
         3'd6: reg0 <= reg0;
       endcase
       case(state)
-        3'd4: reg1 <= out0_Add0;
+        3'd4: reg1 <= out0_Bin0;
       endcase
       case(state)
-        3'd3: reg2 <= out0_Add0;
+        3'd3: reg2 <= out0_Bin0;
       endcase
       case(state)
-        3'd1: reg3 <= out0_Add0;
-        3'd2: reg3 <= out0_Add0;
+        3'd1: reg3 <= out0_Bin0;
+        3'd2: reg3 <= out0_Bin0;
       endcase
       case(state)
-        3'd1: reg4 <= out0_Add1;
+        3'd1: reg4 <= out0_Bin1;
       endcase
     end
   end
