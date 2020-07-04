@@ -5,7 +5,7 @@ package toki
 
 import scala.collection.mutable
 
-class KNormalizer(fun: Fun):
+class KNormalizer(prog: Program):
   private val types = mutable.Map.empty[Label, Type]
   private val retTypes = mutable.Map.empty[String, Type]
 
@@ -16,9 +16,9 @@ class KNormalizer(fun: Fun):
         case Ref(x) => kont(x)
         case _ =>
           val x = lab.getOrElse(Label.temp())
-          types(x) = typ
+          val typ2 = types.getOrElseUpdate(x, typ)
           val kt -> kx = kont(x)
-          kt -> Let(Entry(x, typ), expr, kx)
+          kt -> Let(Entry(x, typ2), expr, kx)
 
     expr match
       case Num(n) =>
@@ -44,6 +44,10 @@ class KNormalizer(fun: Fun):
         } { (gen, arg) =>
           xs => convert(None, arg)(x => gen(Ref(x) :: xs))
         } (Nil)
+      case Get(arr, index) =>
+        convert(None, index):
+          index =>
+            insert(prog.arrayDefs(arr).elemTyp)(Get(arr, Ref(index)))
       case If(cond, tru, fls) =>
         convert(None, cond):
          x =>
@@ -53,11 +57,12 @@ class KNormalizer(fun: Fun):
           insert(tt)(If(Ref(x), tx, fx))
   end convert
 
-  def normalize: (TypeEnv, Expr) =
+  def normalize: (TypeEnv, Program) =
     types.clear()
     retTypes.clear()
-    fun.params.foreach(e => types(e.name) = e.typ)
-    retTypes(fun.name) = fun.ret
-    val (_, e) = convert(None, fun.body)(l => types(l) -> Expr.Ref(l))
-    types.toMap -> e
+    prog.main.params.foreach(e => types(e.name) = e.typ)
+    retTypes(prog.main.name) = prog.main.ret
+
+    val (_, e) = convert(None, prog.main.body)(l => types(l) -> Expr.Ref(l))
+    types.toMap -> prog.copy(main = prog.main.copy(body = e))
 end KNormalizer

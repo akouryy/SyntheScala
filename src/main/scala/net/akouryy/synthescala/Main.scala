@@ -40,9 +40,9 @@ object Main:
 
   private def f(prog: Program): Unit =
     reset()
-    // PP.pprintln(prog)
+    PP.pprintln(prog)
     val (typeEnv, kProg) = KNormalizer(prog).normalize
-    // PP.pprintln(k)
+    PP.pprintln(kProg)
     val graph = cdfg.Specializer()(kProg.main)
     // PP.pprintln(graph)
     cdfg.Liveness.insertInOuts(graph)
@@ -59,9 +59,9 @@ object Main:
     // PP.pprintln(fd)
     val sv = emit.Emitter(graph, regAlloc, bindings, fd).emit
     // println(sv)
-    Files.write(Paths.get(s"dist/${fun.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))
+    Files.write(Paths.get(s"dist/${prog.main.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))
 
-    Files.write(Paths.get(s"dist/${fun.name}.dot"),
+    Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
       cdfg.GraphDrawer(graph, typeEnv, schedule, regAlloc, bindings).draw.getBytes(StandardCharsets.UTF_8),
     )
 

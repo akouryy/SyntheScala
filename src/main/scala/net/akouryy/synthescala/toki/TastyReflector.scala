@@ -30,8 +30,20 @@ object TastyReflector:
         case Literal(Constant(n: Long)) => '{ EX.Num(${n.toLong}) }
         case Ident(lab) =>
           '{ EX.Ref(Label($lab)) }
-        case Apply(Select(left, op), List(right)) =>
-          '{ EX.Bin($op, ${convEX(left)}, ${convEX(right)}) }
+        case Apply(select @ Select(left, op), List(right)) =>
+          op match
+            case "apply" =>
+              left match
+                case Ident(left) =>
+                  '{ EX.Get(Label($left), ${convEX(right)}) }
+                case _ =>
+                  error(s"invalid array application\n${expr.showExtractors}", left.pos)
+                  '{ ??? }
+            case "+" | "-" | "*" | "/" | "%" | "==" | "<" | "<=" | ">" | ">=" =>
+              '{ EX.Bin($op, ${convEX(left)}, ${convEX(right)}) }
+            case _ =>
+              error(s"invalid operator\n${expr.showExtractors}", select.pos)
+              '{ ??? }
         case Apply(Ident(fn), args) =>
           '{ EX.Call($fn, ${listToExpr(args.map(convEX))}) }
         case Block(Nil, kont) =>
@@ -53,7 +65,7 @@ object TastyReflector:
     expr.unseal match
       case prog @ Inlined(None, Nil, Block(defs, Literal(Constant(())))) =>
         var main = Option.empty[Expr[Fun]]
-        val arrayDefs = mutable.ListBuffer.empty[Expr[ArrayDef]]
+        val arrayDefs = mutable.ListBuffer.empty[Expr[(Label, ArrayDef)]]
 
         defs.foreach:
           case defDef @ DefDef(fnName, Nil, params, retTyp, Some(body)) =>
@@ -86,13 +98,15 @@ object TastyReflector:
               List(Literal(Constant(len: Int))),
             ))
           ) =>
-            arrayDefs += '{ ArrayDef(Entry(Label($arrName), ${convTY(elemType)}), $len) }
+            arrayDefs += '{
+              Label($arrName) -> ArrayDef(Label($arrName), ${convTY(elemType)}, $len)
+            }
 
           case df =>
             error(s"invalid defiintion\n${df.showExtractors}", df.pos)
 
         main match
-          case Some(main) => '{Program(${listToExpr(arrayDefs.toList)}, $main)}
+          case Some(main) => '{Program(${listToExpr(arrayDefs.toList)}.toMap, $main)}
           case None =>
             error(s"no function definition\n${prog.showExtractors}", prog.pos)
             '{ ??? }

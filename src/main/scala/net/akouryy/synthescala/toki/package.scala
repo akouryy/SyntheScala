@@ -1,9 +1,9 @@
 package net.akouryy.synthescala
 package toki
 
-case class Program(arrayDefs: List[ArrayDef], main: Fun)
+case class Program(arrayDefs: Map[Label, ArrayDef], main: Fun)
 
-case class ArrayDef(entry: Entry, length: Int)
+case class ArrayDef(name: Label, elemTyp: Type, length: Int)
 
 case class Fun(name: String, ret: Type, params: Seq[Entry], body: Expr)
 
@@ -13,6 +13,7 @@ enum Expr:
   case Bin(op: String, left: Expr, right: Expr)
   // case Update(name: String, expr: Expr)
   case Call(fn: String, args: Seq[Expr])
+  case Get(arr: Label, index: Expr)
   case Let(entry: Entry, expr: Expr, body: Expr)
   // case Semi(x1: Expr, x2: Expr)
   case If(cond: Expr, tru: Expr, fls: Expr)
