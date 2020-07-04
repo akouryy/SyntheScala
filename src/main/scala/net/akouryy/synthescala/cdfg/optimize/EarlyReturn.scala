@@ -11,7 +11,7 @@ object EarlyReturn:
   private def traverse(fn: CDFGFun, ji0: JumpIndex): Unit =
     fn.jumps(ji0) match
       case Jump.Return(_, retID, bi1) =>
-        val b1 @ Block(_, nodes, ji2, _) = fn.blocks(bi1)
+        val b1 @ Block(_, nodes, _, ji2, _) = fn.blocks(bi1)
 
         if nodes.forall {
           case Node.Input(id) => id == retID

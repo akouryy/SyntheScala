@@ -47,8 +47,21 @@ object Main:
           val a64: S[64] = a(i)
           dotProd(i + 1, acc + a64 * b(i))
 
+  lazy val accumulate: Program =
+    import dsl._
+    TastyReflector.reflect:
+      val a = new Array[S[32]](1000)
+
+      def accumulate(i: U[10], acc: S[64]): U[1] =
+        if i == 1000
+          0
+        else
+          val b: S[64] = acc + a(i)
+          a(i) = b
+          accumulate(i + 1, b)
+
   def main(args: Array[String]): Unit =
-    Seq(add7, fib, norm2, dotProd).map:
+    Seq(add7, fib, norm2, dotProd, accumulate).map:
       prog =>
         try f(prog)
         catch err => err.printStackTrace()
@@ -59,7 +72,11 @@ object Main:
     val (typeEnv, kProg) = KNormalizer(prog).normalize
     // PP.pprintln(kProg)
     val graph = cdfg.Specializer()(kProg)
-    // PP.pprintln(graph)
+    PP.pprintln(graph)
+    Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
+      cdfg.GraphDrawer(graph, typeEnv)
+          .draw.getBytes(StandardCharsets.UTF_8),
+    )
     cdfg.Liveness.insertInOuts(graph)
     // PP.pprintln(graph)
     cdfg.optimize.Optimizer(graph)

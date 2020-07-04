@@ -82,14 +82,14 @@ class GraphDrawer(
       // end match
     end for
 
-    for Block(i, nodes, _, _) <- graph.main.blocks.valuesIterator do
+    for Block(i, nodes, _, _, _) <- graph.main.blocks.valuesIterator do
       if nodes.isEmpty then
         current ++= s"""$i [label = "$i\\l(0行)"]""" + "\n"
       else
         current ++= s"""$i [label = "$i"];""" + "\n"
 
     for
-      Block(bi, nodes, _, _) <- graph.main.blocks.valuesIterator
+      Block(bi, nodes, arrayDeps, _, _) <- graph.main.blocks.valuesIterator
       if nodes.nonEmpty
     do
       val ids = mutable.Map.empty[Node, Int]
@@ -115,6 +115,8 @@ class GraphDrawer(
             s"""${idStr(ret)}:$fn(${args.map(_.str).mkString(",")})"""
           case Node.Get(arr, index, ret) =>
             s"""${idStr(ret)}:${arr.str}[${index.str}]"""
+          case Node.Put(arr, index, value) =>
+            s"""${arr.str}[${index.str}]=${value.str}"""
 
         current ++=
           s"""${id(nd)} [label=<
@@ -130,7 +132,13 @@ class GraphDrawer(
         i = read.indexOf(a)
         if i >= 0
       do
-        current ++= s"""${id(from)} -> ${id(to)}; """
+        current ++= s"""${id(from)} -> ${id(to)};""" + "\n"
+
+      for
+        from <- nodes
+        to <- arrayDeps.goForward(from)
+      do
+        current ++= s"""${id(from)} -> ${id(to)} [style = dotted];""" + "\n"
 
       current ++= "}"
     end for

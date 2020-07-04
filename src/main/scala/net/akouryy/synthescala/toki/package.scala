@@ -16,6 +16,7 @@ enum Expr:
   // case Update(name: String, expr: Expr)
   case Call(fn: String, args: Seq[Expr])
   case Get(arr: Label, index: Expr)
+  case Put(arr: Label, index: Expr, value: Expr, kont: Expr)
   case Let(entry: Entry, expr: Expr, body: Expr)
   // case Semi(x1: Expr, x2: Expr)
   case If(cond: Expr, tru: Expr, fls: Expr)

@@ -48,6 +48,13 @@ class KNormalizer(prog: Program):
         convert(None, index):
           index =>
             insert(prog.arrayDefs(arr).elemTyp)(Get(arr, Ref(index)))
+      case Put(arr, index, value, body) =>
+        convert(None, index):
+          index =>
+            convert(None, value):
+              value =>
+                val resTyp -> resExpr = convert(lab, body)(kont)
+                resTyp -> Put(arr, Ref(index), Ref(value), resExpr)
       case If(cond, tru, fls) =>
         convert(None, cond):
          x =>

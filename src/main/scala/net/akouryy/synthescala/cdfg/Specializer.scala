@@ -10,34 +10,59 @@ class Specializer:
   private var currentBlockIndex: BlockIndex = _
   private var currentInputJumpIndex: JumpIndex = _
   private val currentNodes = mutable.IndexedBuffer.empty[Node]
+  private var currentArrayDeps: UnweightedGraph[Node] = _
+  private var currentArrayLastGet = mutable.Map.empty[Label, List[Node]]
+  private var currentArrayLastPut = mutable.Map.empty[Label, Option[Node]]
   private val writtenLabel = mutable.Set.empty[Label]
-  private var normalizationMap = mutable.Map.empty[Label, Label]
+  private var aliasMap = mutable.Map.empty[Label, Label]
 
   private def normalize(x: Label, checkWritten: Boolean = true): Label =
     if !checkWritten || writtenLabel(x)
-      normalizationMap.getOrElse(x, x)
+      aliasMap.getOrElse(x, x)
     else
       writtenLabel += x
       x
+
+
+  private def addNode(node: Node): Node =
+    currentArrayDeps.addVertex(node)
+    currentNodes += node
+    node
+  private def arrayLastGet(lab: Label): List[Node] =
+    currentArrayLastGet.getOrElseUpdate(lab, Nil)
+  private def arrayLastPut(lab: Label): Option[Node] =
+    currentArrayLastPut.getOrElseUpdate(lab, None)
 
   private def specializeExpr(dest: Label, expr: toki.Expr): Unit =
     import toki.Expr._
     expr match
       case Num(i) =>
         writtenLabel += dest
-        currentNodes += Node.Const(i, dest)
+        addNode(Node.Const(i, dest))
       case Ref(n) =>
         writtenLabel += dest
-        normalizationMap(dest) = normalize(n)
+        aliasMap(dest) = normalize(n)
       case Bin(op, Ref(l), Ref(r)) =>
         writtenLabel += dest
-        currentNodes += Node.BinOp(op, normalize(l), normalize(r), dest)
+        addNode(Node.BinOp(op, normalize(l), normalize(r), dest))
       case Call(fn, args) =>
         writtenLabel += dest
-        currentNodes += Node.Call(fn, args.map(a => normalize(a.asInstanceOf[Ref].name)), dest)
+        addNode(Node.Call(fn, args.map(a => normalize(a.asInstanceOf[Ref].name)), dest))
+
       case Get(arr, Ref(index)) =>
         writtenLabel += dest
-        currentNodes += Node.Get(arr, normalize(index), dest)
+        val node = addNode(Node.Get(arr, normalize(index), dest))
+        for parent <- arrayLastPut(arr) do
+          currentArrayDeps.addEdge(parent -> node)
+        currentArrayLastGet(arr) = node :: arrayLastGet(arr)
+      case Put(arr, Ref(index), Ref(value), kont) =>
+        val node = addNode(Node.Put(arr, normalize(index), normalize(value)))
+        for parent <- arrayLastGet(arr).iterator ++ arrayLastPut(arr) do
+          currentArrayDeps.addEdge(parent -> node)
+        currentArrayLastGet(arr) = Nil
+        currentArrayLastPut(arr) = Some(node)
+        specializeExpr(dest, kont)
+
       case Let(toki.Entry(n, t), x, b) =>
         specializeExpr(n, x)
         specializeExpr(dest, b)
@@ -49,8 +74,11 @@ class Specializer:
 
         // ifの前のブロックを登録
         currentGraph.blocks(beginBI) =
-          Block(beginBI, currentNodes.toSet, currentInputJumpIndex, branchJI)
+          Block(beginBI, currentNodes.toSet, currentArrayDeps, currentInputJumpIndex, branchJI)
         currentNodes.clear()
+        currentArrayDeps = UnweightedGraph()
+        currentArrayLastGet.clear()
+        currentArrayLastPut.clear()
         writtenLabel.clear()
         // if分岐を登録
         currentGraph.jumps(branchJI) = Jump.Branch(branchJI, c, beginBI, truBI, flsBI)
@@ -62,8 +90,11 @@ class Specializer:
         // 真分岐の最後のブロックを登録
         val truLastBI = currentBlockIndex
         currentGraph.blocks(truLastBI) =
-          Block(truLastBI, currentNodes.toSet, currentInputJumpIndex, mergeJI)
+          Block(truLastBI, currentNodes.toSet, currentArrayDeps, currentInputJumpIndex, mergeJI)
         currentNodes.clear()
+        currentArrayDeps = UnweightedGraph()
+        currentArrayLastGet.clear()
+        currentArrayLastPut.clear()
         writtenLabel.clear()
 
         // 偽分岐
@@ -73,8 +104,11 @@ class Specializer:
         // 偽分岐の最後のブロックを登録
         val flsLastBI = currentBlockIndex
         currentGraph.blocks(flsLastBI) =
-          Block(flsLastBI, currentNodes.toSet, currentInputJumpIndex, mergeJI)
+          Block(flsLastBI, currentNodes.toSet, currentArrayDeps, currentInputJumpIndex, mergeJI)
         currentNodes.clear()
+        currentArrayDeps = UnweightedGraph()
+        currentArrayLastGet.clear()
+        currentArrayLastPut.clear()
         writtenLabel.clear()
 
         // 併合を登録
@@ -87,6 +121,9 @@ class Specializer:
         currentBlockIndex = kontBI
         currentInputJumpIndex = mergeJI
         currentNodes.clear()
+        currentArrayDeps = UnweightedGraph()
+        currentArrayLastGet.clear()
+        currentArrayLastPut.clear()
         writtenLabel.clear()
         writtenLabel += dest
       case _ => assert(false, expr)
@@ -97,6 +134,7 @@ class Specializer:
     val dest = Label.temp()
     currentInputJumpIndex = JumpIndex.generate()
     currentBlockIndex = BlockIndex.generate()
+    currentArrayDeps = UnweightedGraph()
     currentGraph.jumps(currentInputJumpIndex) =
       Jump.StartFun(currentInputJumpIndex, currentBlockIndex)
 
@@ -105,8 +143,11 @@ class Specializer:
     val normalizedDest = normalize(dest, checkWritten=false)
     val retJI = JumpIndex.generate()
     currentGraph.blocks(currentBlockIndex) =
-      Block(currentBlockIndex, currentNodes.toSet, currentInputJumpIndex, retJI)
+      Block(currentBlockIndex, currentNodes.toSet, currentArrayDeps, currentInputJumpIndex, retJI)
     currentNodes.clear()
+    currentArrayDeps = UnweightedGraph()
+    currentArrayLastGet.clear()
+    currentArrayLastPut.clear()
     writtenLabel.clear()
     currentGraph.jumps(retJI) =
       Jump.Return(retJI, normalizedDest, currentBlockIndex)

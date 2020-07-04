@@ -55,6 +55,7 @@ object JumpIndex:
 case class Block(
   i: BlockIndex,
   /*names: Map[String, Int /* node idx */],*/ nodes: Set[Node],
+  arrayDeps: UnweightedGraph[Node],
   inJumpIndex: JumpIndex, outJump: JumpIndex,
 ):
   def defs: Set[Label] = nodes.flatMap:
@@ -88,6 +89,7 @@ enum Node derives Eql:
   case BinOp(op: base.BinOp, left: Label, right: Label, ans: Label)
   case Call(fn: String, args: Seq[Label], ret: Label)
   case Get(arr: Label, index: Label, ret: Label)
+  case Put(arr: Label, index: Label, value: Label)
 
   override lazy val hashCode = scala.util.hashing.MurmurHash3.productHash(this)
 
@@ -102,6 +104,7 @@ enum Node derives Eql:
     case BinOp(_, l, r, _) => Seq(l, r)
     case Call(_, as, _) => as
     case Get(_, index, _) => Seq(index)
+    case Put(_, index, value) => Seq(index, value)
 
   def written: Option[Label] = this match
     case Input(n) => Some(n)
@@ -110,6 +113,7 @@ enum Node derives Eql:
     case BinOp(_, _, _, a) => Some(a)
     case Call(_, _, r) => Some(r)
     case Get(_, _, ret) => Some(ret)
+    case Put(_, _, _) => None
 
 end Node
 

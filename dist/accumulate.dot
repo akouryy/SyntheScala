@@ -1,0 +1,39 @@
+digraph Program_ {
+graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];
+node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
+edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
+Jump0[label = <StartFun.0<font color="#ff4411" point-size="8"><sup>q?</sup></font><br/>i,acc>; shape = component];
+Jump0 -> Block0;
+Jump1[
+  label = <Branch.1<font color="#ff4411" point-size="8"><sup>q?</sup></font>>;
+  shape = trapezium; style = rounded;
+];
+Block0 -> Jump1;
+Jump1 -> Block1 [label="@b"];
+Jump1 -> Block2 [label="!@b"];
+Jump2[label = <Merge.2<font color="#ff4411" point-size="8"><sup>q?</sup></font>>; shape = invtrapezium; style = rounded];
+Block1 -> Jump2 [label="@c"];Block2 -> Jump2 [label="@g"];
+Jump2 -> Block3 [label="@h"];
+Jump3[label = <Return.3<font color="#ff4411" point-size="8"><sup>q?</sup></font>>; shape = lpromoter];
+Block3 -> Jump3 [label="@h"];
+Block0 [label = "Block0"];
+Block1 [label = "Block1"];
+Block2 [label = "Block2"];
+Block3 [label = "Block3\l(0行)"]
+subgraph cluster_dfg_Block0{
+node [shape = oval];
+label = "Block0";
+ndBlock0_0 [label=<@a<font color="#00dd33" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>:1000<font color="#ff4411" point-size="8"><sup>q?</sup></font>>];ndBlock0_1 [label=<@b<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>:i==<font color="#3311ff" point-size="8"><sup>?</sup></font>@a<font color="#ff4411" point-size="8"><sup>q?</sup></font>>];ndBlock0_0 -> ndBlock0_1;
+}subgraph cluster_dfg_Block1{
+node [shape = oval];
+label = "Block1";
+ndBlock1_0 [label=<@c<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>:0<font color="#ff4411" point-size="8"><sup>q?</sup></font>>];}subgraph cluster_dfg_Block2{
+node [shape = oval];
+label = "Block2";
+ndBlock2_0 [label=<@e<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>:1<font color="#ff4411" point-size="8"><sup>q?</sup></font>>];ndBlock2_1 [label=<@d<font color="#00dd33" point-size="8"><sup>S32</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>:a[i]<font color="#ff4411" point-size="8"><sup>q?</sup></font>>];ndBlock2_2 [label=<a[i]=b<font color="#ff4411" point-size="8"><sup>q?</sup></font>>];ndBlock2_3 [label=<@g<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>:accumulate(@f,b)<font color="#ff4411" point-size="8"><sup>q?</sup></font>>];ndBlock2_4 [label=<@f<font color="#00dd33" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>:i+<font color="#3311ff" point-size="8"><sup>?</sup></font>@e<font color="#ff4411" point-size="8"><sup>q?</sup></font>>];ndBlock2_5 [label=<b<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>:acc+<font color="#3311ff" point-size="8"><sup>?</sup></font>@d<font color="#ff4411" point-size="8"><sup>q?</sup></font>>];ndBlock2_5 -> ndBlock2_2;
+ndBlock2_1 -> ndBlock2_5;
+ndBlock2_4 -> ndBlock2_3;
+ndBlock2_5 -> ndBlock2_3;
+ndBlock2_0 -> ndBlock2_4;
+ndBlock2_1 -> ndBlock2_2 [style = dotted];
+}}

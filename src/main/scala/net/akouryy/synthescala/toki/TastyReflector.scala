@@ -50,13 +50,15 @@ object TastyReflector:
           '{ EX.Call($fn, ${listToExpr(args.map(convEX))}) }
         case Block(Nil, kont) =>
           convEX(kont)
-        case Block(df :: restDefs, kont) =>
-          val kontEX = convEX(Block(restDefs, kont))
-          df match
+        case Block(st :: restStatements, kont) =>
+          val kontEX = convEX(Block(restStatements, kont))
+          st match
             case ValDef(label, typ, Some(bound)) =>
               '{ EX.Let(Entry(Label($label), ${convTY(typ)}), ${convEX(bound)}, $kontEX) }
+            case Apply(Select(Ident(arr), "update"), List(index, value)) =>
+              '{ EX.Put(Label($arr), ${convEX(index)}, ${convEX(value)}, $kontEX) }
             case _ =>
-              error(s"invalid defiintion\n$df", df.pos)
+              error(s"invalid statement\n$st", st.pos)
               '{ ??? }
         case If(cond, tru, fls) =>
           '{ EX.If(${convEX(cond)}, ${convEX(tru)}, ${convEX(fls)}) }
