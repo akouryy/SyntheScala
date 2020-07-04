@@ -6,13 +6,13 @@ import toki._
 
 object Main:
 
-  lazy val add7: List[Fun] =
+  lazy val add7: Program =
     import dsl._
     TastyReflector.reflect:
       def add7(a: U[10], b: U[10], c: U[10], d: U[10], e: U[10], f: U[10], g: U[10]): U[13] =
         a + (b + (c + ((d + e) + (f + g))))
 
-  lazy val fib: List[Fun] =
+  lazy val fib: Program =
     import dsl._
     TastyReflector.reflect:
       def fib(n: U[6], a: U[32], b: U[32]): U[32] =
@@ -22,14 +22,28 @@ object Main:
         else
           fib(n0 - 1, a + b, a)
 
-  def main(args: Array[String]): Unit =
-    Seq(add7(0), fib(0)).map(f)
+  lazy val dotProd: Program =
+    import dsl._
+    TastyReflector.reflect:
+      val a = new Array[S[32]](1000)
+      val b = new Array[S[32]](1000)
 
-  private def f(fun: Fun): Unit =
+      def dotProd(i: U[10], acc: S[64]): S[64] =
+        if i == 1000
+          acc
+        else
+          val a64: S[64] = a(i)
+          dotProd(i + 1, acc + a64 * b(i))
+
+  def main(args: Array[String]): Unit =
+    Seq(add7, fib, dotProd).map(f)
+
+  private def f(prog: Program): Unit =
     reset()
-    val (typeEnv, k) = KNormalizer(fun).normalize
+    // PP.pprintln(prog)
+    val (typeEnv, kProg) = KNormalizer(prog).normalize
     // PP.pprintln(k)
-    val graph = cdfg.Specializer()(fun.copy(body=k))
+    val graph = cdfg.Specializer()(kProg.main)
     // PP.pprintln(graph)
     cdfg.Liveness.insertInOuts(graph)
     // PP.pprintln(graph)

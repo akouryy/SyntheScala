@@ -1,6 +1,10 @@
 package net.akouryy.synthescala
 package toki
 
+case class Program(arrayDefs: List[ArrayDef], main: Fun)
+
+case class ArrayDef(entry: Entry, length: Int)
+
 case class Fun(name: String, ret: Type, params: Seq[Entry], body: Expr)
 
 enum Expr:

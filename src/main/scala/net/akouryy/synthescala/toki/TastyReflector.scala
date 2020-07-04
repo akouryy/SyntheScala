@@ -2,13 +2,14 @@ package net.akouryy.synthescala
 package toki
 
 import toki.{Expr => EX, Type => TY}
+import scala.collection.mutable
 import scala.language.implicitConversions
 import scala.quoted.{autolift, _}
 
 object TastyReflector:
-  inline def reflect(inline expr: Any): List[Fun] = ${ reflectImpl('expr) }
+  inline def reflect(inline expr: Any): Program = ${ reflectImpl('expr) }
 
-  def reflectImpl(expr: Expr[Any])(using QuoteContext): Expr[List[Fun]] =
+  def reflectImpl(expr: Expr[Any])(using QuoteContext): Expr[Program] =
     import qctx.tasty._
     // PP.pprintln(expr.unseal)
 
@@ -50,31 +51,54 @@ object TastyReflector:
           '{ ??? }
 
     expr.unseal match
-      case Inlined(None, Nil, Block(defs, Literal(Constant(())))) =>
-        val exprs = defs.map:
-          case defDef @ DefDef(fnName, Nil, params, retTyp, Some(body)) =>
-            val paramEntries = params match
-              case List(params) => params.map:
-                case paramDef @ ValDef(param, paramTyp, thicket) =>
-                  if thicket.isDefined
-                    error(s"unknown thicket\n$thicket", paramDef.pos)
-                    '{ ??? }
-                  else
-                    '{ Entry(Label($param), ${convTY(paramTyp)}) }
-              case _ =>
-                error(s"multiple param lists\n$params", defDef.pos)
-                Nil
+      case prog @ Inlined(None, Nil, Block(defs, Literal(Constant(())))) =>
+        var main = Option.empty[Expr[Fun]]
+        val arrayDefs = mutable.ListBuffer.empty[Expr[ArrayDef]]
 
-            '{ Fun($fnName, ${convTY(retTyp)}, ${listToExpr(paramEntries)}, ${convEX(body)}) }
+        defs.foreach:
+          case defDef @ DefDef(fnName, Nil, params, retTyp, Some(body)) =>
+            main match
+              case Some(_) =>
+                error(s"multiple functions", defDef.pos)
+              case None =>
+                val paramEntries = params match
+                  case List(params) => params.map:
+                    case paramDef @ ValDef(param, paramTyp, thicket) =>
+                      thicket match
+                        case Some(thicket) =>
+                          error(s"unknown thicket\n${thicket.showExtractors}", paramDef.pos)
+                          '{ ??? }
+                        case None =>
+                          '{ Entry(Label($param), ${convTY(paramTyp)}) }
+                  case _ =>
+                    error(s"multiple param lists\n$params", defDef.pos)
+                    Nil
+                main = Some(
+                  '{ Fun($fnName, ${convTY(retTyp)}, ${listToExpr(paramEntries)}, ${convEX(body)}) }
+                )
+
+          case ValDef(arrName, Inferred(),
+            Some(Apply(
+              TypeApply(
+                Select(New(Applied(TypeIdent("Array"), List(elemType: TypeTree))), "<init>"),
+                List(Inferred()),
+              ),
+              List(Literal(Constant(len: Int))),
+            ))
+          ) =>
+            arrayDefs += '{ ArrayDef(Entry(Label($arrName), ${convTY(elemType)}), $len) }
 
           case df =>
-            error(s"invalid defiintion\n$df", df.pos)
-            return '{ Nil }
+            error(s"invalid defiintion\n${df.showExtractors}", df.pos)
 
-        listToExpr(exprs)
+        main match
+          case Some(main) => '{Program(${listToExpr(arrayDefs.toList)}, $main)}
+          case None =>
+            error(s"no function definition\n${prog.showExtractors}", prog.pos)
+            '{ ??? }
       case prog =>
-        error(s"invalid program\n$prog", prog.pos)
-        '{ Nil }
+        error(s"invalid program\n${prog.showExtractors}", prog.pos)
+        '{ ??? }
     end match
   end reflectImpl
 
