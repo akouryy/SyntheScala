@@ -4,9 +4,19 @@ import cdfg.Node
 import pprint.{PPrinter, Tree}
 import Tree.{Apply, Infix, Literal}
 
-val PP: PPrinter = pprint.copy(additionalHandlers = {
+val PP: PPrinter = pprint.copy(additionalHandlers = { obj =>
+  import PP.treeify
+
+  obj match
   case Register(r) => Literal(s"%r$r")
   case State(q) => Literal(s"q$q")
+
+  case toki.Expr.Let_+(bindings, kont) =>
+    Apply(
+      "Let+",
+      bindings.iterator.map(ex => Infix(treeify(ex._1), ":=", treeify(ex._2))) ++
+        Seq(PP.treeify(kont))
+    )
 
   case g: cdfg.CDFG =>
     Apply("CDFG", Seq(g.params, g.blocks, g.jumps).iterator.map(PP.treeify))

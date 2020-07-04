@@ -27,6 +27,16 @@ object Expr:
         case ("==" | "<", _: (U | S), _: (U | S)) => U(1)
         case _ => ???
 
+  object Let_+ :
+    def unapply(expr: Expr): Option[(List[(Entry, Expr)], Expr)] =
+      expr match
+        case Let(entry, bound, kont) =>
+          val (bindings, lastKont) = kont match
+            case Let_+(bindings, lastKont) => (bindings, lastKont)
+            case _ => (Nil, kont)
+          Some(((entry -> bound) :: bindings, lastKont))
+        case _ => None
+
 enum Type(str: => String) derives Eql:
   case U(width: Int) extends Type(s"U$width")
   case S(width: Int) extends Type(s"S$width")
