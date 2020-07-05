@@ -43,4 +43,7 @@ object BinOp:
   def from(str: String): Option[BinOp] =
     Seq(Add, Sub, Mul, Div, Mod, Eq, Lt, Le, Gt, Ge).find(_.operatorString == str)
 
+  object StringificationOf:
+    def unapply(str: String): Option[BinOp] = BinOp.from(str)
+
 end BinOp

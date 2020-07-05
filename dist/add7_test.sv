@@ -1,3 +1,4 @@
+`default_nettype none
 module top();
 
   reg clk, r_enable, controlArr;
