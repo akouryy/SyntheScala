@@ -16,7 +16,7 @@ object Main:
     import dsl.{_, given _}
     TastyReflector.reflect:
       def fib(n: U[6], a: U[32], b: U[32]): U[32] =
-        val n0: U[6] = n + 0.U[1]
+        val n0 = n + 0.U[1]
         if n0 == 0.U[1]
           a
         else
@@ -31,7 +31,7 @@ object Main:
         if i == 1000.U[10]
           acc
         else
-          val a64: S[64] = a(i).cast[64]
+          val a64 = a(i).cast[64]
           norm2(i + 1.U[1], acc + a64 * a(i))
 
   lazy val dotProd: Program =
@@ -44,7 +44,7 @@ object Main:
         if i == 1000.U[10]
           acc
         else
-          val a64: S[64] = a(i).cast[64]
+          val a64 = a(i).cast[64]
           dotProd(i + 1.U[1], acc + a64 * b(i))
 
   lazy val accumulate: Program =
@@ -56,7 +56,7 @@ object Main:
         if i == 1000.U[10]
           0.U[1]
         else
-          val b: S[64] = acc + a(i)
+          val b = acc + a(i)
           a(i) = b
           accumulate(i + 1.U[1], b)
 
@@ -73,6 +73,7 @@ object Main:
     println(s"$ok succeeded, $ng failed.")
 
   private def f(prog: Program): Unit =
+    println(s"${prog.main.name}:")
     reset()
     // PP.pprintln(prog)
     val (typeEnv, kProg) = KNormalizer(prog).normalize

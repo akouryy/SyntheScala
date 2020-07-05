@@ -14,14 +14,17 @@ object TastyReflector:
     // PP.pprintln(expr.unseal)
 
     def convTY(typ: TypeTree)(using QuoteContext): Expr[TY] =
-      typ match
-        case Applied(TypeIdent(tid @ ("U" | "S")), List(Singleton(Literal(Constant(n: Int))))) =>
+      typ.tpe match
+        case AppliedType(
+          TypeRef(TermRef(ThisType(TypeRef(NoPrefix(), "synthescala")), "dsl"), tid @ ("U" | "S")),
+          List(ConstantType(Constant(n: Int))),
+        ) =>
           if tid == "U"
             '{ TY.U($n) }
           else
             '{ TY.S($n) }
         case _ =>
-          error(s"invalid type ${typ.show} ($typ)", typ.pos)
+          error(s"invalid type ${typ.tpe} \n${typ.showExtractors}", typ.pos)
           '{ TY.S(0) }
 
     def convEX(expr: Term)(using QuoteContext): Expr[EX] =
