@@ -2,6 +2,6 @@
 
 set -eux
 
-iverilog -o "$1"_test.out -g2012 "$1".sv "$1"_test.sv
+iverilog -Wall -o "$1"_test.out -g2012 "$1".sv "$1"_test.sv
 ./"$1"_test.out
 

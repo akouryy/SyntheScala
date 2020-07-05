@@ -19,9 +19,9 @@ module main (
 
   wire[9:0] in0_Bin0;
   wire[9:0] in1_Bin0;
-  wire[0:0] out0_Bin0 = in0_Bin0 == in1_Bin0;
+  wire out0_Bin0 = in0_Bin0 == in1_Bin0;
   wire[9:0] in0_Bin1;
-  wire[0:0] in1_Bin1;
+  wire in1_Bin1;
   wire[9:0] out0_Bin1 = in0_Bin1 + in1_Bin1;
   wire signed[63:0] in0_Bin2;
   wire signed[63:0] in1_Bin2;
@@ -34,10 +34,10 @@ module main (
   arr_a arr_a(.*);
 
   assign in0_Bin1 =
-    state == 4'd5 ? reg0 :
+    state == 4'd5 ? reg0[9:0] :
     'x;
   assign in1_Bin1 =
-    state == 4'd5 ? reg2 :
+    state == 4'd5 ? reg2[0:0] :
     'x;
   assign in0_Bin2 =
     state == 4'd6 ? reg1 :
@@ -46,21 +46,21 @@ module main (
     state == 4'd6 ? reg2 :
     'x;
   assign in0_Bin0 =
-    state == 4'd1 ? reg0 :
+    state == 4'd1 ? reg0[9:0] :
     'x;
   assign in1_Bin0 =
-    state == 4'd1 ? reg2 :
+    state == 4'd1 ? reg2[9:0] :
     'x;
 
   assign arrWEnable_a =
     controlArr ? controlArrWEnable_a :
-    state == 4'd5 ? 32'd0 :
-    state == 4'd7 ? 32'd1 :
+    state == 4'd5 ? 1'd0 :
+    state == 4'd7 ? 1'd1 :
     1'd0;
   assign arrAddr_a =
     controlArr ? controlArrAddr_a :
-    state == 4'd5 ? reg0 :
-    state == 4'd7 ? reg0 :
+    state == 4'd5 ? reg0[9:0] :
+    state == 4'd7 ? reg0[9:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
@@ -90,7 +90,7 @@ module main (
         4'd0: state <= 4'd1;
       endcase
       case(state)
-        4'd2: reg0 <= reg2 ? 32'd0 : reg0;
+        4'd2: reg0 <= reg2 ? 64'd0 : reg0;
         4'd4: reg0 <= reg0;
         4'd7: reg0 <= reg3;
       endcase
@@ -99,13 +99,13 @@ module main (
         4'd7: reg1 <= reg1;
       endcase
       case(state)
-        4'd0: reg2 <= 32'd1000;
-        4'd1: reg2 <= out0_Bin0;
-        4'd2: reg2 <= reg2 ? reg2 : 32'd1;
+        4'd0: reg2 <= 64'd1000;
+        4'd1: reg2 <= {63'd0, out0_Bin0};
+        4'd2: reg2 <= reg2 ? reg2 : 64'd1;
         4'd5: reg2 <= arrRData_a;
       endcase
       case(state)
-        4'd5: reg3 <= out0_Bin1;
+        4'd5: reg3 <= {54'd0, out0_Bin1};
       endcase
     end
   end

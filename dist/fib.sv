@@ -19,32 +19,32 @@ module main (
   wire[31:0] in1_Bin0;
   wire[31:0] out0_Bin0 = in0_Bin0 + in1_Bin0;
   wire[5:0] in0_Bin1;
-  wire[0:0] in1_Bin1;
-  wire[0:0] out0_Bin1 = in0_Bin1 == in1_Bin1;
+  wire in1_Bin1;
+  wire out0_Bin1 = in0_Bin1 == in1_Bin1;
   wire[5:0] in0_Bin2;
-  wire[0:0] in1_Bin2;
+  wire in1_Bin2;
   wire[5:0] out0_Bin2 = in0_Bin2 - in1_Bin2;
 
 
   assign in0_Bin1 =
-    state == 4'd2 ? reg0 :
+    state == 4'd2 ? reg0[5:0] :
     'x;
   assign in1_Bin1 =
-    state == 4'd2 ? reg3 :
+    state == 4'd2 ? reg3[0:0] :
     'x;
   assign in0_Bin2 =
-    state == 4'd6 ? reg0 :
+    state == 4'd6 ? reg0[5:0] :
     'x;
   assign in1_Bin2 =
-    state == 4'd6 ? reg3 :
+    state == 4'd6 ? reg3[0:0] :
     'x;
   assign in0_Bin0 =
-    state == 4'd1 ? reg0 :
-    state == 4'd6 ? reg1 :
+    state == 4'd1 ? reg0[31:0] :
+    state == 4'd6 ? reg1[31:0] :
     'x;
   assign in1_Bin0 =
-    state == 4'd1 ? reg4 :
-    state == 4'd6 ? reg2 :
+    state == 4'd1 ? reg4[31:0] :
+    state == 4'd6 ? reg2[31:0] :
     'x;
 
 
@@ -71,25 +71,25 @@ module main (
         4'd0: state <= 4'd1;
       endcase
       case(state)
-        4'd1: reg0 <= out0_Bin0;
+        4'd1: reg0 <= {32'd0, out0_Bin0};
         4'd5: reg0 <= reg1;
-        4'd6: reg0 <= out0_Bin0;
+        4'd6: reg0 <= {32'd0, out0_Bin0};
         4'd7: reg0 <= reg2;
       endcase
       case(state)
         4'd7: reg1 <= reg0;
       endcase
       case(state)
-        4'd6: reg2 <= out0_Bin2;
+        4'd6: reg2 <= {58'd0, out0_Bin2};
         4'd7: reg2 <= reg1;
       endcase
       case(state)
-        4'd0: reg3 <= 32'd0;
-        4'd2: reg3 <= out0_Bin1;
-        4'd3: reg3 <= reg3 ? reg3 : 32'd1;
+        4'd0: reg3 <= 64'd0;
+        4'd2: reg3 <= {63'd0, out0_Bin1};
+        4'd3: reg3 <= reg3 ? reg3 : 64'd1;
       endcase
       case(state)
-        4'd0: reg4 <= 32'd0;
+        4'd0: reg4 <= 64'd0;
       endcase
     end
   end

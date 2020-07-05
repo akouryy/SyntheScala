@@ -1,6 +1,6 @@
 module top();
 
-  reg clk, r_enable;
+  reg clk, r_enable, controlArr;
   wire[63:0] init_a = 64'd123;
   wire[63:0] init_b = 64'd234;
   wire[63:0] init_c = 64'd345;
@@ -11,10 +11,11 @@ module top();
   wire w_enable;
   wire[63:0] result;
 
-  main main(clk, r_enable, init_a, init_b, init_c, init_d, init_e, init_f, init_g, w_enable, result);
+  main main(.*);
 
   initial begin
     clk = 0;
+    controlArr = 0;
     forever #10 clk = ~clk;
   end
 
