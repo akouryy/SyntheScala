@@ -1,6 +1,4 @@
-# LICENSE
-
-## akouryy/SyntheScala
+# Copyright Notice
 
 This project is licensed under the MIT License.
 
