@@ -21,11 +21,11 @@ Block2 [label = "Block2"];
 subgraph cluster_dfg_Block0{
 node [shape = oval];
 label = "Block0";
-ndBlock0_0 [label=<@b<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:i==<font color="#3311ff" point-size="8"><sup>Bin0</sup></font>@a<font color="#ff4411" point-size="8"><sup>q1</sup></font>>];ndBlock0_1 [label=<out(acc)<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock0_2 [label=<acc<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_3 [label=<i<font color="#00dd33" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_4 [label=<out(@b)<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock0_5 [label=<@a<font color="#00dd33" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:1000<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_6 [label=<out(i)<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock0_2 -> ndBlock0_1;
-ndBlock0_0 -> ndBlock0_4;
-ndBlock0_3 -> ndBlock0_0;
-ndBlock0_5 -> ndBlock0_0;
+ndBlock0_0 [label=<out(acc)<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock0_1 [label=<i<font color="#00dd33" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_2 [label=<out(@b)<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock0_3 [label=<@a<font color="#00dd33" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:1000<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_4 [label=<out(i)<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock0_5 [label=<acc<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];ndBlock0_6 [label=<@b<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:i==<font color="#3311ff" point-size="8"><sup>Bin0</sup></font>@a<font color="#ff4411" point-size="8"><sup>q1</sup></font>>];ndBlock0_5 -> ndBlock0_0;
+ndBlock0_1 -> ndBlock0_6;
 ndBlock0_3 -> ndBlock0_6;
+ndBlock0_6 -> ndBlock0_2;
+ndBlock0_1 -> ndBlock0_4;
 }subgraph cluster_dfg_Block1{
 node [shape = oval];
 label = "Block1";
@@ -33,14 +33,14 @@ ndBlock1_0 [label=<acc<font color="#00dd33" point-size="8"><sup>S64</sup></font>
 }subgraph cluster_dfg_Block2{
 node [shape = oval];
 label = "Block2";
-ndBlock2_0 [label=<out(@e)<font color="#ff4411" point-size="8"><sup>q9</sup></font>>];ndBlock2_1 [label=<@d<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:a64*<font color="#3311ff" point-size="8"><sup>Bin2</sup></font>@c<font color="#ff4411" point-size="8"><sup>q7</sup></font>>];ndBlock2_2 [label=<acc<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:in<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock2_3 [label=<i<font color="#00dd33" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock2_4 [label=<out(@g)<font color="#ff4411" point-size="8"><sup>q9</sup></font>>];ndBlock2_5 [label=<@f<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:1<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock2_6 [label=<@g<font color="#00dd33" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:i+<font color="#3311ff" point-size="8"><sup>Bin1</sup></font>@f<font color="#ff4411" point-size="8"><sup>q5</sup></font>>];ndBlock2_7 [label=<@c<font color="#00dd33" point-size="8"><sup>S32</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:a[i]<font color="#ff4411" point-size="8"><sup>q6</sup></font>>];ndBlock2_8 [label=<a64<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r3</sup></font>:a[i]<font color="#ff4411" point-size="8"><sup>q5</sup></font>>];ndBlock2_9 [label=<@e<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:acc+<font color="#3311ff" point-size="8"><sup>Bin3</sup></font>@d<font color="#ff4411" point-size="8"><sup>q8</sup></font>>];ndBlock2_3 -> ndBlock2_6;
-ndBlock2_5 -> ndBlock2_6;
-ndBlock2_6 -> ndBlock2_4;
-ndBlock2_3 -> ndBlock2_8;
-ndBlock2_9 -> ndBlock2_0;
-ndBlock2_3 -> ndBlock2_7;
-ndBlock2_1 -> ndBlock2_9;
-ndBlock2_2 -> ndBlock2_9;
-ndBlock2_7 -> ndBlock2_1;
-ndBlock2_8 -> ndBlock2_1;
+ndBlock2_0 [label=<@e<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:acc+<font color="#3311ff" point-size="8"><sup>Bin3</sup></font>@d<font color="#ff4411" point-size="8"><sup>q8</sup></font>>];ndBlock2_1 [label=<@c<font color="#00dd33" point-size="8"><sup>S27</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:a[i]<font color="#ff4411" point-size="8"><sup>q6</sup></font>>];ndBlock2_2 [label=<a64<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:a[i]<font color="#ff4411" point-size="8"><sup>q5</sup></font>>];ndBlock2_3 [label=<out(@e)<font color="#ff4411" point-size="8"><sup>q9</sup></font>>];ndBlock2_4 [label=<acc<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:in<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock2_5 [label=<i<font color="#00dd33" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock2_6 [label=<@d<font color="#00dd33" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:a64*<font color="#3311ff" point-size="8"><sup>Bin2</sup></font>@c<font color="#ff4411" point-size="8"><sup>q7</sup></font>>];ndBlock2_7 [label=<out(@g)<font color="#ff4411" point-size="8"><sup>q9</sup></font>>];ndBlock2_8 [label=<@f<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:1<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];ndBlock2_9 [label=<@g<font color="#00dd33" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r3</sup></font>:i+<font color="#3311ff" point-size="8"><sup>Bin1</sup></font>@f<font color="#ff4411" point-size="8"><sup>q5</sup></font>>];ndBlock2_9 -> ndBlock2_7;
+ndBlock2_5 -> ndBlock2_2;
+ndBlock2_5 -> ndBlock2_9;
+ndBlock2_8 -> ndBlock2_9;
+ndBlock2_5 -> ndBlock2_1;
+ndBlock2_4 -> ndBlock2_0;
+ndBlock2_6 -> ndBlock2_0;
+ndBlock2_0 -> ndBlock2_3;
+ndBlock2_1 -> ndBlock2_6;
+ndBlock2_2 -> ndBlock2_6;
 }}

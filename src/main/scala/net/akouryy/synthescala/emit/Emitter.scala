@@ -22,6 +22,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
   private def index(arr: Label): String = s"arrAddr_${lab2sv(arr)}"
   private def readData(arr: Label): String = s"arrRData_${lab2sv(arr)}"
   private def writeData(arr: Label): String = s"arrWData_${lab2sv(arr)}"
+  private def ctrl(s: String) = s"control${s.capitalize}"
 
   private def typ2sv(typ: toki.Type): String = typ match
     case toki.Type.U(w) => s"""[${w - 1}:0]"""
@@ -57,9 +58,14 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     r ++= "`default_nettype none"
     r ++= s"module main ("
     r.indent:
-      r ++= "input wire clk, r_enable,"
+      r ++= "input wire clk, r_enable, controlArr,"
       for p <- cdfg.main.params do
         r ++= s"input wire[63:0] init_${lab2sv(p)},"
+      for toki.ArrayDef(arr, elemTyp, len) <- cdfg.arrayDefs.valuesIterator do
+        r ++= s"input wire ${ctrl(writeEnable(arr))},"
+        r ++= s"input wire[${len.width - 1}:0] ${ctrl(index(arr))},"
+        r ++= s"output wire${typ2sv(elemTyp)} ${ctrl(readData(arr))},"
+        r ++= s"input wire${typ2sv(elemTyp)} ${ctrl(writeData(arr))},"
       r ++= "output reg w_enable,"
       r ++= "output reg[63:0] result"
     r.indent(");", "endmodule // main"):
@@ -68,7 +74,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
       r ++= s"reg[${stateBitLen - 1}:0] state;"
       r ++= s"reg[${stateBitLen - 1}:0] linkreg;"
       for reg <- regSet do
-        r ++= s"reg[31:0] ${reg2sv(reg)};"
+        r ++= s"reg[63:0] ${reg2sv(reg)};"
       r ++= ""
 
       // definitions: calculator ports
@@ -102,14 +108,30 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
         r ++= s"arr_${lab2sv(arr)} arr_${lab2sv(arr)}(.*);"
       r ++= ""
 
-      // (calculator input and array index) port selectors
-      for (dst: (
-        ConnPort.CalcIn | ConnPort.ArrWriteEnable | ConnPort.ArrIndex | ConnPort.ArrWriteValue
-      ), paths) <- fsmd.datapath.map do
+      // calculator input port selectors
+      for (dst: ConnPort.CalcIn, paths) <- fsmd.datapath.map do
         r.indent(s"assign ${connDst2sv(dst)} =", ""):
           for (state -> source) <- paths do
             r ++= f"state == $stateBitLen'd${state.id} ? ${source2sv(source, dst)} :"
           r ++= s"'x;"
+      r ++= ""
+
+      // array port selectors
+      for toki.ArrayDef(arr, elemTyp, len) <- cdfg.arrayDefs.valuesIterator do
+        import ConnPort._
+        for dst <- Seq(new ArrWriteEnable(arr), new ArrIndex(arr), new ArrWriteValue(arr)) do
+          r.indent(s"assign ${connDst2sv(dst)} =", ""):
+            r ++= s"controlArr ? ${ctrl(connDst2sv(dst))} :"
+            for
+              paths <- fsmd.datapath.map.get(dst)
+              (state -> source) <- paths
+            do
+              r ++= f"state == $stateBitLen'd${state.id} ? ${source2sv(source, dst)} :"
+            dst match
+              case _: ArrWriteEnable => r ++= s"1'd0;"
+              case _ => r ++= s"'x;"
+        val rd = readData(arr)
+        r ++= s"assign ${ctrl(rd)} = controlArr ? ${rd} : 'x;"
       r ++= ""
 
       r.indent("always @(posedge clk) begin", "end"):
@@ -162,11 +184,6 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
         r ++= s"output wire${typ2sv(elemTyp)} ${readData(arr)},"
         r ++= s"input wire${typ2sv(elemTyp)} ${writeData(arr)}"
       r.indent(");", "endmodule"):
-
-        r ++= "integer i;"
-        r.indent("initial begin", "end"):
-          r.indent(s"for(i = 0; i < $len; i = i + 1)", ""):
-            r ++= "mem[i] = i;"
 
         r ++= s"reg${typ2sv(elemTyp)} mem [0:${len - 1}];";
         r.indent("always @(posedge clk) begin", "end"):

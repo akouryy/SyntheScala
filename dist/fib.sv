@@ -1,6 +1,6 @@
 `default_nettype none
 module main (
-  input wire clk, r_enable,
+  input wire clk, r_enable, controlArr,
   input wire[63:0] init_n,
   input wire[63:0] init_a,
   input wire[63:0] init_b,
@@ -9,11 +9,11 @@ module main (
 );
   reg[3:0] state;
   reg[3:0] linkreg;
-  reg[31:0] reg0;
-  reg[31:0] reg1;
-  reg[31:0] reg2;
-  reg[31:0] reg3;
-  reg[31:0] reg4;
+  reg[63:0] reg0;
+  reg[63:0] reg1;
+  reg[63:0] reg2;
+  reg[63:0] reg3;
+  reg[63:0] reg4;
 
   wire[31:0] in0_Bin0;
   wire[31:0] in1_Bin0;
@@ -46,6 +46,7 @@ module main (
     state == 4'd1 ? reg4 :
     state == 4'd6 ? reg2 :
     'x;
+
 
   always @(posedge clk) begin
     if(r_enable) begin

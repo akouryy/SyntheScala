@@ -25,7 +25,7 @@ object Main:
   lazy val norm2: Program =
     import dsl._
     TastyReflector.reflect:
-      val a = new Array[S[32]](1000)
+      val a = new Array[S[27]](1000)
 
       def norm2(i: U[10], acc: S[64]): S[64] =
         if i == 1000
@@ -37,8 +37,8 @@ object Main:
   lazy val dotProd: Program =
     import dsl._
     TastyReflector.reflect:
-      val a = new Array[S[32]](1000)
-      val b = new Array[S[32]](1000)
+      val a = new Array[S[27]](1000)
+      val b = new Array[S[27]](1000)
 
       def dotProd(i: U[10], acc: S[64]): S[64] =
         if i == 1000
@@ -50,11 +50,11 @@ object Main:
   lazy val accumulate: Program =
     import dsl._
     TastyReflector.reflect:
-      val a = new Array[S[32]](1000)
+      val a = new Array[S[64]](1000)
 
-      def accumulate(i: U[10], acc: S[64]): S[32] =
+      def accumulate(i: U[10], acc: S[64]): U[1] =
         if i == 1000
-          a(800)
+          0
         else
           val b: S[64] = acc + a(i)
           a(i) = b
