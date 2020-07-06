@@ -49,7 +49,7 @@ digraph Program_ {
     6 [label=<@d<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:a64*<font color="#3311ff" point-size="8"><sup>Bin2</sup></font>@c<font color="#ff4411" point-size="8"><sup>q8</sup></font>>; ];
     9 [label=<@g<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:i+<font color="#3311ff" point-size="8"><sup>Bin1</sup></font>@f<font color="#ff4411" point-size="8"><sup>q5</sup></font>>; ];
     2 [label=<req a[i]<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; ];
-    7 [label=<@e<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:acc+<font color="#3311ff" point-size="8"><sup>Bin3</sup></font>@d<font color="#ff4411" point-size="8"><sup>q9</sup></font>>; ];
+    7 [label=<@e<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:acc+<font color="#3311ff" point-size="8"><sup>Bin3</sup></font>@d<font color="#ff4411" point-size="8"><sup>q9</sup></font>>; ];
     3 [label=<a64<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r3</sup></font>:a[]<font color="#ff4411" point-size="8"><sup>q7</sup></font>>; ];
     16 [label=<i<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q2</sup></font>>; style="filled"; fillcolor="#ffeeff";];
     23 [label=<out(@g)<font color="#ff4411" point-size="8"><sup>q10</sup></font>>; style="filled"; fillcolor="#ffffee";];

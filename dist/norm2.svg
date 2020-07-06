@@ -277,7 +277,7 @@
 <ellipse fill="none" stroke="black" cx="837.81" cy="-107" rx="82.55" ry="18"/>
 <text text-anchor="start" x="781.7" y="-106.53" font-family="Monaco" font-size="11.00">@e</text>
 <text text-anchor="start" x="794.9" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">S64</text>
-<text text-anchor="start" x="809.3" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r0</text>
+<text text-anchor="start" x="809.3" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r1</text>
 <text text-anchor="start" x="818.9" y="-106.53" font-family="Monaco" font-size="11.00">:acc+</text>
 <text text-anchor="start" x="851.91" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin3</text>
 <text text-anchor="start" x="871.11" y="-106.53" font-family="Monaco" font-size="11.00">@d</text>

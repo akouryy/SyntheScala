@@ -104,11 +104,11 @@ module main (
         4'd4: reg0 <= reg1;
         4'd6: reg0 <= {{37{arrRData_a[26]}}, arrRData_a};
         4'd8: reg0 <= out0_Bin2;
-        4'd9: reg0 <= out0_Bin3;
         4'd10: reg0 <= reg2;
       endcase
       case(state)
-        4'd10: reg1 <= reg0;
+        4'd9: reg1 <= out0_Bin3;
+        4'd10: reg1 <= reg1;
       endcase
       case(state)
         4'd0: reg2 <= 64'd1000;
