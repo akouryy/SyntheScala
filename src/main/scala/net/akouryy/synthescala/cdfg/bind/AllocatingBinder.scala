@@ -7,7 +7,7 @@ import scala.collection.{immutable, mutable}
 
 class AllocatingBinder(graph: CDFG, typeEnv: toki.TypeEnv, sche: Schedule):
   def bind: Binder.Bindings =
-    val ids = mutable.Map.empty[(BlockIndex, Node), Int]
+    val ids = mutable.Map.empty[(BlockIndex, NodeID), Int]
     val calculators = mutable.Map.empty[Int, Calculator]
     val used = mutable.Set.empty[Int]
 
@@ -31,7 +31,7 @@ class AllocatingBinder(graph: CDFG, typeEnv: toki.TypeEnv, sche: Schedule):
               calculators(calc.id) = calc
               calc.id -> ()
 
-      ids((bi, node)) = id
+      ids((bi, node.id)) = id
       used += id
       // calc
     end bindCalc
@@ -41,7 +41,7 @@ class AllocatingBinder(graph: CDFG, typeEnv: toki.TypeEnv, sche: Schedule):
       used.clear()
 
       nodes.foreach:
-        case node @ Node.BinOp(op, l, r, _) =>
+        case node @ Node.BinOp(_, op, l, r, _) =>
           val lt = typeEnv(l)
           val rt = typeEnv(r)
           bindCalc(b.i, node, Calculator.Bin(op, lt, rt)) {

@@ -47,6 +47,7 @@ object Main:
 
   private def reset(): Unit =
     Label.reset()
+    NodeID.reset()
     cdfg.BlockIndex.reset()
     cdfg.JumpIndex.reset()
     cdfg.bind.Calculator.reset()

@@ -6,7 +6,9 @@ package cdfg
 import net.akouryy.{synthescala => base}
 import scala.collection.mutable
 
-final case class CDFG(val arrayDefs: toki.ArrayDefMap, val main: CDFGFun)
+final case class CDFG(val arrayDefs: toki.ArrayDefMap, val main: CDFGFun):
+  def node(blockIndex: BlockIndex, nodeID: NodeID): Node =
+    main.blocks(blockIndex).nodes(nodeID)
 
 final class CDFGFun(val fnName: String, val params: Seq[Label]):
   val blocks: mutable.SortedMap[BlockIndex, Block] = mutable.SortedMap[BlockIndex, Block]()
@@ -25,7 +27,7 @@ final case class BlockIndex(indices: List[Int]) extends Ordered[BlockIndex] deri
     implicitly[Ordering[List[Int]]].compare(indices, that.indices)
 
 object BlockIndex:
-  private[this] var cnt = -1
+  private var cnt = -1
 
   def generate(prefix: BlockIndex = BlockIndex(Nil)): BlockIndex = {
     cnt += 1
@@ -54,66 +56,71 @@ object JumpIndex:
 
 case class Block(
   i: BlockIndex,
-  /*names: Map[String, Int /* node idx */],*/ nodes: Set[Node],
-  arrayDeps: UnweightedGraph[Node],
+  /*names: Map[String, Int /* node idx */],*/ nodes: Map[NodeID, Node],
+  arrayDeps: UnweightedGraph[NodeID],
   inJumpIndex: JumpIndex, outJump: JumpIndex,
 ):
-  def defs: Set[Label] = nodes.flatMap:
-    case Node.Input(_) => Nil
+  def defs: Iterable[Label] = nodes.values.flatMap:
+    case _: Node.Input => Nil
     case nd => nd.written
 
-  def uses: Set[Label] = nodes.flatMap:
-    case Node.Output(_) => Nil
+  def uses: Iterable[Label] = nodes.values.flatMap:
+    case _: Node.Output => Nil
     case nd => nd.read
 
-  lazy val writeMap: Map[Label, Node] = nodes.flatMap(nd => nd.written.map(_ -> nd)).toMap
+  lazy val writeMap: Map[Label, NodeID] =
+    nodes.valuesIterator.flatMap(nd => nd.written.map(_ -> nd.id)).toMap
 
-  lazy val readMap: Map[Label, Seq[Node]] =
-    val res = mutable.Map.empty[Label, List[Node]]
-    for nd <- nodes; id <- nd.read do
-      res(id) = nd :: res.getOrElse(id, Nil)
+  lazy val readMap: Map[Label, Seq[NodeID]] =
+    val res = mutable.Map.empty[Label, List[NodeID]]
+    for nd <- nodes.valuesIterator; lab <- nd.read do
+      res(lab) = nd.id :: res.getOrElse(lab, Nil)
     res.toMap
 
-  lazy val inputs: Set[Node] = nodes.filter(_.isInput)
+  lazy val inputs: Set[Node] = nodes.valuesIterator.filter(_.isInput).toSet
 
   def stateToNodes(sche: schedule.Schedule): collection.MultiDict[State, Node] =
     mutable.SortedMultiDict.from:
-      for node <- nodes if !node.isInput yield
-        sche.nodeStates(i, node) -> node
+      for (nid -> node) <- nodes.toSeq if !node.isInput yield
+        sche.nodeStates(i, nid) -> node
 end Block
 
 enum Node derives Eql:
-  case Input(name: Label)
-  case Const(value: Long, name: Label)
-  case Output(name: Label)
-  case BinOp(op: base.BinOp, left: Label, right: Label, ans: Label)
-  case Call(fn: String, args: Seq[Label], ret: Label)
-  case Get(arr: Label, index: Label, ret: Label)
-  case Put(arr: Label, index: Label, value: Label)
+  val id: NodeID
+
+  case Input(val id: NodeID, name: Label)
+  case Const(val id: NodeID, value: Long, name: Label)
+  case Output(val id: NodeID, name: Label)
+  case BinOp(val id: NodeID, op: base.BinOp, left: Label, right: Label, ans: Label)
+  case Call(val id: NodeID, fn: String, args: Seq[Label], ret: Label)
+  case Get(val id: NodeID, arr: Label, index: Label, ret: Label)
+  case Put(val id: NodeID, arr: Label, index: Label, value: Label)
 
   override lazy val hashCode = scala.util.hashing.MurmurHash3.productHash(this)
+
+  def withID: (NodeID, Node) = id -> this
 
   def isInput: Boolean = this match
     case _: (Input | Const) => true
     case _ => false
 
   def read: Seq[Label] = this match
-    case Input(_) => Nil
-    case Const(_, _) => Nil
-    case Output(n) => Seq(n)
-    case BinOp(_, l, r, _) => Seq(l, r)
-    case Call(_, as, _) => as
-    case Get(_, index, _) => Seq(index)
-    case Put(_, index, value) => Seq(index, value)
+    case _: Input => Nil
+    case _: Const => Nil
+    case Output(_, n) => Seq(n)
+    case BinOp(_, _, l, r, _) => Seq(l, r)
+    case Call(_, _, as, _) => as
+    case Get(_, _, index, _) => Seq(index)
+    case Put(_, _, index, value) => Seq(index, value)
 
   def written: Option[Label] = this match
-    case Input(n) => Some(n)
-    case Const(_, n) => Some(n)
-    case Output(_) => None
-    case BinOp(_, _, _, a) => Some(a)
-    case Call(_, _, r) => Some(r)
-    case Get(_, _, ret) => Some(ret)
-    case Put(_, _, _) => None
+    case Input(_, n) => Some(n)
+    case Const(_, _, n) => Some(n)
+    case _: Output => None
+    case BinOp(_, _, _, _, a) => Some(a)
+    case Call(_, _, _, r) => Some(r)
+    case Get(_, _, _, ret) => Some(ret)
+    case _: Put => None
 
 end Node
 

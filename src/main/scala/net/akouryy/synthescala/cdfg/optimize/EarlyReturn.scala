@@ -10,17 +10,18 @@ object EarlyReturn:
 
   private def traverse(fn: CDFGFun, ji0: JumpIndex): Unit =
     fn.jumps(ji0) match
-      case Jump.Return(_, retID, bi1) =>
+      case Jump.Return(_, retLab, bi1) =>
         val b1 @ Block(_, nodes, _, ji2, _) = fn.blocks(bi1)
 
-        if nodes.forall {
-          case Node.Input(id) => id == retID
-          case Node.Output(id) => id == retID
-          case _ => false
-        } then
+        if
+          nodes.valuesIterator.forall:
+            case Node.Input(_, lab) => lab == retLab
+            case Node.Output(_, lab) => lab == retLab
+            case _ => false
+        then
           fn.jumps(ji2) match
-            case Jump.Merge(_, ibs, inIDss, _, ons) if ons.contains(retID) =>
-              val retIdx = ons.indexOf(retID)
+            case Jump.Merge(_, ibs, inIDss, _, ons) if ons.contains(retLab) =>
+              val retIdx = ons.indexOf(retLab)
               fn.jumps --= Seq(ji0, ji2)
               fn.blocks -= bi1
 
@@ -36,15 +37,17 @@ object EarlyReturn:
             case _ =>
         end if
 
-        b1.nodes.filter(_.isInstanceOf[Node.Output]).toSeq match
+        b1.nodes.valuesIterator.filter(_.isInstanceOf[Node.Output]).toSeq match
           case Seq(outputNode: Node.Output) => // one element
-            b1.writeMap.get(outputNode.name) match
-              case Some(node @ Node.Call(callee, args, _)) =>
+            b1.writeMap.get(outputNode.name).map(b1.nodes) match
+              case Some(node @ Node.Call(nid, callee, args, _)) =>
                 fn.jumps -= ji0
                 val ji0p = JumpIndex.generate(ji0)
                 fn.jumps(ji0p) = Jump.TailCall(ji0p, callee, args, bi1)
                 fn.blocks(bi1) = b1.copy(
-                  nodes = b1.nodes - node - outputNode ++ args.map(Node.Output(_)),
+                  nodes =
+                    b1.nodes - nid - outputNode.id
+                    ++ args.map(Node.Output(NodeID.generate(), _).withID),
                   outJump = ji0p
                 )
                 return

@@ -24,46 +24,46 @@ digraph Program_ {
   subgraph cluster_dfg_Block0 {
     node [shape = oval];
     label = "Block0";
-    ndBlock0_0 [label=<@b<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:0<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];
-    ndBlock0_1 [label=<@a<font color="#00dd33" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:1<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];
-    ndBlock0_2 [label=<i<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>];
-    ndBlock0_3 [label=<out(@c)<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];
-    ndBlock0_4 [label=<@c<font color="#00dd33" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:i==<font color="#3311ff" point-size="8"><sup>Bin0</sup></font>@b<font color="#ff4411" point-size="8"><sup>q1</sup></font>>];
-    ndBlock0_5 [label=<out(@a)<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];
-    ndBlock0_0 -> ndBlock0_4;
-    ndBlock0_1 -> ndBlock0_5;
-    ndBlock0_2 -> ndBlock0_4;
-    ndBlock0_4 -> ndBlock0_3;
+    0 [label=<@a<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:1<font color="#ff4411" point-size="8"><sup>q0</sup></font>>; ];
+    1 [label=<@b<font color="#00aa11" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:0<font color="#ff4411" point-size="8"><sup>q0</sup></font>>; ];
+    2 [label=<@c<font color="#00aa11" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:i==<font color="#3311ff" point-size="8"><sup>Bin0</sup></font>@b<font color="#ff4411" point-size="8"><sup>q1</sup></font>>; ];
+    17 [label=<out(@c)<font color="#ff4411" point-size="8"><sup>q2</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    16 [label=<out(@a)<font color="#ff4411" point-size="8"><sup>q2</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    15 [label=<i<font color="#00aa11" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>; style="filled"; fillcolor="#ffeeff";];
+    0 -> 16;
+    1 -> 2;
+    2 -> 17;
+    15 -> 2;
   }
   subgraph cluster_dfg_Block1 {
     node [shape = oval];
     label = "Block1";
-    ndBlock1_0 [label=<@d<font color="#00dd33" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:1<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];
-    ndBlock1_1 [label=<@a<font color="#00dd33" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:in<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];
-    ndBlock1_2 [label=<out(@a)<font color="#ff4411" point-size="8"><sup>q4</sup></font>>];
-    ndBlock1_3 [label=<out(@d)<font color="#ff4411" point-size="8"><sup>q4</sup></font>>];
-    ndBlock1_0 -> ndBlock1_3;
-    ndBlock1_1 -> ndBlock1_2;
+    3 [label=<@d<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:1<font color="#ff4411" point-size="8"><sup>q2</sup></font>>; ];
+    9 [label=<@a<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:in<font color="#ff4411" point-size="8"><sup>q2</sup></font>>; style="filled"; fillcolor="#ffeeff";];
+    10 [label=<out(@a)<font color="#ff4411" point-size="8"><sup>q4</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    11 [label=<out(@d)<font color="#ff4411" point-size="8"><sup>q4</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    3 -> 11;
+    9 -> 10;
   }
   subgraph cluster_dfg_Block2 {
     node [shape = oval];
     label = "Block2";
-    ndBlock2_0 [label=<@e<font color="#00dd33" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:2<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];
-    ndBlock2_1 [label=<@a<font color="#00dd33" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:in<font color="#ff4411" point-size="8"><sup>q2</sup></font>>];
-    ndBlock2_2 [label=<out(@a)<font color="#ff4411" point-size="8"><sup>q5</sup></font>>];
-    ndBlock2_3 [label=<out(@e)<font color="#ff4411" point-size="8"><sup>q5</sup></font>>];
-    ndBlock2_0 -> ndBlock2_3;
-    ndBlock2_1 -> ndBlock2_2;
+    4 [label=<@e<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:2<font color="#ff4411" point-size="8"><sup>q2</sup></font>>; ];
+    12 [label=<@a<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:in<font color="#ff4411" point-size="8"><sup>q2</sup></font>>; style="filled"; fillcolor="#ffeeff";];
+    13 [label=<out(@a)<font color="#ff4411" point-size="8"><sup>q5</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    14 [label=<out(@e)<font color="#ff4411" point-size="8"><sup>q5</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    4 -> 14;
+    12 -> 13;
   }
   subgraph cluster_dfg_Block3 {
     node [shape = oval];
     label = "Block3";
-    ndBlock3_0 [label=<@g<font color="#00dd33" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:@a+<font color="#3311ff" point-size="8"><sup>Bin1</sup></font>@f<font color="#ff4411" point-size="8"><sup>q6</sup></font>>];
-    ndBlock3_1 [label=<@a<font color="#00dd33" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:in<font color="#ff4411" point-size="8"><sup>q5|q4</sup></font>>];
-    ndBlock3_2 [label=<@f<font color="#00dd33" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q5|q4</sup></font>>];
-    ndBlock3_3 [label=<out(@g)<font color="#ff4411" point-size="8"><sup>q7</sup></font>>];
-    ndBlock3_0 -> ndBlock3_3;
-    ndBlock3_1 -> ndBlock3_0;
-    ndBlock3_2 -> ndBlock3_0;
+    5 [label=<@g<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:@a+<font color="#3311ff" point-size="8"><sup>Bin1</sup></font>@f<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; ];
+    6 [label=<@a<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:in<font color="#ff4411" point-size="8"><sup>q5|q4</sup></font>>; style="filled"; fillcolor="#ffeeff";];
+    7 [label=<@f<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q5|q4</sup></font>>; style="filled"; fillcolor="#ffeeff";];
+    8 [label=<out(@g)<font color="#ff4411" point-size="8"><sup>q7</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    5 -> 8;
+    6 -> 5;
+    7 -> 5;
   }
 }

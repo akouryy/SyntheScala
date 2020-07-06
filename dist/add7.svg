@@ -50,232 +50,232 @@
 <polygon fill="black" stroke="black" points="54.41,-354.11 50.91,-344.11 47.41,-354.11 54.41,-354.11"/>
 <text text-anchor="middle" x="57.51" y="-367.87" font-family="Monaco" font-size="11.00">@f</text>
 </g>
-<!-- ndBlock0_0 -->
+<!-- 0 -->
 <g id="node4" class="node">
-<title>ndBlock0_0</title>
-<ellipse fill="none" stroke="black" cx="284.91" cy="-485.67" rx="48.84" ry="18"/>
-<text text-anchor="start" x="254.9" y="-485.2" font-family="Monaco" font-size="11.00">d</text>
-<text text-anchor="start" x="261.5" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U10</text>
-<text text-anchor="start" x="275.91" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r3</text>
-<text text-anchor="start" x="285.51" y="-485.2" font-family="Monaco" font-size="11.00">:in</text>
-<text text-anchor="start" x="305.31" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
+<title>0</title>
+<ellipse fill="none" stroke="black" cx="248.91" cy="-412.67" rx="69.56" ry="18"/>
+<text text-anchor="start" x="202.7" y="-412.2" font-family="Monaco" font-size="11.00">@a</text>
+<text text-anchor="start" x="215.9" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U13</text>
+<text text-anchor="start" x="230.3" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r4</text>
+<text text-anchor="start" x="239.91" y="-412.2" font-family="Monaco" font-size="11.00">:d+</text>
+<text text-anchor="start" x="259.71" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin1</text>
+<text text-anchor="start" x="278.91" y="-412.2" font-family="Monaco" font-size="11.00">e</text>
+<text text-anchor="start" x="285.51" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q1</text>
 </g>
-<!-- ndBlock0_4 -->
-<g id="node8" class="node">
-<title>ndBlock0_4</title>
-<ellipse fill="none" stroke="black" cx="258.91" cy="-412.67" rx="69.56" ry="18"/>
-<text text-anchor="start" x="212.7" y="-412.2" font-family="Monaco" font-size="11.00">@a</text>
-<text text-anchor="start" x="225.9" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U13</text>
-<text text-anchor="start" x="240.3" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r3</text>
-<text text-anchor="start" x="249.91" y="-412.2" font-family="Monaco" font-size="11.00">:d+</text>
-<text text-anchor="start" x="269.71" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
-<text text-anchor="start" x="288.91" y="-412.2" font-family="Monaco" font-size="11.00">e</text>
-<text text-anchor="start" x="295.51" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q1</text>
+<!-- 2 -->
+<g id="node11" class="node">
+<title>2</title>
+<ellipse fill="none" stroke="black" cx="270.91" cy="-326" rx="78.05" ry="18"/>
+<text text-anchor="start" x="218.1" y="-325.53" font-family="Monaco" font-size="11.00">@c</text>
+<text text-anchor="start" x="231.3" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U13</text>
+<text text-anchor="start" x="245.7" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r3</text>
+<text text-anchor="start" x="255.3" y="-325.53" font-family="Monaco" font-size="11.00">:@a+</text>
+<text text-anchor="start" x="281.71" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
+<text text-anchor="start" x="300.91" y="-325.53" font-family="Monaco" font-size="11.00">@b</text>
+<text text-anchor="start" x="314.11" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q2</text>
 </g>
-<!-- ndBlock0_0&#45;&gt;ndBlock0_4 -->
+<!-- 0&#45;&gt;2 -->
 <g id="edge3" class="edge">
-<title>ndBlock0_0&#45;&gt;ndBlock0_4</title>
-<path fill="none" stroke="black" d="M278.61,-467.48C275.61,-459.28 271.95,-449.29 268.61,-440.15"/>
-<polygon fill="black" stroke="black" points="271.87,-438.88 265.14,-430.7 265.3,-441.29 271.87,-438.88"/>
+<title>0&#45;&gt;2</title>
+<path fill="none" stroke="black" d="M253.36,-394.53C256.37,-382.94 260.41,-367.39 263.86,-354.13"/>
+<polygon fill="black" stroke="black" points="267.33,-354.67 266.46,-344.11 260.56,-352.91 267.33,-354.67"/>
 </g>
-<!-- ndBlock0_1 -->
+<!-- 5 -->
 <g id="node5" class="node">
-<title>ndBlock0_1</title>
-<ellipse fill="none" stroke="black" cx="230.91" cy="-107" rx="74.05" ry="18"/>
-<text text-anchor="start" x="181.4" y="-106.53" font-family="Monaco" font-size="11.00">@f</text>
-<text text-anchor="start" x="194.6" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U13</text>
-<text text-anchor="start" x="209" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r0</text>
-<text text-anchor="start" x="218.6" y="-106.53" font-family="Monaco" font-size="11.00">:a+</text>
-<text text-anchor="start" x="238.41" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
-<text text-anchor="start" x="257.61" y="-106.53" font-family="Monaco" font-size="11.00">@e</text>
-<text text-anchor="start" x="270.81" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q5</text>
+<title>5</title>
+<ellipse fill="none" stroke="black" cx="409.91" cy="-107" rx="74.05" ry="18"/>
+<text text-anchor="start" x="360.4" y="-106.53" font-family="Monaco" font-size="11.00">@f</text>
+<text text-anchor="start" x="373.6" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U13</text>
+<text text-anchor="start" x="388" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r0</text>
+<text text-anchor="start" x="397.6" y="-106.53" font-family="Monaco" font-size="11.00">:a+</text>
+<text text-anchor="start" x="417.41" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
+<text text-anchor="start" x="436.61" y="-106.53" font-family="Monaco" font-size="11.00">@e</text>
+<text text-anchor="start" x="449.81" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q5</text>
 </g>
-<!-- ndBlock0_12 -->
-<g id="node16" class="node">
-<title>ndBlock0_12</title>
-<ellipse fill="none" stroke="black" cx="230.91" cy="-34" rx="46.44" ry="18"/>
-<text text-anchor="start" x="203" y="-33.53" font-family="Monaco" font-size="11.00">out(@f)</text>
-<text text-anchor="start" x="249.21" y="-33.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q6</text>
+<!-- 13 -->
+<g id="node10" class="node">
+<title>13</title>
+<ellipse fill="#ffffee" stroke="black" cx="409.91" cy="-34" rx="46.44" ry="18"/>
+<text text-anchor="start" x="382" y="-33.53" font-family="Monaco" font-size="11.00">out(@f)</text>
+<text text-anchor="start" x="428.21" y="-33.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q6</text>
 </g>
-<!-- ndBlock0_1&#45;&gt;ndBlock0_12 -->
-<g id="edge4" class="edge">
-<title>ndBlock0_1&#45;&gt;ndBlock0_12</title>
-<path fill="none" stroke="black" d="M230.91,-88.81C230.91,-80.79 230.91,-71.05 230.91,-62.07"/>
-<polygon fill="black" stroke="black" points="234.41,-62.03 230.91,-52.03 227.41,-62.03 234.41,-62.03"/>
+<!-- 5&#45;&gt;13 -->
+<g id="edge8" class="edge">
+<title>5&#45;&gt;13</title>
+<path fill="none" stroke="black" d="M409.91,-88.81C409.91,-80.79 409.91,-71.05 409.91,-62.07"/>
+<polygon fill="black" stroke="black" points="413.41,-62.03 409.91,-52.03 406.41,-62.03 413.41,-62.03"/>
 </g>
-<!-- ndBlock0_2 -->
+<!-- 10 -->
 <g id="node6" class="node">
-<title>ndBlock0_2</title>
-<ellipse fill="none" stroke="black" cx="516.91" cy="-485.67" rx="48.84" ry="18"/>
-<text text-anchor="start" x="486.9" y="-485.2" font-family="Monaco" font-size="11.00">f</text>
-<text text-anchor="start" x="493.5" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U10</text>
-<text text-anchor="start" x="507.91" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r5</text>
+<title>10</title>
+<ellipse fill="#ffeeff" stroke="black" cx="478.91" cy="-253" rx="48.84" ry="18"/>
+<text text-anchor="start" x="448.9" y="-252.53" font-family="Monaco" font-size="11.00">b</text>
+<text text-anchor="start" x="455.5" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U10</text>
+<text text-anchor="start" x="469.91" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r1</text>
+<text text-anchor="start" x="479.51" y="-252.53" font-family="Monaco" font-size="11.00">:in</text>
+<text text-anchor="start" x="499.31" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
+</g>
+<!-- 4 -->
+<g id="node17" class="node">
+<title>4</title>
+<ellipse fill="none" stroke="black" cx="373.91" cy="-180" rx="74.05" ry="18"/>
+<text text-anchor="start" x="324.4" y="-179.53" font-family="Monaco" font-size="11.00">@e</text>
+<text text-anchor="start" x="337.6" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U13</text>
+<text text-anchor="start" x="352" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r1</text>
+<text text-anchor="start" x="361.6" y="-179.53" font-family="Monaco" font-size="11.00">:b+</text>
+<text text-anchor="start" x="381.41" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
+<text text-anchor="start" x="400.61" y="-179.53" font-family="Monaco" font-size="11.00">@d</text>
+<text text-anchor="start" x="413.81" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q4</text>
+</g>
+<!-- 10&#45;&gt;4 -->
+<g id="edge13" class="edge">
+<title>10&#45;&gt;4</title>
+<path fill="none" stroke="black" d="M456.64,-236.94C442.11,-227.12 422.9,-214.13 406.65,-203.14"/>
+<polygon fill="black" stroke="black" points="408.22,-199.97 397.97,-197.27 404.29,-205.77 408.22,-199.97"/>
+</g>
+<!-- 1 -->
+<g id="node7" class="node">
+<title>1</title>
+<ellipse fill="none" stroke="black" cx="406.91" cy="-412.67" rx="69.56" ry="18"/>
+<text text-anchor="start" x="360.7" y="-412.2" font-family="Monaco" font-size="11.00">@b</text>
+<text text-anchor="start" x="373.9" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U13</text>
+<text text-anchor="start" x="388.3" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r3</text>
+<text text-anchor="start" x="397.91" y="-412.2" font-family="Monaco" font-size="11.00">:f+</text>
+<text text-anchor="start" x="417.71" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
+<text text-anchor="start" x="436.91" y="-412.2" font-family="Monaco" font-size="11.00">g</text>
+<text text-anchor="start" x="443.51" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q1</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge4" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="black" d="M381.33,-395.74C359.9,-382.41 329.13,-363.24 305.5,-348.54"/>
+<polygon fill="black" stroke="black" points="307.17,-345.46 296.84,-343.14 303.47,-351.4 307.17,-345.46"/>
+</g>
+<!-- 6 -->
+<g id="node8" class="node">
+<title>6</title>
+<ellipse fill="#ffeeff" stroke="black" cx="514.91" cy="-180" rx="48.84" ry="18"/>
+<text text-anchor="start" x="484.9" y="-179.53" font-family="Monaco" font-size="11.00">a</text>
+<text text-anchor="start" x="491.5" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U10</text>
+<text text-anchor="start" x="505.91" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r0</text>
+<text text-anchor="start" x="515.51" y="-179.53" font-family="Monaco" font-size="11.00">:in</text>
+<text text-anchor="start" x="535.31" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
+</g>
+<!-- 6&#45;&gt;5 -->
+<g id="edge9" class="edge">
+<title>6&#45;&gt;5</title>
+<path fill="none" stroke="black" d="M492.64,-163.94C478.11,-154.12 458.9,-141.13 442.65,-130.14"/>
+<polygon fill="black" stroke="black" points="444.22,-126.97 433.97,-124.27 440.29,-132.77 444.22,-126.97"/>
+</g>
+<!-- 9 -->
+<g id="node9" class="node">
+<title>9</title>
+<ellipse fill="#ffeeff" stroke="black" cx="516.91" cy="-485.67" rx="48.84" ry="18"/>
+<text text-anchor="start" x="486.9" y="-485.2" font-family="Monaco" font-size="11.00">g</text>
+<text text-anchor="start" x="493.5" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U13</text>
+<text text-anchor="start" x="507.91" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r6</text>
 <text text-anchor="start" x="517.51" y="-485.2" font-family="Monaco" font-size="11.00">:in</text>
 <text text-anchor="start" x="537.31" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
 </g>
-<!-- ndBlock0_13 -->
-<g id="node17" class="node">
-<title>ndBlock0_13</title>
-<ellipse fill="none" stroke="black" cx="416.91" cy="-412.67" rx="69.56" ry="18"/>
-<text text-anchor="start" x="370.7" y="-412.2" font-family="Monaco" font-size="11.00">@b</text>
-<text text-anchor="start" x="383.9" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U13</text>
-<text text-anchor="start" x="398.3" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r4</text>
-<text text-anchor="start" x="407.91" y="-412.2" font-family="Monaco" font-size="11.00">:f+</text>
-<text text-anchor="start" x="427.71" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin1</text>
-<text text-anchor="start" x="446.91" y="-412.2" font-family="Monaco" font-size="11.00">g</text>
-<text text-anchor="start" x="453.51" y="-412.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q1</text>
-</g>
-<!-- ndBlock0_2&#45;&gt;ndBlock0_13 -->
-<g id="edge8" class="edge">
-<title>ndBlock0_2&#45;&gt;ndBlock0_13</title>
-<path fill="none" stroke="black" d="M495.21,-469.26C481.35,-459.42 463.16,-446.51 447.8,-435.6"/>
-<polygon fill="black" stroke="black" points="449.78,-432.72 439.6,-429.78 445.73,-438.43 449.78,-432.72"/>
-</g>
-<!-- ndBlock0_3 -->
-<g id="node7" class="node">
-<title>ndBlock0_3</title>
-<ellipse fill="none" stroke="black" cx="400.91" cy="-485.67" rx="48.84" ry="18"/>
-<text text-anchor="start" x="370.9" y="-485.2" font-family="Monaco" font-size="11.00">g</text>
-<text text-anchor="start" x="377.5" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U13</text>
-<text text-anchor="start" x="391.91" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r6</text>
-<text text-anchor="start" x="401.51" y="-485.2" font-family="Monaco" font-size="11.00">:in</text>
-<text text-anchor="start" x="421.31" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
-</g>
-<!-- ndBlock0_3&#45;&gt;ndBlock0_13 -->
-<g id="edge9" class="edge">
-<title>ndBlock0_3&#45;&gt;ndBlock0_13</title>
-<path fill="none" stroke="black" d="M404.78,-467.48C406.59,-459.46 408.78,-449.72 410.81,-440.74"/>
-<polygon fill="black" stroke="black" points="414.29,-441.22 413.07,-430.7 407.46,-439.68 414.29,-441.22"/>
-</g>
-<!-- ndBlock0_10 -->
-<g id="node14" class="node">
-<title>ndBlock0_10</title>
-<ellipse fill="none" stroke="black" cx="322.91" cy="-326" rx="78.05" ry="18"/>
-<text text-anchor="start" x="270.1" y="-325.53" font-family="Monaco" font-size="11.00">@c</text>
-<text text-anchor="start" x="283.3" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U13</text>
-<text text-anchor="start" x="297.7" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r3</text>
-<text text-anchor="start" x="307.3" y="-325.53" font-family="Monaco" font-size="11.00">:@a+</text>
-<text text-anchor="start" x="333.71" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
-<text text-anchor="start" x="352.91" y="-325.53" font-family="Monaco" font-size="11.00">@b</text>
-<text text-anchor="start" x="366.11" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q2</text>
-</g>
-<!-- ndBlock0_4&#45;&gt;ndBlock0_10 -->
-<g id="edge10" class="edge">
-<title>ndBlock0_4&#45;&gt;ndBlock0_10</title>
-<path fill="none" stroke="black" d="M271.55,-394.94C280.78,-382.73 293.46,-365.96 303.9,-352.14"/>
-<polygon fill="black" stroke="black" points="306.83,-354.07 310.07,-343.98 301.25,-349.85 306.83,-354.07"/>
-</g>
-<!-- ndBlock0_5 -->
-<g id="node9" class="node">
-<title>ndBlock0_5</title>
-<ellipse fill="none" stroke="black" cx="353.91" cy="-180" rx="48.84" ry="18"/>
-<text text-anchor="start" x="323.9" y="-179.53" font-family="Monaco" font-size="11.00">a</text>
-<text text-anchor="start" x="330.5" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U10</text>
-<text text-anchor="start" x="344.91" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r0</text>
-<text text-anchor="start" x="354.51" y="-179.53" font-family="Monaco" font-size="11.00">:in</text>
-<text text-anchor="start" x="374.31" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
-</g>
-<!-- ndBlock0_5&#45;&gt;ndBlock0_1 -->
-<g id="edge11" class="edge">
-<title>ndBlock0_5&#45;&gt;ndBlock0_1</title>
-<path fill="none" stroke="black" d="M328.72,-164.46C310.92,-154.19 286.8,-140.27 266.97,-128.82"/>
-<polygon fill="black" stroke="black" points="268.61,-125.72 258.2,-123.75 265.11,-131.78 268.61,-125.72"/>
-</g>
-<!-- ndBlock0_6 -->
-<g id="node10" class="node">
-<title>ndBlock0_6</title>
-<ellipse fill="none" stroke="black" cx="334.91" cy="-253" rx="48.84" ry="18"/>
-<text text-anchor="start" x="304.9" y="-252.53" font-family="Monaco" font-size="11.00">b</text>
-<text text-anchor="start" x="311.5" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U10</text>
-<text text-anchor="start" x="325.91" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r1</text>
-<text text-anchor="start" x="335.51" y="-252.53" font-family="Monaco" font-size="11.00">:in</text>
-<text text-anchor="start" x="355.31" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
-</g>
-<!-- ndBlock0_7 -->
-<g id="node11" class="node">
-<title>ndBlock0_7</title>
-<ellipse fill="none" stroke="black" cx="212.91" cy="-180" rx="74.05" ry="18"/>
-<text text-anchor="start" x="163.4" y="-179.53" font-family="Monaco" font-size="11.00">@e</text>
-<text text-anchor="start" x="176.6" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U13</text>
-<text text-anchor="start" x="191" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r1</text>
-<text text-anchor="start" x="200.6" y="-179.53" font-family="Monaco" font-size="11.00">:b+</text>
-<text text-anchor="start" x="220.41" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
-<text text-anchor="start" x="239.61" y="-179.53" font-family="Monaco" font-size="11.00">@d</text>
-<text text-anchor="start" x="252.81" y="-179.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q4</text>
-</g>
-<!-- ndBlock0_6&#45;&gt;ndBlock0_7 -->
+<!-- 9&#45;&gt;1 -->
 <g id="edge12" class="edge">
-<title>ndBlock0_6&#45;&gt;ndBlock0_7</title>
-<path fill="none" stroke="black" d="M309.92,-237.46C292.39,-227.26 268.68,-213.46 249.08,-202.05"/>
-<polygon fill="black" stroke="black" points="250.81,-199.01 240.41,-197 247.29,-205.06 250.81,-199.01"/>
+<title>9&#45;&gt;1</title>
+<path fill="none" stroke="black" d="M493.85,-469.78C478.29,-459.74 457.51,-446.33 440.17,-435.14"/>
+<polygon fill="black" stroke="black" points="441.76,-432 431.46,-429.52 437.97,-437.88 441.76,-432"/>
 </g>
-<!-- ndBlock0_7&#45;&gt;ndBlock0_1 -->
-<g id="edge13" class="edge">
-<title>ndBlock0_7&#45;&gt;ndBlock0_1</title>
-<path fill="none" stroke="black" d="M217.26,-161.81C219.32,-153.7 221.82,-143.84 224.12,-134.78"/>
-<polygon fill="black" stroke="black" points="227.52,-135.58 226.59,-125.03 220.74,-133.86 227.52,-135.58"/>
+<!-- 3 -->
+<g id="node14" class="node">
+<title>3</title>
+<ellipse fill="none" stroke="black" cx="337.91" cy="-253" rx="74.05" ry="18"/>
+<text text-anchor="start" x="288.4" y="-252.53" font-family="Monaco" font-size="11.00">@d</text>
+<text text-anchor="start" x="301.6" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U13</text>
+<text text-anchor="start" x="316" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r2</text>
+<text text-anchor="start" x="325.6" y="-252.53" font-family="Monaco" font-size="11.00">:c+</text>
+<text text-anchor="start" x="345.41" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
+<text text-anchor="start" x="364.61" y="-252.53" font-family="Monaco" font-size="11.00">@c</text>
+<text text-anchor="start" x="377.81" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q3</text>
 </g>
-<!-- ndBlock0_8 -->
+<!-- 2&#45;&gt;3 -->
+<g id="edge5" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="black" d="M286.79,-308.17C295.21,-299.24 305.72,-288.11 315.01,-278.26"/>
+<polygon fill="black" stroke="black" points="317.83,-280.38 322.14,-270.71 312.73,-275.58 317.83,-280.38"/>
+</g>
+<!-- 12 -->
 <g id="node12" class="node">
-<title>ndBlock0_8</title>
-<ellipse fill="none" stroke="black" cx="193.91" cy="-253" rx="74.05" ry="18"/>
-<text text-anchor="start" x="144.4" y="-252.53" font-family="Monaco" font-size="11.00">@d</text>
-<text text-anchor="start" x="157.6" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U13</text>
-<text text-anchor="start" x="172" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r2</text>
-<text text-anchor="start" x="181.6" y="-252.53" font-family="Monaco" font-size="11.00">:c+</text>
-<text text-anchor="start" x="201.41" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
-<text text-anchor="start" x="220.61" y="-252.53" font-family="Monaco" font-size="11.00">@c</text>
-<text text-anchor="start" x="233.81" y="-252.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q3</text>
+<title>12</title>
+<ellipse fill="#ffeeff" stroke="black" cx="415.91" cy="-326" rx="48.84" ry="18"/>
+<text text-anchor="start" x="385.9" y="-325.53" font-family="Monaco" font-size="11.00">c</text>
+<text text-anchor="start" x="392.5" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U10</text>
+<text text-anchor="start" x="406.91" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r2</text>
+<text text-anchor="start" x="416.51" y="-325.53" font-family="Monaco" font-size="11.00">:in</text>
+<text text-anchor="start" x="436.31" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
 </g>
-<!-- ndBlock0_8&#45;&gt;ndBlock0_7 -->
-<g id="edge14" class="edge">
-<title>ndBlock0_8&#45;&gt;ndBlock0_7</title>
-<path fill="none" stroke="black" d="M198.51,-234.81C200.68,-226.7 203.32,-216.84 205.74,-207.78"/>
-<polygon fill="black" stroke="black" points="209.15,-208.59 208.35,-198.03 202.38,-206.78 209.15,-208.59"/>
+<!-- 12&#45;&gt;3 -->
+<g id="edge15" class="edge">
+<title>12&#45;&gt;3</title>
+<path fill="none" stroke="black" d="M398.21,-308.89C387.98,-299.58 374.94,-287.71 363.6,-277.39"/>
+<polygon fill="black" stroke="black" points="365.83,-274.68 356.08,-270.54 361.12,-279.86 365.83,-274.68"/>
 </g>
-<!-- ndBlock0_9 -->
+<!-- 7 -->
 <g id="node13" class="node">
-<title>ndBlock0_9</title>
-<ellipse fill="none" stroke="black" cx="168.91" cy="-485.67" rx="48.84" ry="18"/>
-<text text-anchor="start" x="138.9" y="-485.2" font-family="Monaco" font-size="11.00">e</text>
-<text text-anchor="start" x="145.5" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U13</text>
-<text text-anchor="start" x="159.91" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r4</text>
+<title>7</title>
+<ellipse fill="#ffeeff" stroke="black" cx="168.91" cy="-485.67" rx="48.84" ry="18"/>
+<text text-anchor="start" x="138.9" y="-485.2" font-family="Monaco" font-size="11.00">d</text>
+<text text-anchor="start" x="145.5" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U10</text>
+<text text-anchor="start" x="159.91" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r3</text>
 <text text-anchor="start" x="169.51" y="-485.2" font-family="Monaco" font-size="11.00">:in</text>
 <text text-anchor="start" x="189.31" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
 </g>
-<!-- ndBlock0_9&#45;&gt;ndBlock0_4 -->
-<g id="edge15" class="edge">
-<title>ndBlock0_9&#45;&gt;ndBlock0_4</title>
-<path fill="none" stroke="black" d="M188.88,-468.91C201.06,-459.3 216.83,-446.87 230.31,-436.23"/>
-<polygon fill="black" stroke="black" points="232.68,-438.82 238.36,-429.87 228.35,-433.32 232.68,-438.82"/>
+<!-- 7&#45;&gt;0 -->
+<g id="edge10" class="edge">
+<title>7&#45;&gt;0</title>
+<path fill="none" stroke="black" d="M187.06,-468.56C197.55,-459.25 210.93,-447.38 222.56,-437.06"/>
+<polygon fill="black" stroke="black" points="225.11,-439.46 230.27,-430.21 220.47,-434.23 225.11,-439.46"/>
 </g>
-<!-- ndBlock0_10&#45;&gt;ndBlock0_8 -->
-<g id="edge5" class="edge">
-<title>ndBlock0_10&#45;&gt;ndBlock0_8</title>
-<path fill="none" stroke="black" d="M294.28,-309.24C275.74,-299.04 251.4,-285.65 231.34,-274.6"/>
-<polygon fill="black" stroke="black" points="232.9,-271.47 222.46,-269.71 229.53,-277.6 232.9,-271.47"/>
-</g>
-<!-- ndBlock0_11 -->
-<g id="node15" class="node">
-<title>ndBlock0_11</title>
-<ellipse fill="none" stroke="black" cx="177.91" cy="-326" rx="48.84" ry="18"/>
-<text text-anchor="start" x="147.9" y="-325.53" font-family="Monaco" font-size="11.00">c</text>
-<text text-anchor="start" x="154.5" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00dd33">U10</text>
-<text text-anchor="start" x="168.91" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r2</text>
-<text text-anchor="start" x="178.51" y="-325.53" font-family="Monaco" font-size="11.00">:in</text>
-<text text-anchor="start" x="198.31" y="-325.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
-</g>
-<!-- ndBlock0_11&#45;&gt;ndBlock0_8 -->
+<!-- 3&#45;&gt;4 -->
 <g id="edge6" class="edge">
-<title>ndBlock0_11&#45;&gt;ndBlock0_8</title>
-<path fill="none" stroke="black" d="M181.78,-307.81C183.59,-299.79 185.78,-290.05 187.81,-281.07"/>
-<polygon fill="black" stroke="black" points="191.29,-281.55 190.07,-271.03 184.46,-280.01 191.29,-281.55"/>
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="black" d="M346.62,-234.81C350.82,-226.53 355.95,-216.41 360.63,-207.19"/>
+<polygon fill="black" stroke="black" points="363.87,-208.53 365.27,-198.03 357.63,-205.37 363.87,-208.53"/>
 </g>
-<!-- ndBlock0_13&#45;&gt;ndBlock0_10 -->
+<!-- 11 -->
+<g id="node15" class="node">
+<title>11</title>
+<ellipse fill="#ffeeff" stroke="black" cx="400.91" cy="-485.67" rx="48.84" ry="18"/>
+<text text-anchor="start" x="370.9" y="-485.2" font-family="Monaco" font-size="11.00">f</text>
+<text text-anchor="start" x="377.5" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U10</text>
+<text text-anchor="start" x="391.91" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r5</text>
+<text text-anchor="start" x="401.51" y="-485.2" font-family="Monaco" font-size="11.00">:in</text>
+<text text-anchor="start" x="421.31" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
+</g>
+<!-- 11&#45;&gt;1 -->
+<g id="edge14" class="edge">
+<title>11&#45;&gt;1</title>
+<path fill="none" stroke="black" d="M402.36,-467.48C403.04,-459.46 403.86,-449.72 404.62,-440.74"/>
+<polygon fill="black" stroke="black" points="408.11,-440.96 405.47,-430.7 401.14,-440.37 408.11,-440.96"/>
+</g>
+<!-- 8 -->
+<g id="node16" class="node">
+<title>8</title>
+<ellipse fill="#ffeeff" stroke="black" cx="284.91" cy="-485.67" rx="48.84" ry="18"/>
+<text text-anchor="start" x="254.9" y="-485.2" font-family="Monaco" font-size="11.00">e</text>
+<text text-anchor="start" x="261.5" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U13</text>
+<text text-anchor="start" x="275.91" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r4</text>
+<text text-anchor="start" x="285.51" y="-485.2" font-family="Monaco" font-size="11.00">:in</text>
+<text text-anchor="start" x="305.31" y="-485.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
+</g>
+<!-- 8&#45;&gt;0 -->
+<g id="edge11" class="edge">
+<title>8&#45;&gt;0</title>
+<path fill="none" stroke="black" d="M276.38,-467.84C272.13,-459.48 266.91,-449.18 262.16,-439.81"/>
+<polygon fill="black" stroke="black" points="265.27,-438.2 257.63,-430.87 259.03,-441.37 265.27,-438.2"/>
+</g>
+<!-- 4&#45;&gt;5 -->
 <g id="edge7" class="edge">
-<title>ndBlock0_13&#45;&gt;ndBlock0_10</title>
-<path fill="none" stroke="black" d="M398.34,-394.94C384.3,-382.3 364.85,-364.78 349.22,-350.7"/>
-<polygon fill="black" stroke="black" points="351.21,-347.79 341.44,-343.69 346.53,-352.99 351.21,-347.79"/>
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="black" d="M382.62,-161.81C386.82,-153.53 391.95,-143.41 396.63,-134.19"/>
+<polygon fill="black" stroke="black" points="399.87,-135.53 401.27,-125.03 393.63,-132.37 399.87,-135.53"/>
 </g>
 </g>
 </svg>

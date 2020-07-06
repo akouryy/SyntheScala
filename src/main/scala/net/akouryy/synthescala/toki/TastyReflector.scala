@@ -2,7 +2,7 @@ package net.akouryy.synthescala
 package toki
 
 import toki.{Expr => EX, Type => TY}
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import scala.language.implicitConversions
 import scala.quoted.{autolift, _}
 
@@ -146,7 +146,8 @@ object TastyReflector:
             error(s"invalid defiintion\n${df.showExtractors}", df.pos)
 
         main match
-          case Some(main) => '{Program(${listToExpr(arrayDefs.toList)}.toMap, $main)}
+          case Some(main) =>
+            '{Program(immutable.SortedMap.from(${listToExpr(arrayDefs.toList)}), $main)}
           case None =>
             error(s"no function definition\n${prog.showExtractors}", prog.pos)
             '{ ??? }

@@ -30,45 +30,48 @@ module main (
   arr_a arr_a(.*);
 
   assign in0_Bin1 =
-    state == 5'd8 ? reg1 :
-    state == 5'd11 ? reg1 :
+    state == 5'd9 ? reg2 :
+    state == 5'd12 ? reg2 :
     'x;
   assign in1_Bin1 =
-    state == 5'd8 ? reg0 :
-    state == 5'd11 ? reg0 :
+    state == 5'd9 ? reg0 :
+    state == 5'd12 ? reg0 :
     'x;
   assign in0_Bin0 =
-    state == 5'd4 ? reg0 :
+    state == 5'd5 ? reg0 :
     'x;
   assign in1_Bin0 =
-    state == 5'd4 ? {reg2[63], reg2[0:0]} :
+    state == 5'd5 ? {reg2[63], reg2[0:0]} :
     'x;
 
   assign arrWEnable_a =
     controlArr ? controlArrWEnable_a :
     state == 5'd1 ? 1'd1 :
     state == 5'd2 ? 1'd1 :
-    state == 5'd3 ? 1'd0 :
-    state == 5'd7 ? 1'd0 :
-    state == 5'd10 ? 1'd0 :
-    state == 5'd13 ? 1'd1 :
-    state == 5'd14 ? 1'd0 :
+    state == 5'd3 ? 1'd1 :
+    state == 5'd4 ? 1'd0 :
+    state == 5'd8 ? 1'd0 :
+    state == 5'd11 ? 1'd0 :
+    state == 5'd14 ? 1'd1 :
+    state == 5'd15 ? 1'd0 :
     1'd0;
   assign arrAddr_a =
     controlArr ? controlArrAddr_a :
-    state == 5'd1 ? reg3[0:0] :
-    state == 5'd2 ? reg3[0:0] :
-    state == 5'd3 ? reg3[0:0] :
-    state == 5'd7 ? reg3[0:0] :
-    state == 5'd10 ? reg3[0:0] :
-    state == 5'd13 ? reg3[0:0] :
-    state == 5'd14 ? reg3[0:0] :
+    state == 5'd1 ? reg1[0:0] :
+    state == 5'd2 ? reg1[0:0] :
+    state == 5'd3 ? reg1[0:0] :
+    state == 5'd4 ? reg1[0:0] :
+    state == 5'd8 ? reg1[0:0] :
+    state == 5'd11 ? reg1[0:0] :
+    state == 5'd14 ? reg1[0:0] :
+    state == 5'd15 ? reg1[0:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
-    state == 5'd1 ? reg1 :
-    state == 5'd2 ? reg0 :
-    state == 5'd13 ? reg0 :
+    state == 5'd1 ? reg0 :
+    state == 5'd2 ? reg3 :
+    state == 5'd3 ? reg0 :
+    state == 5'd14 ? reg0 :
     'x;
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
@@ -84,41 +87,42 @@ module main (
           w_enable <= 1'd1;
           result <= reg0;
         end
-        5'd15: state <= linkreg;
+        5'd15: state <= 5'd16;
         5'd12: state <= 5'd13;
+        5'd6: state <= reg0 ? 5'd8 : 5'd11;
         5'd14: state <= 5'd15;
-        5'd10: state <= 5'd11;
+        5'd10: state <= 5'd14;
         5'd3: state <= 5'd4;
         5'd13: state <= 5'd14;
+        5'd16: state <= linkreg;
         5'd0: state <= 5'd1;
-        5'd5: state <= reg0 ? 5'd7 : 5'd10;
+        5'd5: state <= 5'd6;
         5'd2: state <= 5'd3;
         5'd8: state <= 5'd9;
-        5'd9: state <= 5'd13;
+        5'd9: state <= 5'd10;
         5'd11: state <= 5'd12;
         5'd4: state <= 5'd5;
         5'd1: state <= 5'd2;
-        5'd7: state <= 5'd8;
       endcase
       case(state)
-        5'd3: reg0 <= arrRData_a;
-        5'd4: reg0 <= {63'd0, out0_Bin0};
-        5'd5: reg0 <= reg0 ? 64'd2 : $unsigned(-$signed(64'd3));
-        5'd8: reg0 <= out0_Bin1;
-        5'd11: reg0 <= out0_Bin1;
-        5'd14: reg0 <= arrRData_a;
-        5'd15: reg0 <= reg0;
+        5'd4: reg0 <= arrRData_a;
+        5'd5: reg0 <= {63'd0, out0_Bin0};
+        5'd6: reg0 <= reg0 ? 64'd2 : $unsigned(-$signed(64'd3));
+        5'd9: reg0 <= out0_Bin1;
+        5'd12: reg0 <= out0_Bin1;
+        5'd15: reg0 <= arrRData_a;
+        5'd16: reg0 <= reg0;
       endcase
       case(state)
-        5'd0: reg1 <= 64'd1;
-        5'd7: reg1 <= arrRData_a;
-        5'd10: reg1 <= arrRData_a;
+        5'd0: reg1 <= 64'd0;
       endcase
       case(state)
         5'd0: reg2 <= 64'd0;
+        5'd8: reg2 <= arrRData_a;
+        5'd11: reg2 <= arrRData_a;
       endcase
       case(state)
-        5'd0: reg3 <= 64'd0;
+        5'd0: reg3 <= 64'd1;
       endcase
     end
   end

@@ -20,7 +20,7 @@ module main (
 
 
   assign in0_Bin1 =
-    state == 4'd6 ? reg2[1:0] :
+    state == 4'd6 ? reg1[1:0] :
     'x;
   assign in1_Bin1 =
     state == 4'd6 ? reg0[1:0] :
@@ -29,7 +29,7 @@ module main (
     state == 4'd1 ? reg0[0:0] :
     'x;
   assign in1_Bin0 =
-    state == 4'd1 ? reg1[0:0] :
+    state == 4'd1 ? reg2[0:0] :
     'x;
 
 
@@ -60,10 +60,10 @@ module main (
         4'd7: reg0 <= reg0;
       endcase
       case(state)
-        4'd0: reg1 <= 64'd0;
+        4'd0: reg1 <= 64'd1;
       endcase
       case(state)
-        4'd0: reg2 <= 64'd1;
+        4'd0: reg2 <= 64'd0;
       endcase
     end
   end

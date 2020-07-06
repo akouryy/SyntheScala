@@ -64,14 +64,14 @@ class Composer(
 
   private def composeDatapath(fn: CDFGFun): Unit =
     for b <- fn.blocks.valuesIterator
-        node <- b.nodes
+        (nid -> node) <- b.nodes
     do
       import cdfg.Node._
-      lazy val q = sche.nodeStates(b.i, node)
+      lazy val q = sche.nodeStates(b.i, nid)
 
       node match
         case _: (Input | Output) => // nothing to do
-        case Const(num, ident) =>
+        case Const(_, num, ident) =>
           import Jump._
           fn.jumps(b.inJumpIndex) match
             case Branch(ji1, cond, _, tru, fls) =>
@@ -91,8 +91,8 @@ class Composer(
                   q,
                   Source.Always(new ConnPort.Const(num))
                 )
-        case BinOp(_, l, r, a) =>
-          val calc = bindings(b.i, node)
+        case BinOp(_, _, l, r, a) =>
+          val calc = bindings(b.i, nid)
           mergeDatapath(
             new ConnPort.CalcIn(calc.id, 0), q,
             Source.Always(new ConnPort.Reg(regs(l))),
@@ -105,7 +105,7 @@ class Composer(
             new ConnPort.Reg(regs(a)), q,
             Source.Always(new ConnPort.CalcOut(calc.id, 0)),
           )
-        case Get(arr, index, res) =>
+        case Get(_, arr, index, res) =>
           mergeDatapath(
             new ConnPort.ArrWriteEnable(arr), q,
             Source.Always(new ConnPort.Const(0)),
@@ -118,7 +118,7 @@ class Composer(
             new ConnPort.Reg(regs(res)), q,
             Source.Always(new ConnPort.ArrReadValue(arr)),
           )
-        case Put(arr, index, value) =>
+        case Put(_, arr, index, value) =>
           mergeDatapath(
             new ConnPort.ArrWriteEnable(arr), q,
             Source.Always(new ConnPort.Const(1)),

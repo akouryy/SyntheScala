@@ -26,7 +26,7 @@ class GraphDrawer(
 
   private def idStr(id: Label): String =
     id.str +
-      typeEnv.get(id).fold("")(t => sup("#00dd33", t.toString)) +
+      typeEnv.get(id).fold("")(t => sup("#00aa11", t.toString)) +
       sup("#3311ff", regs.getOrElse(id, "r?"))
 
   private def (s: String).singleLine: String = s"""\n *""".r.replaceAllIn(s, "")
@@ -47,13 +47,15 @@ class GraphDrawer(
 
         j.match
           case Jump.StartFun(i, ob) =>
-            r ++= s"$i[label = <$label<br/>${graph.main.params.map(_.str).mkString(",")}>; shape = component];"
+            r ++= s"$i[label = <$label<br/>${graph.main.params.map(_.str).mkString(",")}>; " +
+                   "shape = component];"
             r ++= s"$i -> $ob;"
           case Jump.Return(i, v, ib) =>
             r ++= s"$i[label = <$label>; shape = lpromoter];"
             r ++= s"""$ib -> $i [label="${v.str}"];"""
           case Jump.TailCall(i, fn, args, ib) =>
-            r ++= s"$i[label = <$label<br/>$fn(${args.map(_.str).mkString(",")})>; shape = component];"
+            r ++= s"$i[label = <$label<br/>$fn(${args.map(_.str).mkString(",")})>; " +
+                   "shape = component];"
             r ++= s"$ib -> $i;"
           case Jump.Branch(i, cond, ib, tob, fob) =>
             r.indent(s"$i[", "];"):
@@ -80,54 +82,56 @@ class GraphDrawer(
         if nodes.nonEmpty
       do
         val ids = mutable.Map.empty[Node, Int]
-        def id(node: Node) = s"nd${bi}_${ids.getOrElseUpdate(node, ids.size)}"
 
         r.indent(s"subgraph cluster_dfg_$bi {", "}"):
           r ++= s"node [shape = oval];"
           r ++= s"""label = "$bi";"""
 
-          for nd <- nodes do
+          for nd <- nodes.valuesIterator do
             val labelBase = nd match
-              case Node.Input(n) => s"""${idStr(n)}:in"""
-              case Node.Const(v, n) => s"""${idStr(n)}:$v"""
-              case Node.Output(n) => s"""out(${n.str})"""
-              case Node.BinOp(op, l, r, a) =>
+              case Node.Input(_, n) => s"""${idStr(n)}:in"""
+              case Node.Const(_, v, n) => s"""${idStr(n)}:$v"""
+              case Node.Output(_, n) => s"""out(${n.str})"""
+              case Node.BinOp(nid, op, l, r, a) =>
                 val bound = sup("#3311ff", unsafeEscape(
-                  bindings.get(bi, nd).fold("?")(_.shortString)
+                  bindings.get(bi, nid).fold("?")(_.shortString)
                 ))
                 s"""${idStr(a)}:${l.str}${unsafeEscape(op.operatorString)}$bound${r.str}"""
-              case Node.Call(fn, args, ret) =>
+              case Node.Call(_, fn, args, ret) =>
                 s"""${idStr(ret)}:$fn(${args.map(_.str).mkString(",")})"""
-              case Node.Get(arr, index, ret) =>
+              case Node.Get(_, arr, index, ret) =>
                 s"""${idStr(ret)}:${arr.str}[${index.str}]"""
-              case Node.Put(arr, index, value) =>
+              case Node.Put(_, arr, index, value) =>
                 s"""${arr.str}[${index.str}]=${value.str}"""
 
+            val style = nd match
+              case Node.Input(_, _) => """style="filled"; fillcolor="#ffeeff";"""
+              case Node.Output(_, _) => """style="filled"; fillcolor="#ffffee";"""
+              case _ => ""
+
             r ++=
-              s"""${id(nd)} [label=<
+              s"""${nd.id} [label=<
                     $labelBase
-                    ${stateStr(sche.getStateOf(graph, bi, nd))}
-                  >];""".singleLine
+                    ${stateStr(sche.getStateOf(graph, bi, nd.id))}
+                  >; $style];""".singleLine
 
           (
             for
-              to <- nodes
-              read = to.read
-              from <- nodes
+              (toID, to) <- nodes.toSeq
+              (fromID, from) <- nodes
               a <- from.written
-              i = read.indexOf(a)
-              if i >= 0
-            yield id(from) -> id(to)
+              if to.read.contains(a)
+            yield fromID -> toID
           ).toSeq.sorted.foreach((f, t) =>
             r ++= s"""$f -> $t;"""
           )
 
           (
             for
-              (from: (Node.Get | Node.Put)) <- nodes
-              to <- arrayDeps.goForward(from)
-            yield id(from) -> id(to)
-          ).toSeq.sorted.foreach((f, t) =>
+              (fromID, _: (Node.Get | Node.Put)) <- nodes
+              to <- arrayDeps.goForward(fromID)
+            yield fromID -> to
+         ).toSeq.sorted.foreach((f, t) =>
             r ++= s"""$f -> $t [style = dotted];"""
           )
       end for

@@ -3,7 +3,7 @@ package cdfg
 package bind
 
 object Binder:
-  type Bindings = collection.Map[(BlockIndex, Node), Calculator]
+  type Bindings = collection.Map[(BlockIndex, NodeID), Calculator]
 
 enum Calculator:
   val id: Int

@@ -59,6 +59,7 @@ def Examples = Seq[Program](
 
     def dependencyTest(i: S[64]): S[64] =
       val zero = 0.U[1]
+      a(zero) = i
       a(zero) = 1.S[64]
       a(zero) = i
       a(zero) = if a(zero) >= 0.S[1] then a(zero) * 2.S[64] else a(zero) * -3.S[64]

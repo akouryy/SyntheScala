@@ -17,7 +17,10 @@ object Liveness:
       val jump = prog.main.jumps(ji)
       if jump.outBlocks.forall(visited)
         val liveOutBase = jump.outBlocks.toSet.flatMap(liveIns)
-        for bi <- jump.inBlocks do
+        for
+          bi <- jump.inBlocks
+          if !visited(bi)
+        do
           val block = prog.main.blocks(bi)
           visited += bi
           jis += block.inJumpIndex
@@ -29,7 +32,9 @@ object Liveness:
           liveIns(bi) = liveOut ++ block.uses -- block.defs
 
           prog.main.blocks(bi) = block.copy(
-            nodes = block.nodes ++ liveIns(bi).map(Node.Input(_)) ++ liveOut.map(Node.Output(_))
+            nodes = block.nodes ++
+                    liveIns(bi).map(Node.Input(NodeID.generate(), _).withID) ++
+                    liveOut.map(Node.Output(NodeID.generate(), _).withID)
           )
   end insertInOuts
 
@@ -47,11 +52,9 @@ object Liveness:
         case _ => // TODO: Merge*/
 
     for (bi -> b) <- graph.blocks do
-      val live = mutable.Set.empty[Label]
-      for node <- b.nodes do
-        node match
-          case Node.Output(id) => live += id
-          case _ =>
+      val live = mutable.Set.from:
+        for Node.Output(_, lab) <- b.nodes.valuesIterator
+        yield lab
 
       for (state -> nodes) <- b.stateToNodes(sche).sets.toSeq.reverseIterator do
         for node <- nodes do

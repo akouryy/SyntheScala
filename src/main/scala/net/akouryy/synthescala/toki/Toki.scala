@@ -1,9 +1,11 @@
 package net.akouryy.synthescala
 package toki
 
+import scala.collection.immutable
+
 case class Program(arrayDefs: ArrayDefMap, main: Fun)
 
-type ArrayDefMap = Map[Label, ArrayDef]
+type ArrayDefMap = immutable.SortedMap[Label, ArrayDef]
 
 case class ArrayDef(name: Label, elemTyp: Type, length: Int)
 

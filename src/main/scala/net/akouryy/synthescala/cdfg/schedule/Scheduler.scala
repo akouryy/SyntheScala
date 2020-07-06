@@ -11,13 +11,13 @@ trait Scheduler:
 */
 case class Schedule(
   jumpStates: collection.Map[JumpIndex, collection.Set[State]],
-  nodeStates: collection.Map[(BlockIndex, Node), State],
+  nodeStates: collection.Map[(BlockIndex, NodeID), State],
 ):
-  def stateOf(graph: CDFG, bi: BlockIndex, nd: Node): State | collection.Set[State] =
+  def stateOf(graph: CDFG, bi: BlockIndex, nd: NodeID): State | collection.Set[State] =
     getStateOf(graph, bi, nd).get
 
-  def getStateOf(graph: CDFG, bi: BlockIndex, nd: Node): Option[State | collection.Set[State]] =
-    if nd.isInput
+  def getStateOf(graph: CDFG, bi: BlockIndex, nd: NodeID): Option[State | collection.Set[State]] =
+    if graph.node(bi, nd).isInput
       jumpStates.get(graph.main.blocks(bi).inJumpIndex)
     else
       nodeStates.get(bi, nd)
