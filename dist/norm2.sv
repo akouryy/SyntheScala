@@ -43,10 +43,10 @@ module main (
     state == 4'd5 ? reg2[0:0] :
     'x;
   assign in0_Bin2 =
-    state == 4'd7 ? reg0 :
+    state == 4'd8 ? reg3 :
     'x;
   assign in1_Bin2 =
-    state == 4'd7 ? {reg2[63], reg2[26:0]} :
+    state == 4'd8 ? {reg0[63], reg0[26:0]} :
     'x;
   assign in0_Bin0 =
     state == 4'd1 ? reg0[9:0] :
@@ -55,10 +55,10 @@ module main (
     state == 4'd1 ? reg2[9:0] :
     'x;
   assign in0_Bin3 =
-    state == 4'd8 ? reg1 :
+    state == 4'd9 ? reg1 :
     'x;
   assign in1_Bin3 =
-    state == 4'd8 ? reg0 :
+    state == 4'd9 ? reg0 :
     'x;
 
   assign arrWEnable_a =
@@ -93,7 +93,8 @@ module main (
         4'd2: state <= reg2 ? 4'd4 : 4'd5;
         4'd8: state <= 4'd9;
         4'd6: state <= 4'd7;
-        4'd9: state <= 4'd0;
+        4'd9: state <= 4'd10;
+        4'd10: state <= 4'd0;
         4'd4: state <= linkreg;
         4'd1: state <= 4'd2;
         4'd7: state <= 4'd8;
@@ -102,21 +103,21 @@ module main (
       case(state)
         4'd4: reg0 <= reg1;
         4'd6: reg0 <= {{37{arrRData_a[26]}}, arrRData_a};
-        4'd7: reg0 <= out0_Bin2;
-        4'd8: reg0 <= out0_Bin3;
-        4'd9: reg0 <= reg3;
+        4'd8: reg0 <= out0_Bin2;
+        4'd9: reg0 <= out0_Bin3;
+        4'd10: reg0 <= reg2;
       endcase
       case(state)
-        4'd9: reg1 <= reg0;
+        4'd10: reg1 <= reg0;
       endcase
       case(state)
         4'd0: reg2 <= 64'd1000;
         4'd1: reg2 <= {63'd0, out0_Bin0};
         4'd2: reg2 <= reg2 ? reg2 : 64'd1;
-        4'd5: reg2 <= {{37{arrRData_a[26]}}, arrRData_a};
+        4'd5: reg2 <= {54'd0, out0_Bin1};
       endcase
       case(state)
-        4'd5: reg3 <= {54'd0, out0_Bin1};
+        4'd7: reg3 <= {{37{arrRData_a[26]}}, arrRData_a};
       endcase
     end
   end
@@ -128,12 +129,14 @@ module arr_a (
   output wire signed[26:0] arrRData_a,
   input wire signed[26:0] arrWData_a
 );
+  reg[9:0] delayedRAddr;
   reg signed[26:0] mem [0:999];
   always @(posedge clk) begin
     if(arrWEnable_a) begin
       mem[arrAddr_a] <= arrWData_a;
     end
+    delayedRAddr <= arrWEnable_a ? 'x : arrAddr_a;
   end
-  assign arrRData_a = /*arrWEnable_a ? 'x :*/ mem[arrAddr_a];
+  assign arrRData_a = mem[delayedRAddr];
 endmodule
 `default_nettype wire

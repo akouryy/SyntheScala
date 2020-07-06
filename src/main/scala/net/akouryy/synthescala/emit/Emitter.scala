@@ -234,11 +234,13 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
         r ++= s"input wire${typ2sv(elemTyp)} ${writeData(arr)}"
       r.indent(");", "endmodule"):
 
+        r ++= s"reg[${len.width - 1}:0] delayedRAddr;";
         r ++= s"reg${typ2sv(elemTyp)} mem [0:${len - 1}];";
         r.indent("always @(posedge clk) begin", "end"):
           r.indent(s"if(${writeEnable(arr)}) begin", "end"):
             r ++= s"mem[${index(arr)}] <= ${writeData(arr)};"
-        r ++= s"assign ${readData(arr)} = /*${writeEnable(arr)} ? 'x :*/ mem[${index(arr)}];"
+          r ++= s"delayedRAddr <= ${writeEnable(arr)} ? 'x : ${index(arr)};"
+        r ++= s"assign ${readData(arr)} = mem[delayedRAddr];"
 
     r ++= "`default_nettype wire"
     r.toString

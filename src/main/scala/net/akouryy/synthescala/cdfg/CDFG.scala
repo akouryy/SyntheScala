@@ -93,7 +93,9 @@ enum Node derives Eql:
   case Output(val id: NodeID, name: Label)
   case BinOp(val id: NodeID, op: base.BinOp, left: Label, right: Label, ans: Label)
   case Call(val id: NodeID, fn: String, args: Seq[Label], ret: Label)
-  case Get(val id: NodeID, arr: Label, index: Label, ret: Label)
+  case GetReq(val id: NodeID, awa: NodeID, arr: Label, index: Label)
+  /** GetAwait */
+  case GetAwa(val id: NodeID, req: NodeID, arr: Label, ret: Label)
   case Put(val id: NodeID, arr: Label, index: Label, value: Label)
 
   override lazy val hashCode = scala.util.hashing.MurmurHash3.productHash(this)
@@ -104,13 +106,18 @@ enum Node derives Eql:
     case _: (Input | Const) => true
     case _ => false
 
+  def isMemoryRelated: Boolean = this match
+    case _: (GetReq | GetAwa | Put) => true
+    case _ => false
+
   def read: Seq[Label] = this match
     case _: Input => Nil
     case _: Const => Nil
     case Output(_, n) => Seq(n)
     case BinOp(_, _, l, r, _) => Seq(l, r)
     case Call(_, _, as, _) => as
-    case Get(_, _, index, _) => Seq(index)
+    case GetReq(_, _, _, index) => Seq(index)
+    case _: GetAwa => Nil
     case Put(_, _, index, value) => Seq(index, value)
 
   def written: Option[Label] = this match
@@ -119,7 +126,8 @@ enum Node derives Eql:
     case _: Output => None
     case BinOp(_, _, _, _, a) => Some(a)
     case Call(_, _, _, r) => Some(r)
-    case Get(_, _, _, ret) => Some(ret)
+    case _: GetReq => None
+    case GetAwa(_, _, _, ret) => Some(ret)
     case _: Put => None
 
 end Node

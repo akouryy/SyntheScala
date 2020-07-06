@@ -13,6 +13,7 @@ object Main:
           f(prog)
           ok += 1
         catch err =>
+          System.err.print(fansi.Color.Red(s"[${prog.main.name}] "))
           err.printStackTrace()
           ng += 1
     println(s"$ok succeeded, $ng failed.")
@@ -35,10 +36,14 @@ object Main:
     // PP.pprintln(regAlloc)
     val bindings = cdfg.bind.AllocatingBinder(graph, typeEnv, schedule).bind
     // PP.pprintln(bindings)
-    Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
-      cdfg.GraphDrawer(graph, typeEnv, schedule, regAlloc, bindings)
-          .draw.getBytes(StandardCharsets.UTF_8),
-    )
+    try
+      Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
+        cdfg.GraphDrawer(graph, typeEnv, schedule, regAlloc, bindings)
+            .draw.getBytes(StandardCharsets.UTF_8),
+      )
+    catch err =>
+      System.err.print(fansi.Color.Red(s"[GraphDrawer] "))
+      err.printStackTrace()
     val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
     // PP.pprintln(fd)
     val sv = emit.Emitter(graph, regAlloc, bindings, fd).emit

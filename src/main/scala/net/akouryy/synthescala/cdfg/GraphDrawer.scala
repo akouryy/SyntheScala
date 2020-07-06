@@ -99,8 +99,10 @@ class GraphDrawer(
                 s"""${idStr(a)}:${l.str}${unsafeEscape(op.operatorString)}$bound${r.str}"""
               case Node.Call(_, fn, args, ret) =>
                 s"""${idStr(ret)}:$fn(${args.map(_.str).mkString(",")})"""
-              case Node.Get(_, arr, index, ret) =>
-                s"""${idStr(ret)}:${arr.str}[${index.str}]"""
+              case Node.GetReq(_, _, arr, index) =>
+                s"""req ${arr.str}[${index.str}]"""
+              case Node.GetAwa(_, _, arr, ret) =>
+                s"""${idStr(ret)}:${arr.str}[]"""
               case Node.Put(_, arr, index, value) =>
                 s"""${arr.str}[${index.str}]=${value.str}"""
 
@@ -128,7 +130,8 @@ class GraphDrawer(
 
           (
             for
-              (fromID, _: (Node.Get | Node.Put)) <- nodes
+              fromID <- nodes.keysIterator
+              if nodes(fromID).isMemoryRelated
               to <- arrayDeps.goForward(fromID)
             yield fromID -> to
          ).toSeq.sorted.foreach((f, t) =>

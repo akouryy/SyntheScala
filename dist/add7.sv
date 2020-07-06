@@ -30,21 +30,21 @@ module main (
 
 
   assign in0_Bin1 =
-    state == 3'd1 ? reg3[9:0] :
+    state == 3'd1 ? reg5[9:0] :
     'x;
   assign in1_Bin1 =
-    state == 3'd1 ? reg4[12:0] :
+    state == 3'd1 ? reg6[12:0] :
     'x;
   assign in0_Bin0 =
-    state == 3'd1 ? reg5[12:0] :
-    state == 3'd2 ? reg4[12:0] :
+    state == 3'd1 ? reg3[12:0] :
+    state == 3'd2 ? reg3[12:0] :
     state == 3'd3 ? reg2[12:0] :
     state == 3'd4 ? reg1[12:0] :
     state == 3'd5 ? reg0[12:0] :
     'x;
   assign in1_Bin0 =
-    state == 3'd1 ? reg6[12:0] :
-    state == 3'd2 ? reg3[12:0] :
+    state == 3'd1 ? reg4[12:0] :
+    state == 3'd2 ? reg4[12:0] :
     state == 3'd3 ? reg3[12:0] :
     state == 3'd4 ? reg2[12:0] :
     state == 3'd5 ? reg1[12:0] :

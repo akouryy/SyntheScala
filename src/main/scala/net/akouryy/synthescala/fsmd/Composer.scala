@@ -105,7 +105,7 @@ class Composer(
             new ConnPort.Reg(regs(a)), q,
             Source.Always(new ConnPort.CalcOut(calc.id, 0)),
           )
-        case Get(_, arr, index, res) =>
+        case GetReq(_, _, arr, index) =>
           mergeDatapath(
             new ConnPort.ArrWriteEnable(arr), q,
             Source.Always(new ConnPort.Const(0)),
@@ -114,6 +114,7 @@ class Composer(
             new ConnPort.ArrIndex(arr), q,
             Source.Always(new ConnPort.Reg(regs(index))),
           )
+        case GetAwa(_, _, arr, res) =>
           mergeDatapath(
             new ConnPort.Reg(regs(res)), q,
             Source.Always(new ConnPort.ArrReadValue(arr)),

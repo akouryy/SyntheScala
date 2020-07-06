@@ -27,7 +27,8 @@ module top();
   integer i;
   initial begin
     acc = 0;
-    controlArr = 1;
+    controlArr <= 1;
+    r_enable <= 0;
     #1
     for(i = 0; i < 1000; i += 1) begin
       controlArrWEnable_a <= 1;
@@ -54,14 +55,17 @@ module top();
         controlArrWEnable_a <= 0;
         controlArrAddr_a <= i;
       end
-      if(1 <= i && i <= 1000) begin
-        $write("ans = %d, result = %d\n", ans[i - 1], controlArrRData_a);
-        if(ans[i - 1] != controlArrRData_a) begin
+      if(2 <= i && i <= 1001) begin
+        $write("ans = %d, result = %d\n", ans[i - 2], controlArrRData_a);
+        if(ans[i - 2] !== controlArrRData_a) begin
           $write("wrong");
           $finish;
         end
       end
-      if(i == 1000) $finish;
+      if(i == 1001) begin
+        $write("ok");
+        $finish;
+      end
       i += 1;
     end
   end

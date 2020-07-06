@@ -9,14 +9,14 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
   private val jumpStates = mutable.MultiDict.empty[JumpIndex, State]
   private val nodeStates = mutable.Map.empty[(BlockIndex, NodeID), State]
   private val visited = mutable.Set.empty[BlockIndex]
-  private val arrayAccessed = mutable.Set.empty[(State, Label)]
+  private val arrayAccessedAfter = mutable.Set.empty[(State, Label)]
   private var maxState: State = _
 
   override def schedule: Schedule =
     jumpStates.clear()
     nodeStates.clear()
     visited.clear()
-    arrayAccessed.clear()
+    arrayAccessedAfter.clear()
     maxState = State(0)
     scheduleJump(graph.main, graph.main.jumps.firstKey)
     Schedule(jumpStates.sets, nodeStates.toMap)
@@ -34,14 +34,16 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
     def nodeVisited(nid: NodeID): Boolean = stateOf(bi, nid).nonEmpty
 
     def parents(nid: NodeID) =
-      nodes(nid) match
-        case _: (Node.Get | Node.Put) => block.arrayDeps.goBackward(nid)
-        case _ => Set.empty
+      if nodes(nid).isMemoryRelated
+        block.arrayDeps.goBackward(nid)
+      else
+        Set.empty
 
     def children(nid: NodeID) =
-      nodes(nid) match
-        case _: (Node.Get | Node.Put) => block.arrayDeps.goForward(nid)
-        case _ => Set.empty
+      if nodes(nid).isMemoryRelated
+        block.arrayDeps.goForward(nid)
+      else
+        Set.empty
 
     val q = mutable.Queue.from:
       import scala.language.implicitConversions
@@ -59,10 +61,12 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
               parents(nid).map(par => stateOf(bi, par).get).maxOption
             ).max.succ
           node match
-            case Node.Get(_, arr, _, _) =>
-              while arrayAccessed(state, arr) do
+            case Node.GetReq(_, _, arr, _) =>
+              while arrayAccessedAfter(state, arr) do
                 state = state.succ
-              arrayAccessed += state -> arr
+              arrayAccessedAfter += state -> arr
+            case Node.GetAwa(_, reqID, _, _) =>
+              state = nodeStates(bi, reqID).succ
             case _ =>
           nodeStates((bi, nid)) = state
 

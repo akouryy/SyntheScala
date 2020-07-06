@@ -25,7 +25,8 @@ module top();
   longint ans, da;
   integer i;
   initial begin
-    controlArr = 1;
+    controlArr <= 1;
+    r_enable <= 0;
     #1
     for(i = 0; i < 1000; i = i + 1) begin
       controlArrWEnable_a <= 1;

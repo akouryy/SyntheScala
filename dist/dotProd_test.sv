@@ -29,7 +29,8 @@ module top();
   longint ans, da, db;
   integer i;
   initial begin
-    controlArr = 1;
+    controlArr <= 1;
+    r_enable <= 0;
     #1
     for(i = 0; i < 1000; i = i + 1) begin
       controlArrWEnable_a <= 1;
@@ -41,7 +42,6 @@ module top();
       controlArrWData_a <= da;
       controlArrWData_b <= db;
       ans += {32'd0, da} * db;
-      $write(i, da, db, ans, "\n");
       #4 ;
     end
 

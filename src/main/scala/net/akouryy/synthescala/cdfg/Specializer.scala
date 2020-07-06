@@ -11,8 +11,8 @@ class Specializer:
   private var currentInputJumpIndex: JumpIndex = _
   private val currentNodes = mutable.IndexedBuffer.empty[Node]
   private var currentArrayDeps: UnweightedGraph[NodeID] = _
-  private var currentArrayLastGet = mutable.Map.empty[Label, List[Node]]
-  private var currentArrayLastPut = mutable.Map.empty[Label, Option[Node]]
+  private var currentArrayLastGet = mutable.Map.empty[Label, List[NodeID]]
+  private var currentArrayLastPut = mutable.Map.empty[Label, Option[NodeID]]
   private val writtenLabel = mutable.Set.empty[Label]
   private var aliasMap = mutable.Map.empty[Label, Label]
 
@@ -27,9 +27,9 @@ class Specializer:
     currentArrayDeps.addVertex(node.id)
     currentNodes += node
     node
-  private def arrayLastGet(lab: Label): List[Node] =
+  private def arrayLastGet(lab: Label): List[NodeID] =
     currentArrayLastGet.getOrElseUpdate(lab, Nil)
-  private def arrayLastPut(lab: Label): Option[Node] =
+  private def arrayLastPut(lab: Label): Option[NodeID] =
     currentArrayLastPut.getOrElseUpdate(lab, None)
 
   private def extractNodes(): Map[NodeID, Node] =
@@ -57,16 +57,19 @@ class Specializer:
 
       case Get(arr, Ref(index)) =>
         writtenLabel += dest
-        val node = addNode(Node.Get(NodeID.generate(), arr, normalize(index), dest))
+        val reqID = NodeID.generate()
+        val awa = addNode(Node.GetAwa(NodeID.generate(), reqID, arr, dest))
+        val req = addNode(Node.GetReq(reqID, awa.id, arr, normalize(index)))
         for parent <- arrayLastPut(arr) do
-          currentArrayDeps.addEdge(parent.id -> node.id)
-        currentArrayLastGet(arr) = node :: arrayLastGet(arr)
+          currentArrayDeps.addEdge(parent -> reqID)
+        currentArrayDeps.addEdge(reqID -> awa.id)
+        currentArrayLastGet(arr) = awa.id :: arrayLastGet(arr)
       case Put(arr, Ref(index), Ref(value), kont) =>
         val node = addNode(Node.Put(NodeID.generate(), arr, normalize(index), normalize(value)))
         for parent <- arrayLastGet(arr).iterator ++ arrayLastPut(arr) do
-          currentArrayDeps.addEdge(parent.id -> node.id)
+          currentArrayDeps.addEdge(parent -> node.id)
         currentArrayLastGet(arr) = Nil
-        currentArrayLastPut(arr) = Some(node)
+        currentArrayLastPut(arr) = Some(node.id)
         specializeExpr(dest, kont)
 
       case Let(toki.Entry(n, t), x, b) =>

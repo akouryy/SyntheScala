@@ -14,6 +14,11 @@
 <polygon fill="none" stroke="black" points="157.47,-338.67 157.47,-560.68 485.47,-560.68 485.47,-338.67 157.47,-338.67"/>
 <text text-anchor="middle" x="321.47" y="-547.08" font-family="Monaco" font-size="12.00">Block0</text>
 </g>
+<g id="clust2" class="cluster">
+<title>cluster_dfg_Block1</title>
+<polygon fill="none" stroke="black" points="493.47,-411.67 493.47,-560.68 719.47,-560.68 719.47,-411.67 493.47,-411.67"/>
+<text text-anchor="middle" x="606.47" y="-547.08" font-family="Monaco" font-size="12.00">Block1</text>
+</g>
 <g id="clust3" class="cluster">
 <title>cluster_dfg_Block2</title>
 <polygon fill="none" stroke="black" points="727.47,-411.67 727.47,-560.68 953.47,-560.68 953.47,-411.67 727.47,-411.67"/>
@@ -23,11 +28,6 @@
 <title>cluster_dfg_Block3</title>
 <polygon fill="none" stroke="black" points="961.47,-338.67 961.47,-560.68 1232.47,-560.68 1232.47,-338.67 961.47,-338.67"/>
 <text text-anchor="middle" x="1096.97" y="-547.08" font-family="Monaco" font-size="12.00">Block3</text>
-</g>
-<g id="clust2" class="cluster">
-<title>cluster_dfg_Block1</title>
-<polygon fill="none" stroke="black" points="493.47,-411.67 493.47,-560.68 719.47,-560.68 719.47,-411.67 493.47,-411.67"/>
-<text text-anchor="middle" x="606.47" y="-547.08" font-family="Monaco" font-size="12.00">Block1</text>
 </g>
 <!-- Jump0 -->
 <g id="node1" class="node">
