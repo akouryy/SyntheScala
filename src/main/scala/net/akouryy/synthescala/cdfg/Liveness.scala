@@ -33,9 +33,7 @@ object Liveness:
           )
   end insertInOuts
 
-  def liveInsForState(graph: CDFGFun, sche: schedule.Schedule)
-  : collection.Map[State, Set[Label]] =
-
+  def liveInsForState(graph: CDFGFun, sche: schedule.Schedule): collection.Map[State, Set[Label]] =
     val ret = mutable.Map.empty[State, Set[Label]]
 
     /*for (ji -> j) <- graph.jumps do

@@ -10,7 +10,7 @@ case class ArrayDef(name: Label, elemTyp: Type, length: Int)
 case class Fun(name: String, ret: Type, params: Seq[Entry], body: Expr)
 
 enum Expr:
-  case Num(num: Long)
+  case Num(num: Long, typ: Type)
   case Ref(name: Label)
   case Bin(op: BinOp, left: Expr, right: Expr)
   // case Update(name: String, expr: Expr)

@@ -73,14 +73,14 @@ module main (
       case(state)
         4'd1: reg0 <= {32'd0, out0_Bin0};
         4'd5: reg0 <= reg1;
-        4'd6: reg0 <= {32'd0, out0_Bin0};
-        4'd7: reg0 <= reg2;
+        4'd6: reg0 <= {58'd0, out0_Bin2};
+        4'd7: reg0 <= reg0;
       endcase
       case(state)
-        4'd7: reg1 <= reg0;
+        4'd7: reg1 <= reg2;
       endcase
       case(state)
-        4'd6: reg2 <= {58'd0, out0_Bin2};
+        4'd6: reg2 <= {32'd0, out0_Bin0};
         4'd7: reg2 <= reg1;
       endcase
       case(state)

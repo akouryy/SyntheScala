@@ -13,16 +13,23 @@ object TastyReflector:
     import qctx.tasty._
     // PP.pprintln(expr.unseal)
 
+    def us(kind: "U" | "S", width: Int) =
+      if kind == "U"
+        '{ TY.U($width) }
+      else
+        '{ TY.S($width) }
+
     def convTY(typ: TypeTree)(using QuoteContext): Expr[TY] =
       typ.tpe match
         case AppliedType(
-          TypeRef(TermRef(ThisType(TypeRef(NoPrefix(), "synthescala")), "dsl"), tid @ ("U" | "S")),
+          TypeRef(
+            TermRef(ThisType(TypeRef(NoPrefix(), "synthescala")), "dsl") |
+            ThisType(TypeRef(NoPrefix(), "dsl")),
+            tid @ ("U" | "S"),
+          ),
           List(ConstantType(Constant(n: Int))),
         ) =>
-          if tid == "U"
-            '{ TY.U($n) }
-          else
-            '{ TY.S($n) }
+          us(tid, n)
         case _ =>
           error(s"invalid type ${typ.tpe} \n${typ.showExtractors}", typ.pos)
           '{ TY.S(0) }
@@ -33,12 +40,12 @@ object TastyReflector:
         // case Literal(Constant(n: Long)) => '{ EX.Num(${n.toLong}) }
         case Apply(
           TypeApply(
-            Select(Ident("ConversionFromLong"), "U" | "S"),
-            List(Singleton(Literal(Constant(width)))),
+            Select(Ident("ConversionFromLong"), kind @ ("U" | "S")),
+            List(Singleton(Literal(Constant(width: Int)))),
           ),
           List(Literal(Constant(num: Long))),
         ) =>
-          '{ EX.Num($num) }
+          '{ EX.Num($num, ${us(kind, width)}) }
         case Ident(lab) =>
           '{ EX.Ref(Label($lab)) }
         case Apply(select @ Select(left, op), List(right)) =>

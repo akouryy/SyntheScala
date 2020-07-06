@@ -49,4 +49,18 @@ def Examples = Seq[Program](
         val b = acc + a(i)
         a(i) = b
         accumulate(i + 1.U[1], b),
+
+  TastyReflector.reflect:
+    def complexIf(i: U[1]): U[2] =
+      1.U[2] + (if i == 0.U[1] then 1.U[2] else 2.U[2]),
+
+  TastyReflector.reflect:
+    val a = new Array[S[64]](1)
+
+    def dependencyTest(i: S[64]): S[64] =
+      val zero = 0.U[1]
+      a(zero) = 1.S[64]
+      a(zero) = i
+      a(zero) = if a(zero) >= 0.S[1] then a(zero) * 2.S[64] else a(zero) * -3.S[64]
+      a(zero),
 )

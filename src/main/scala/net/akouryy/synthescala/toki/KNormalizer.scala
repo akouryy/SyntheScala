@@ -21,11 +21,8 @@ class KNormalizer(prog: Program):
           kt -> Let(Entry(x, typ2), expr, kx)
 
     expr match
-      case Num(n) =>
-        def width(m: Long) = m.toBinaryString.length
-        insert(
-          if n >= 0 then Type.U(width(n)) else Type.S(1 + width(1 - n))
-        )(expr)
+      case Num(n, typ) =>
+        insert(typ)(expr)
       case Ref(v) => insert(types(v))(expr)
       case Let(Entry(x, t), expr, body) =>
         types(x) = t
@@ -60,7 +57,7 @@ class KNormalizer(prog: Program):
          x =>
           val tt -> tx = convert(None, tru)(l => types(l) -> Expr.Ref(l))
           val ft -> fx = convert(None, fls)(l => types(l) -> Expr.Ref(l))
-          assert(tt == ft)
+          assert(tt == ft, s"$tt != $ft")
           insert(tt)(If(Ref(x), tx, fx))
   end convert
 

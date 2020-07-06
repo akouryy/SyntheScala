@@ -23,7 +23,6 @@ class Specializer:
       writtenLabel += x
       x
 
-
   private def addNode(node: Node): Node =
     currentArrayDeps.addVertex(node)
     currentNodes += node
@@ -36,7 +35,7 @@ class Specializer:
   private def specializeExpr(dest: Label, expr: toki.Expr): Unit =
     import toki.Expr._
     expr match
-      case Num(i) =>
+      case Num(i, _) =>
         writtenLabel += dest
         addNode(Node.Const(i, dest))
       case Ref(n) =>

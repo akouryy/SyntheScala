@@ -58,9 +58,11 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
       case ConnPort.CalcOut(cid, port) => out(calculators(cid), port) :> reqTyp
       case ConnPort.ArrReadValue(arr) => readData(arr) :> reqTyp
       case ConnPort.Reg(reg) => reg2sv(reg) :> reqTyp
-      case ConnPort.Const(num) => reqTyp.get match
-        case Type.U(w) => s"$w'd$num"
-        case Type.S(w) => if num >= 0 then s"$$signed($w'd$num)" else s"(-$$signed($w'd${num.abs}))"
+      case ConnPort.Const(num) =>
+        def base(w: Int) = if num >= 0 then s"$w'd$num" else s"(-$$signed($w'd${num.abs}))"
+        reqTyp.get match
+        case Type.U(w) => if num >= 0 then base(w) else s"$$unsigned${base(w)}"
+        case Type.S(w) => if num >= 0 then s"$$signed(${base(w)})" else base(w)
       case ConnPort.Inherit => connDst2sv(dst, reqTyp)
 
   private def connDst2sv(dst: ConnPort.Dst, reqTyp: Option[Type]): String = dst match
@@ -118,13 +120,12 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
             case Bin(_, _, lt, rt) => Seq(lt, rt)
         val outputs =
           import Calculator._
-          cal match
-            case cal @ Bin(_, op @ (BinOp.Add | BinOp.Sub | BinOp.Mul | BinOp.Eq), _, _) =>
+          (cal: @unchecked) match
+            case cal @ Bin(_, op, _, _) =>
               Seq(
                 Bin.retTyp(cal) ->
                 s"${in(cal, 0)} ${op.operatorString} ${in(cal, 1)}"
               )
-            case _ => !!!(cal)
         for (t, i) <- inputTyps.zipWithIndex do
           val name = in(cal, i)
           varTyps(name) = t
