@@ -95,7 +95,7 @@
 <title>Jump2_4</title>
 <polygon fill="none" stroke="black" points="91.42,-119 18.19,-119 18.19,-125 0.19,-107 18.19,-89 18.19,-95 73.42,-95 73.42,-89 91.42,-89 91.42,-119"/>
 <text text-anchor="start" x="8" y="-106.53" font-family="Monaco" font-size="11.00">Return.2_4</text>
-<text text-anchor="start" x="74.01" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q4</text>
+<text text-anchor="start" x="74.01" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q3</text>
 </g>
 <!-- Block1&#45;&gt;Jump2_4 -->
 <g id="edge5" class="edge">
@@ -111,7 +111,7 @@
 <polyline fill="none" stroke="black" points="109.79,-121 113.79,-121 113.79,-117 109.79,-117 "/>
 <polyline fill="none" stroke="black" points="109.79,-97 113.79,-97 113.79,-93 109.79,-93 "/>
 <text text-anchor="start" x="117.8" y="-110.2" font-family="Monaco" font-size="11.00">TailCall.2_5_6</text>
-<text text-anchor="start" x="210.21" y="-110.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q9</text>
+<text text-anchor="start" x="210.21" y="-110.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q8</text>
 <text text-anchor="start" x="122.6" y="-99.2" font-family="Monaco" font-size="11.00">dotProd(@g,@e)</text>
 </g>
 <!-- Block2&#45;&gt;Jump2_5_6 -->
@@ -228,7 +228,7 @@
 <title>14</title>
 <ellipse fill="#ffffee" stroke="black" cx="635.81" cy="-353.34" rx="50.43" ry="18"/>
 <text text-anchor="start" x="604.6" y="-352.87" font-family="Monaco" font-size="11.00">out(acc)</text>
-<text text-anchor="start" x="657.41" y="-352.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q4</text>
+<text text-anchor="start" x="657.41" y="-352.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q3</text>
 </g>
 <!-- 13&#45;&gt;14 -->
 <g id="edge12" class="edge">
@@ -244,7 +244,7 @@
 <text text-anchor="start" x="1021.4" y="-279.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">S27</text>
 <text text-anchor="start" x="1035.8" y="-279.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r2</text>
 <text text-anchor="start" x="1045.41" y="-279.87" font-family="Monaco" font-size="11.00">:b[]</text>
-<text text-anchor="start" x="1071.81" y="-279.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q6</text>
+<text text-anchor="start" x="1071.81" y="-279.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q5</text>
 </g>
 <!-- 6 -->
 <g id="node19" class="node">
@@ -256,7 +256,7 @@
 <text text-anchor="start" x="940.9" y="-193.2" font-family="Monaco" font-size="11.00">:a64*</text>
 <text text-anchor="start" x="973.91" y="-193.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin2</text>
 <text text-anchor="start" x="993.11" y="-193.2" font-family="Monaco" font-size="11.00">@c</text>
-<text text-anchor="start" x="1006.31" y="-193.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q7</text>
+<text text-anchor="start" x="1006.31" y="-193.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q6</text>
 </g>
 <!-- 5&#45;&gt;6 -->
 <g id="edge14" class="edge">
@@ -269,7 +269,7 @@
 <title>24</title>
 <ellipse fill="#ffffee" stroke="black" cx="837.81" cy="-34" rx="46.44" ry="18"/>
 <text text-anchor="start" x="809.9" y="-33.53" font-family="Monaco" font-size="11.00">out(@e)</text>
-<text text-anchor="start" x="856.11" y="-33.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q9</text>
+<text text-anchor="start" x="856.11" y="-33.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q8</text>
 </g>
 <!-- 7 -->
 <g id="node22" class="node">
@@ -281,7 +281,7 @@
 <text text-anchor="start" x="818.9" y="-106.53" font-family="Monaco" font-size="11.00">:acc+</text>
 <text text-anchor="start" x="851.91" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin3</text>
 <text text-anchor="start" x="871.11" y="-106.53" font-family="Monaco" font-size="11.00">@d</text>
-<text text-anchor="start" x="884.31" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q8</text>
+<text text-anchor="start" x="884.31" y="-106.53" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q7</text>
 </g>
 <!-- 6&#45;&gt;7 -->
 <g id="edge15" class="edge">
@@ -299,14 +299,14 @@
 <text text-anchor="start" x="778.5" y="-352.87" font-family="Monaco" font-size="11.00">:i+</text>
 <text text-anchor="start" x="798.31" y="-352.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin1</text>
 <text text-anchor="start" x="817.51" y="-352.87" font-family="Monaco" font-size="11.00">@f</text>
-<text text-anchor="start" x="830.71" y="-352.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q5</text>
+<text text-anchor="start" x="830.71" y="-352.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q4</text>
 </g>
 <!-- 23 -->
 <g id="node25" class="node">
 <title>23</title>
 <ellipse fill="#ffffee" stroke="black" cx="781.81" cy="-280.34" rx="46.44" ry="18"/>
 <text text-anchor="start" x="753.9" y="-279.87" font-family="Monaco" font-size="11.00">out(@g)</text>
-<text text-anchor="start" x="800.11" y="-279.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q9</text>
+<text text-anchor="start" x="800.11" y="-279.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q8</text>
 </g>
 <!-- 9&#45;&gt;23 -->
 <g id="edge18" class="edge">
@@ -319,7 +319,7 @@
 <title>2</title>
 <ellipse fill="none" stroke="black" cx="932.81" cy="-353.34" rx="50.43" ry="18"/>
 <text text-anchor="start" x="901.6" y="-352.87" font-family="Monaco" font-size="11.00">req a[i]</text>
-<text text-anchor="start" x="954.41" y="-352.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q5</text>
+<text text-anchor="start" x="954.41" y="-352.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q4</text>
 </g>
 <!-- 3 -->
 <g id="node23" class="node">
@@ -329,7 +329,7 @@
 <text text-anchor="start" x="887.7" y="-279.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">S64</text>
 <text text-anchor="start" x="902.11" y="-279.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r3</text>
 <text text-anchor="start" x="911.71" y="-279.87" font-family="Monaco" font-size="11.00">:a[]</text>
-<text text-anchor="start" x="938.11" y="-279.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q6</text>
+<text text-anchor="start" x="938.11" y="-279.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q5</text>
 </g>
 <!-- 2&#45;&gt;3 -->
 <g id="edge23" class="edge">
@@ -376,7 +376,7 @@
 <title>4</title>
 <ellipse fill="none" stroke="black" cx="1051.81" cy="-353.34" rx="50.43" ry="18"/>
 <text text-anchor="start" x="1020.6" y="-352.87" font-family="Monaco" font-size="11.00">req b[i]</text>
-<text text-anchor="start" x="1073.41" y="-352.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q5</text>
+<text text-anchor="start" x="1073.41" y="-352.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q4</text>
 </g>
 <!-- 16&#45;&gt;4 -->
 <g id="edge21" class="edge">

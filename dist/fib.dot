@@ -11,9 +11,9 @@ digraph Program_ {
   Block0 -> Jump1;
   Jump1 -> Block1 [label="@c"];
   Jump1 -> Block2 [label="!@c"];
-  Jump2_4[label = <Return.2_4<font color="#ff4411" point-size="8"><sup>q5</sup></font>>; shape = lpromoter];
+  Jump2_4[label = <Return.2_4<font color="#ff4411" point-size="8"><sup>q4</sup></font>>; shape = lpromoter];
   Block1 -> Jump2_4 [label="a"];
-  Jump2_5_6[label = <TailCall.2_5_6<font color="#ff4411" point-size="8"><sup>q7</sup></font><br/>fib(@f,@d,a)>; shape = component];
+  Jump2_5_6[label = <TailCall.2_5_6<font color="#ff4411" point-size="8"><sup>q6</sup></font><br/>fib(@f,@d,a)>; shape = component];
   Block2 -> Jump2_5_6;
   Block0 [label = "Block0"];
   Block1 [label = "Block1"];
@@ -45,7 +45,7 @@ digraph Program_ {
     node [shape = oval];
     label = "Block1";
     10 [label=<a<font color="#00aa11" point-size="8"><sup>U32</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:in<font color="#ff4411" point-size="8"><sup>q3</sup></font>>; style="filled"; fillcolor="#ffeeff";];
-    11 [label=<out(a)<font color="#ff4411" point-size="8"><sup>q5</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    11 [label=<out(a)<font color="#ff4411" point-size="8"><sup>q4</sup></font>>; style="filled"; fillcolor="#ffffee";];
     10 -> 11;
   }
   subgraph cluster_dfg_Block2 {
@@ -53,13 +53,13 @@ digraph Program_ {
     label = "Block2";
     5 [label=<@e<font color="#00aa11" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r3</sup></font>:1<font color="#ff4411" point-size="8"><sup>q3</sup></font>>; ];
     14 [label=<b<font color="#00aa11" point-size="8"><sup>U32</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:in<font color="#ff4411" point-size="8"><sup>q3</sup></font>>; style="filled"; fillcolor="#ffeeff";];
-    6 [label=<@f<font color="#00aa11" point-size="8"><sup>U6</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:n0-<font color="#3311ff" point-size="8"><sup>Bin2</sup></font>@e<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; ];
+    6 [label=<@f<font color="#00aa11" point-size="8"><sup>U6</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:n0-<font color="#3311ff" point-size="8"><sup>Bin2</sup></font>@e<font color="#ff4411" point-size="8"><sup>q5</sup></font>>; ];
     13 [label=<n0<font color="#00aa11" point-size="8"><sup>U6</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q3</sup></font>>; style="filled"; fillcolor="#ffeeff";];
     12 [label=<a<font color="#00aa11" point-size="8"><sup>U32</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:in<font color="#ff4411" point-size="8"><sup>q3</sup></font>>; style="filled"; fillcolor="#ffeeff";];
-    23 [label=<out(@f)<font color="#ff4411" point-size="8"><sup>q7</sup></font>>; style="filled"; fillcolor="#ffffee";];
-    4 [label=<@d<font color="#00aa11" point-size="8"><sup>U32</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:a+<font color="#3311ff" point-size="8"><sup>Bin0</sup></font>b<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; ];
-    24 [label=<out(@d)<font color="#ff4411" point-size="8"><sup>q7</sup></font>>; style="filled"; fillcolor="#ffffee";];
-    25 [label=<out(a)<font color="#ff4411" point-size="8"><sup>q7</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    23 [label=<out(@f)<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    4 [label=<@d<font color="#00aa11" point-size="8"><sup>U32</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:a+<font color="#3311ff" point-size="8"><sup>Bin0</sup></font>b<font color="#ff4411" point-size="8"><sup>q5</sup></font>>; ];
+    24 [label=<out(@d)<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; style="filled"; fillcolor="#ffffee";];
+    25 [label=<out(a)<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; style="filled"; fillcolor="#ffffee";];
     4 -> 24;
     5 -> 6;
     6 -> 23;

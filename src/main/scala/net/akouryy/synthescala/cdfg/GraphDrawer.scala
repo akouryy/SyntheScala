@@ -42,7 +42,7 @@ class GraphDrawer(
 
       for (ji -> j) <- graph.main.jumps do
         val label = s"""${j.productPrefix}.${ji.indexString}
-                        ${stateStr(sche.jumpStates.get(ji))}
+                        ${stateStr(sche.jumpStates.get(ji).map(_.values.toSet))}
                         """.singleLine
 
         j.match

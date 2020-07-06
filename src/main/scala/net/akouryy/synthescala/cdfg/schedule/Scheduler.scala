@@ -10,7 +10,7 @@ trait Scheduler:
   @param nodeStates Input,Const以外のノードの実行時の状態
 */
 case class Schedule(
-  jumpStates: collection.Map[JumpIndex, collection.Set[State]],
+  jumpStates: collection.Map[JumpIndex, collection.Map[BlockIndex, State]],
   nodeStates: collection.Map[(BlockIndex, NodeID), State],
 ):
   def stateOf(graph: CDFG, bi: BlockIndex, nd: NodeID): State | collection.Set[State] =
@@ -18,6 +18,6 @@ case class Schedule(
 
   def getStateOf(graph: CDFG, bi: BlockIndex, nd: NodeID): Option[State | collection.Set[State]] =
     if graph.node(bi, nd).isInput
-      jumpStates.get(graph.main.blocks(bi).inJumpIndex)
+      jumpStates.get(graph.main.blocks(bi).inJumpIndex).map(_.values.toSet)
     else
       nodeStates.get(bi, nd)

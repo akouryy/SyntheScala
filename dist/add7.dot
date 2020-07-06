@@ -10,10 +10,10 @@ digraph Program_ {
   subgraph cluster_dfg_Block0 {
     node [shape = oval];
     label = "Block0";
-    0 [label=<@a<font color="#00aa11" point-size="8"><sup>U13</sup></font><font color="#3311ff" point-size="8"><sup>r4</sup></font>:d+<font color="#3311ff" point-size="8"><sup>Bin1</sup></font>e<font color="#ff4411" point-size="8"><sup>q1</sup></font>>; ];
+    0 [label=<@a<font color="#00aa11" point-size="8"><sup>U13</sup></font><font color="#3311ff" point-size="8"><sup>r3</sup></font>:d+<font color="#3311ff" point-size="8"><sup>Bin0</sup></font>e<font color="#ff4411" point-size="8"><sup>q1</sup></font>>; ];
     5 [label=<@f<font color="#00aa11" point-size="8"><sup>U13</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:a+<font color="#3311ff" point-size="8"><sup>Bin0</sup></font>@e<font color="#ff4411" point-size="8"><sup>q5</sup></font>>; ];
     10 [label=<b<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>; style="filled"; fillcolor="#ffeeff";];
-    1 [label=<@b<font color="#00aa11" point-size="8"><sup>U13</sup></font><font color="#3311ff" point-size="8"><sup>r3</sup></font>:f+<font color="#3311ff" point-size="8"><sup>Bin0</sup></font>g<font color="#ff4411" point-size="8"><sup>q1</sup></font>>; ];
+    1 [label=<@b<font color="#00aa11" point-size="8"><sup>U13</sup></font><font color="#3311ff" point-size="8"><sup>r4</sup></font>:f+<font color="#3311ff" point-size="8"><sup>Bin1</sup></font>g<font color="#ff4411" point-size="8"><sup>q1</sup></font>>; ];
     6 [label=<a<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>; style="filled"; fillcolor="#ffeeff";];
     9 [label=<g<font color="#00aa11" point-size="8"><sup>U13</sup></font><font color="#3311ff" point-size="8"><sup>r6</sup></font>:in<font color="#ff4411" point-size="8"><sup>q0</sup></font>>; style="filled"; fillcolor="#ffeeff";];
     13 [label=<out(@f)<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; style="filled"; fillcolor="#ffffee";];

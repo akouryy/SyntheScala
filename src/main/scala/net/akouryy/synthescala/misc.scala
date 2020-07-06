@@ -5,12 +5,16 @@ final case class State(id: Int) extends Ordered[State] derives Eql:
 
   def compare(that: State) = this.id.compare(that.id)
 
+  def pred = State(id - 1)
   def succ = State(id + 1)
 
 final case class Register(id: Int) extends Ordered[Register] derives Eql:
-  override def toString = s"r$id"
+  override def toString = s"r${id.toString.replace("-", "_")}"
 
   def compare(that: Register) = this.id.compare(that.id)
+
+object Register:
+  val STATE = Register(-1)
 
 /** identifier */
 final case class Label(str: String) extends Ordered[Label] derives Eql:

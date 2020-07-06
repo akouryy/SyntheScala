@@ -2,9 +2,13 @@
 module top();
 
   reg clk, r_enable, controlArr;
-  wire[63:0] init_i = 64'd1;
+  wire[0:0] init_i = 1'd0;
+  wire controlArrWEnable_a = 1'd0;
+  wire[0:0] controlArrAddr_a;
+  wire controlArrRData_a;
+  wire controlArrWData_a;
   wire w_enable;
-  wire[63:0] result;
+  wire[1:0] result;
 
   main main(.*);
 

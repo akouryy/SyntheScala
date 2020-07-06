@@ -32,7 +32,9 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     case Type.U(w) => s"""[${w - 1}:0]"""
     case Type.S(w) => s""" signed[${w - 1}:0]"""
 
-  private def reg2sv(reg: Register): String = s"reg${reg.id}"
+  private def reg2sv(reg: Register): String = reg match
+    case Register.STATE => s"stateR"
+    case _ => s"reg${reg.id}"
 
   private def convBitWidth(typs: (Type, Type), v: String): String =
     import Type._
@@ -104,7 +106,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     r.indent(");", "endmodule // main"):
 
       // definitions
-      r ++= s"reg[${stateBitLen - 1}:0] state;"
+      r ++= s"reg[${stateBitLen - 1}:0] ${reg2sv(Register.STATE)};"
       r ++= s"reg[${stateBitLen - 1}:0] linkreg;"
       for reg <- regSet do
         val name = reg2sv(reg)
@@ -157,7 +159,8 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
         val typ = Some(varTyps(name))
         r.indent(s"assign $name =", ""):
           for (state -> source) <- paths do
-            r ++= s"state == $stateBitLen'd${state.id} ? ${source2sv(source, dst, typ)} :"
+            r ++= s"${reg2sv(Register.STATE)} == $stateBitLen'd${state.id} ? "
+                + s"${source2sv(source, dst, typ)} :"
           r ++= s"'x;"
       r ++= ""
 
@@ -173,7 +176,8 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
               paths <- fsmd.datapath.map.get(dst)
               (state -> source) <- paths
             do
-              r ++= s"state == $stateBitLen'd${state.id} ? ${source2sv(source, dst, typ)} :"
+              r ++= s"${reg2sv(Register.STATE)} == $stateBitLen'd${state.id} ? " +
+                    s"${source2sv(source, dst, typ)} :"
             dst match
               case _: ArrWriteEnable => r ++= s"1'd0;"
               case _ => r ++= s"'x;"
@@ -184,7 +188,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
       r.indent("always @(posedge clk) begin", "end"):
         // initializations
         r.indent("if(r_enable) begin", ""):
-          r ++= "state <= '0;"
+          r ++= s"${reg2sv(Register.STATE)} <= '0;"
           r ++= "linkreg <= '1;"
           r ++= "w_enable <= 1'd0;"
           for (toki.Entry(p, pt), i) <- cdfg.main.params.zipWithIndex do
@@ -192,12 +196,12 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
                   s"${convBitWidth(pt -> Type.U(64), s"init_${lab2sv(p)}")};"
         r.indent("end else begin", "end"):
           // states
-          r.indent("case(state)", "endcase"):
+          r.indent(s"case(${reg2sv(Register.STATE)})", "endcase"):
             r.indent("'1: begin", "end"):
               r ++= "w_enable <= 1'd1;"
               r ++= s"result <= ${convBitWidth(Type.U(64) -> cdfg.main.retTyp, "reg0")};"
             for (State(q1) -> next) <- fsmd.fsm do
-              r ++= s"$stateBitLen'd$q1: state <= " + next.match
+              r ++= s"$stateBitLen'd$q1: ${reg2sv(Register.STATE)} <= " + next.match
                 case Transition.Always(State(q2)) =>
                   s"$stateBitLen'd$q2;"
                 case Transition.Conditional(reg, State(q2), State(q3)) =>
@@ -212,7 +216,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
           for (reg, paths) <- regDatapath do
             val name = reg2sv(reg)
             val typ = Some(varTyps(name))
-            r.indent("case(state)", "endcase"):
+            r.indent(s"case(${reg2sv(Register.STATE)})", "endcase"):
               for (state -> source) <- paths do
                 r ++= s"$stateBitLen'd${s"${state.id}:"} $name <= " +
                       s"${source2sv(source, new ConnPort.Reg(reg), typ)};"

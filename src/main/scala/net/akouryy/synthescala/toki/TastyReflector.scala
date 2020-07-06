@@ -98,6 +98,8 @@ object TastyReflector:
               '{ ??? }
         case If(cond, tru, fls) =>
           '{ EX.If(${convEX(cond)}, ${convEX(tru)}, ${convEX(fls)}) }
+        case Typed(ex, Inferred()) =>
+          convEX(ex)
         case _ =>
           error(s"invalid expr\n$expr", expr.pos)
           '{ ??? }

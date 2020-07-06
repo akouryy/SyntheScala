@@ -29,17 +29,17 @@ class Composer(
     for j <- fn.jumps.valuesIterator do
       j match
         case _: Jump.Return =>
-          for q1 <- sche.jumpStates(j.i) do
+          for q1 <- sche.jumpStates(j.i).valuesIterator do
             fsm(q1) = Transition.LinkReg
         case _: Jump.TailCall =>
-          for q1 <- sche.jumpStates(j.i) do
+          for q1 <- sche.jumpStates(j.i).valuesIterator do
             fsm(q1) = Transition.Always(State(0))
         case _: (Jump.StartFun | Jump.Merge) =>
           val bi = j.outBlocks.soleElement
-          for q1 <- sche.jumpStates(j.i) do
+          for q1 <- sche.jumpStates(j.i).valuesIterator do
             fsm(q1) = Transition.Always(blockFirstState(fn, bi))
-        case Jump.Branch(ji, cond, _, tbi, fbi) =>
-          val q1 = sche.jumpStates(ji).soleElement
+        case Jump.Branch(ji, cond, ibi, tbi, fbi) =>
+          val q1 = sche.jumpStates(ji)(ibi)
           fsm(q1) = Transition.Conditional(
             regs(cond), blockFirstState(fn, tbi), blockFirstState(fn, fbi),
           )
@@ -50,7 +50,7 @@ class Composer(
     import Source._
 
     val newSrc =
-      (datapath.getOrElseUpdate(pin, mutable.SortedMap.empty).get(q), src) match
+      (datapath.getOrElseUpdate(pin, mutable.SortedMap.empty).get(q), src): @unchecked match
         case (None, _) => src
         case (Some(Conditional(reg, tru, Inherit)), Conditional(reg1, Inherit, fls))
         if reg == reg1 =>
@@ -58,7 +58,6 @@ class Composer(
         case (Some(Conditional(reg, Inherit, fls)), Conditional(reg1, tru, Inherit))
         if reg == reg1 =>
           Conditional(reg, tru, fls)
-        case _ => ???
 
     datapath(pin)(q) = newSrc
 
@@ -74,10 +73,10 @@ class Composer(
         case Const(_, num, ident) =>
           import Jump._
           fn.jumps(b.inJumpIndex) match
-            case Branch(ji1, cond, _, tru, fls) =>
+            case Branch(ji1, cond, ibi, tru, fls) =>
               mergeDatapath(
                 new ConnPort.Reg(regs(ident)),
-                sche.jumpStates(ji1).soleElement,
+                sche.jumpStates(ji1)(ibi),
                 Source.Conditional(
                   regs(cond),
                   if tru == b.i then new ConnPort.Const(num) else ConnPort.Inherit,
@@ -85,7 +84,7 @@ class Composer(
                 )
               )
             case j1 =>
-              for q <- sche.jumpStates(j1.i) do
+              for q <- sche.jumpStates(j1.i).valuesIterator do
                 mergeDatapath(
                   new ConnPort.Reg(regs(ident)),
                   q,
@@ -132,22 +131,32 @@ class Composer(
             new ConnPort.ArrWriteValue(arr), q,
             Source.Always(new ConnPort.Reg(regs(value))),
           )
-        case _: Call => !!!(node)
+        case _: Call => assert(false, "non-tail recursion")
     end for
 
     for j <- fn.jumps.valuesIterator do
       j match
-        case Jump.TailCall(ji, _, params, _) =>
+        case Jump.Merge(ji, ibis, inLabss, _, outLabs) =>
+          for
+            (ibi, inLabs) <- ibis.zipStrict(inLabss)
+            (inLab, outLab) <- inLabs.zipStrict(outLabs)
+          do
+            mergeDatapath(
+              new ConnPort.Reg(regs(outLab)),
+              sche.jumpStates(ji)(ibi),
+              Source.Always(new ConnPort.Reg(regs(inLab))),
+            )
+        case Jump.TailCall(ji, _, params, ibi) =>
           for (param, i) <- params.zipWithIndex do
             mergeDatapath(
               new ConnPort.Reg(Register(i)),
-              sche.jumpStates(ji).soleElement,
+              sche.jumpStates(ji)(ibi),
               Source.Always(new ConnPort.Reg(regs(param))),
             )
-        case Jump.Return(ji, ident, _) =>
+        case Jump.Return(ji, ident, ibi) =>
           mergeDatapath(
             new ConnPort.Reg(Register(0)),
-            sche.jumpStates(ji).soleElement,
+            sche.jumpStates(ji)(ibi),
             Source.Always(new ConnPort.Reg(regs(ident))),
           )
         case _ =>

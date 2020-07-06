@@ -6,7 +6,7 @@ import scala.collection.mutable
 import scala.math.Ordering.Implicits.infixOrderingOps
 
 class GorgeousScheduler(graph: CDFG) extends Scheduler:
-  private val jumpStates = mutable.MultiDict.empty[JumpIndex, State]
+  private val jumpStates = mutable.Map.empty[JumpIndex, mutable.Map[BlockIndex, State]]
   private val nodeStates = mutable.Map.empty[(BlockIndex, NodeID), State]
   private val visited = mutable.Set.empty[BlockIndex]
   private val arrayAccessedAfter = mutable.Set.empty[(State, Label)]
@@ -18,8 +18,8 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
     visited.clear()
     arrayAccessedAfter.clear()
     maxState = State(0)
-    scheduleJump(graph.main, graph.main.jumps.firstKey)
-    Schedule(jumpStates.sets, nodeStates.toMap)
+    scheduleJump(graph.main, null, graph.main.jumps.firstKey) // TODO
+    Schedule(jumpStates.toMap, nodeStates.toMap)
 
   private def stateOf(bi: BlockIndex, nid: NodeID): Option[State] =
     graph.node(bi, nid) match
@@ -84,20 +84,22 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
       block.nodes.keysIterator.flatMap(nid => stateOf(bi, nid))
         .maxOption.fold(maxState)(maxState.max)
 
+    /*if graph.main.jumps(block.outJump).isInstanceOf[Jump.Branch]
+      val maxNodes = nodeStates.iterator.filter(_._2 == maxState).toSeq
+      if maxNodes.forall(kv => nodes(kv._1._2).isInstanceOf[Node.Output])
+        maxState = maxState.pred*/
+
     // align Outputs
     for (nid, node: Node.Output) <- block.nodes do
       nodeStates((bi, nid)) = maxState
 
-    scheduleJump(fn, block.outJump)
+    scheduleJump(fn, bi, block.outJump)
   end scheduleBlock
 
-  private def scheduleJump(fn: CDFGFun, ji: JumpIndex): Unit =
+  private def scheduleJump(fn: CDFGFun, ibi: BlockIndex, ji: JumpIndex): Unit =
     val jump = fn.jumps(ji)
-    jumpStates += ji -> maxState
+    jumpStates.getOrElseUpdate(ji, mutable.Map.empty)
+    jumpStates(ji)(ibi) = maxState
     if jump.inBlocks.forall(visited)
-      jump match
-        case _: Jump.Branch =>
-          maxState = maxState.succ
-        case _ =>
       jump.outBlocks.foreach(scheduleBlock(fn, _))
   end scheduleJump

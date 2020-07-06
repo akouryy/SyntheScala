@@ -2,14 +2,19 @@
 module main (
   input wire clk, r_enable, controlArr,
   input wire init_i,
+  input wire controlArrWEnable_a,
+  input wire[0:0] controlArrAddr_a,
+  output wire controlArrRData_a,
+  input wire controlArrWData_a,
   output reg w_enable,
   output reg[1:0] result
 );
-  reg[3:0] state;
-  reg[3:0] linkreg;
+  reg[2:0] stateR;
+  reg[2:0] linkreg;
   reg[63:0] reg0;
   reg[63:0] reg1;
   reg[63:0] reg2;
+  reg[63:0] reg3;
 
   wire in0_Bin0;
   wire in1_Bin0;
@@ -18,54 +23,95 @@ module main (
   wire[1:0] in1_Bin1;
   wire[1:0] out0_Bin1 = in0_Bin1 + in1_Bin1;
 
+  wire arrWEnable_a;
+  wire arrAddr_a;
+  wire arrRData_a;
+  wire arrWData_a;
+  arr_a arr_a(.*);
 
   assign in0_Bin1 =
-    state == 4'd6 ? reg1[1:0] :
+    stateR == 3'd5 ? reg1[1:0] :
     'x;
   assign in1_Bin1 =
-    state == 4'd6 ? reg0[1:0] :
+    stateR == 3'd5 ? reg0[1:0] :
     'x;
   assign in0_Bin0 =
-    state == 4'd1 ? reg0[0:0] :
+    stateR == 3'd1 ? reg0[0:0] :
     'x;
   assign in1_Bin0 =
-    state == 4'd1 ? reg2[0:0] :
+    stateR == 3'd1 ? reg2[0:0] :
     'x;
 
+  assign arrWEnable_a =
+    controlArr ? controlArrWEnable_a :
+    stateR == 3'd3 ? 1'd1 :
+    1'd0;
+  assign arrAddr_a =
+    controlArr ? controlArrAddr_a :
+    stateR == 3'd3 ? reg3[0:0] :
+    'x;
+  assign arrWData_a =
+    controlArr ? controlArrWData_a :
+    stateR == 3'd3 ? reg0[0:0] :
+    'x;
+  assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
   always @(posedge clk) begin
     if(r_enable) begin
-      state <= '0;
+      stateR <= '0;
       linkreg <= '1;
       w_enable <= 1'd0;
       reg0 <= {63'd0, init_i};
     end else begin
-      case(state)
+      case(stateR)
         '1: begin
           w_enable <= 1'd1;
           result <= reg0[1:0];
         end
-        4'd5: state <= 4'd6;
-        4'd2: state <= reg0 ? 4'd4 : 4'd5;
-        4'd6: state <= 4'd7;
-        4'd4: state <= 4'd6;
-        4'd1: state <= 4'd2;
-        4'd7: state <= linkreg;
-        4'd0: state <= 4'd1;
+        3'd5: stateR <= 3'd6;
+        3'd2: stateR <= reg2 ? 3'd3 : 3'd4;
+        3'd6: stateR <= linkreg;
+        3'd3: stateR <= 3'd5;
+        3'd4: stateR <= 3'd5;
+        3'd1: stateR <= 3'd2;
+        3'd0: stateR <= 3'd1;
       endcase
-      case(state)
-        4'd1: reg0 <= {63'd0, out0_Bin0};
-        4'd2: reg0 <= reg0 ? 64'd1 : 64'd2;
-        4'd6: reg0 <= {62'd0, out0_Bin1};
-        4'd7: reg0 <= reg0;
+      case(stateR)
+        3'd2: reg0 <= reg2 ? reg0 : 64'd2;
+        3'd3: reg0 <= reg2;
+        3'd4: reg0 <= reg0;
+        3'd5: reg0 <= {62'd0, out0_Bin1};
+        3'd6: reg0 <= reg0;
       endcase
-      case(state)
-        4'd0: reg1 <= 64'd1;
+      case(stateR)
+        3'd0: reg1 <= 64'd1;
       endcase
-      case(state)
-        4'd0: reg2 <= 64'd0;
+      case(stateR)
+        3'd0: reg2 <= 64'd0;
+        3'd1: reg2 <= {63'd0, out0_Bin0};
+        3'd2: reg2 <= reg2 ? 64'd1 : reg2;
+      endcase
+      case(stateR)
+        3'd2: reg3 <= reg2 ? 64'd0 : reg3;
       endcase
     end
   end
 endmodule // main
+
+module arr_a (
+  input wire clk, arrWEnable_a,
+  input wire[0:0] arrAddr_a,
+  output wire arrRData_a,
+  input wire arrWData_a
+);
+  reg[0:0] delayedRAddr;
+  reg mem [0:0];
+  always @(posedge clk) begin
+    if(arrWEnable_a) begin
+      mem[arrAddr_a] <= arrWData_a;
+    end
+    delayedRAddr <= arrWEnable_a ? 'x : arrAddr_a;
+  end
+  assign arrRData_a = mem[delayedRAddr];
+endmodule
 `default_nettype wire

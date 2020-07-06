@@ -28,9 +28,7 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
       ret.getOrElseUpdate(id, {
         val used = interferenceGraph.get(id).flatMap(ret.get)
 
-        println((id, (preferred.get(id).toSeq ++ 0.to(used.size).map(Register)), used))
-
-        (preferred.get(id).toSeq ++ 0.to(used.size).map(Register)).find(r => !used(r)).get
+        (preferred.get(id).toSeq ++ 0.to(used.size).map(Register(_))).find(r => !used(r)).get
       })
 
     fn.params.foreach(e => getOrAlloc(e.name))
