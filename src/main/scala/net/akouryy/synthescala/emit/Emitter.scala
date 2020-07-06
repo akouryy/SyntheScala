@@ -92,15 +92,15 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     r ++= s"module main ("
     r.indent:
       r ++= "input wire clk, r_enable, controlArr,"
-      for p <- cdfg.main.params do
-        r ++= s"input wire[63:0] init_${lab2sv(p)},"
+      for toki.Entry(param, paramTyp) <- cdfg.main.params do
+        r ++= s"input wire${typ2sv(paramTyp)} init_${lab2sv(param)},"
       for toki.ArrayDef(arr, elemTyp, len) <- cdfg.arrayDefs.valuesIterator do
         r ++= s"input wire ${ctrl(writeEnable(arr))},"
         r ++= s"input wire[${len.width - 1}:0] ${ctrl(index(arr))},"
         r ++= s"output wire${typ2sv(elemTyp)} ${ctrl(readData(arr))},"
         r ++= s"input wire${typ2sv(elemTyp)} ${ctrl(writeData(arr))},"
       r ++= "output reg w_enable,"
-      r ++= "output reg[63:0] result"
+      r ++= s"output reg${typ2sv(cdfg.main.retTyp)} result"
     r.indent(");", "endmodule // main"):
 
       // definitions
@@ -187,14 +187,15 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
           r ++= "state <= '0;"
           r ++= "linkreg <= '1;"
           r ++= "w_enable <= 1'd0;"
-          for (p, i) <- cdfg.main.params.zipWithIndex do
-            r ++= s"${reg2sv(Register(i))} <= init_${lab2sv(p)};"
+          for (toki.Entry(p, pt), i) <- cdfg.main.params.zipWithIndex do
+            r ++= s"${reg2sv(Register(i))} <= " +
+                  s"${convBitWidth(pt -> Type.U(64), s"init_${lab2sv(p)}")};"
         r.indent("end else begin", "end"):
           // states
           r.indent("case(state)", "endcase"):
             r.indent("'1: begin", "end"):
               r ++= "w_enable <= 1'd1;"
-              r ++= "result <= reg0;"
+              r ++= s"result <= ${convBitWidth(Type.U(64) -> cdfg.main.retTyp, "reg0")};"
             for (State(q1) -> next) <- fsmd.fsm do
               r ++= s"$stateBitLen'd$q1: state <= " + next.match
                 case Transition.Always(State(q2)) =>

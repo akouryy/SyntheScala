@@ -1,11 +1,11 @@
 `default_nettype none
 module main (
   input wire clk, r_enable, controlArr,
-  input wire[63:0] init_n,
-  input wire[63:0] init_a,
-  input wire[63:0] init_b,
+  input wire[5:0] init_n,
+  input wire[31:0] init_a,
+  input wire[31:0] init_b,
   output reg w_enable,
-  output reg[63:0] result
+  output reg[31:0] result
 );
   reg[3:0] state;
   reg[3:0] linkreg;
@@ -53,14 +53,14 @@ module main (
       state <= '0;
       linkreg <= '1;
       w_enable <= 1'd0;
-      reg0 <= init_n;
-      reg1 <= init_a;
-      reg2 <= init_b;
+      reg0 <= {58'd0, init_n};
+      reg1 <= {32'd0, init_a};
+      reg2 <= {32'd0, init_b};
     end else begin
       case(state)
         '1: begin
           w_enable <= 1'd1;
-          result <= reg0;
+          result <= reg0[31:0];
         end
         4'd5: state <= linkreg;
         4'd2: state <= 4'd3;

@@ -10,7 +10,7 @@ final case class CDFG(val arrayDefs: toki.ArrayDefMap, val main: CDFGFun):
   def node(blockIndex: BlockIndex, nodeID: NodeID): Node =
     main.blocks(blockIndex).nodes(nodeID)
 
-final class CDFGFun(val fnName: String, val params: Seq[Label]):
+final class CDFGFun(val fnName: String, val retTyp: toki.Type, val params: Seq[toki.Entry]):
   val blocks: mutable.SortedMap[BlockIndex, Block] = mutable.SortedMap[BlockIndex, Block]()
   val jumps: mutable.SortedMap[JumpIndex, Jump] = mutable.SortedMap[JumpIndex, Jump]()
 

@@ -30,7 +30,7 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
         Register(0.to(used.size).find(i => !used(Register(i))).get)
       })
 
-    fn.params.foreach(getOrAlloc)
+    fn.params.foreach(e => getOrAlloc(e.name))
 
     for (bi -> b) <- fn.blocks do
       fn.inJump(b) match

@@ -1,13 +1,13 @@
 `default_nettype none
 module main (
   input wire clk, r_enable, controlArr,
-  input wire[63:0] init_i,
+  input wire signed[63:0] init_i,
   input wire controlArrWEnable_a,
   input wire[0:0] controlArrAddr_a,
   output wire signed[63:0] controlArrRData_a,
   input wire signed[63:0] controlArrWData_a,
   output reg w_enable,
-  output reg[63:0] result
+  output reg signed[63:0] result
 );
   reg[4:0] state;
   reg[4:0] linkreg;

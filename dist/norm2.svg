@@ -27,12 +27,17 @@
 <!-- Jump0 -->
 <g id="node1" class="node">
 <title>Jump0</title>
-<polygon fill="none" stroke="black" points="141.42,-444.34 50.19,-444.34 50.19,-440.34 46.19,-440.34 46.19,-436.34 50.19,-436.34 50.19,-416.34 46.19,-416.34 46.19,-412.34 50.19,-412.34 50.19,-408.34 141.42,-408.34 141.42,-444.34"/>
-<polyline fill="none" stroke="black" points="50.19,-440.34 54.19,-440.34 54.19,-436.34 50.19,-436.34 "/>
-<polyline fill="none" stroke="black" points="50.19,-416.34 54.19,-416.34 54.19,-412.34 50.19,-412.34 "/>
+<polygon fill="none" stroke="black" points="144.32,-444.34 47.29,-444.34 47.29,-440.34 43.29,-440.34 43.29,-436.34 47.29,-436.34 47.29,-416.34 43.29,-416.34 43.29,-412.34 47.29,-412.34 47.29,-408.34 144.32,-408.34 144.32,-444.34"/>
+<polyline fill="none" stroke="black" points="47.29,-440.34 51.29,-440.34 51.29,-436.34 47.29,-436.34 "/>
+<polyline fill="none" stroke="black" points="47.29,-416.34 51.29,-416.34 51.29,-412.34 47.29,-412.34 "/>
 <text text-anchor="start" x="58" y="-429.54" font-family="Monaco" font-size="11.00">StartFun.0</text>
 <text text-anchor="start" x="124.01" y="-429.54" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
-<text text-anchor="start" x="79.3" y="-418.54" font-family="Monaco" font-size="11.00">i,acc</text>
+<text text-anchor="start" x="55.3" y="-418.54" font-family="Monaco" font-size="11.00">i</text>
+<text text-anchor="start" x="61.9" y="-418.54" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U10</text>
+<text text-anchor="start" x="76.3" y="-418.54" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r0</text>
+<text text-anchor="start" x="85.9" y="-418.54" font-family="Monaco" font-size="11.00">,acc</text>
+<text text-anchor="start" x="112.31" y="-418.54" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">S64</text>
+<text text-anchor="start" x="126.71" y="-418.54" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r1</text>
 </g>
 <!-- Block0 -->
 <g id="node2" class="node">
@@ -329,7 +334,7 @@
 <!-- 2&#45;&gt;3 -->
 <g id="edge23" class="edge">
 <title>2&#45;&gt;3</title>
-<path fill="none" stroke="black" stroke-dasharray="1,5" d="M926.75,-335.15C923.87,-326.95 920.35,-316.96 917.13,-307.82"/>
+<path fill="none" stroke="black" d="M926.75,-335.15C923.87,-326.95 920.35,-316.96 917.13,-307.82"/>
 <polygon fill="black" stroke="black" points="920.42,-306.64 913.8,-298.37 913.82,-308.96 920.42,-306.64"/>
 </g>
 <!-- 7&#45;&gt;24 -->
@@ -398,7 +403,7 @@
 <!-- 4&#45;&gt;5 -->
 <g id="edge24" class="edge">
 <title>4&#45;&gt;5</title>
-<path fill="none" stroke="black" stroke-dasharray="1,5" d="M1050.11,-335.15C1049.32,-327.13 1048.36,-317.38 1047.47,-308.41"/>
+<path fill="none" stroke="black" d="M1050.11,-335.15C1049.32,-327.13 1048.36,-317.38 1047.47,-308.41"/>
 <polygon fill="black" stroke="black" points="1050.95,-307.97 1046.49,-298.37 1043.98,-308.66 1050.95,-307.97"/>
 </g>
 <!-- 15 -->

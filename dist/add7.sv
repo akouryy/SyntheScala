@@ -1,15 +1,15 @@
 `default_nettype none
 module main (
   input wire clk, r_enable, controlArr,
-  input wire[63:0] init_a,
-  input wire[63:0] init_b,
-  input wire[63:0] init_c,
-  input wire[63:0] init_d,
-  input wire[63:0] init_e,
-  input wire[63:0] init_f,
-  input wire[63:0] init_g,
+  input wire[9:0] init_a,
+  input wire[9:0] init_b,
+  input wire[9:0] init_c,
+  input wire[9:0] init_d,
+  input wire[12:0] init_e,
+  input wire[9:0] init_f,
+  input wire[12:0] init_g,
   output reg w_enable,
-  output reg[63:0] result
+  output reg[12:0] result
 );
   reg[2:0] state;
   reg[2:0] linkreg;
@@ -56,18 +56,18 @@ module main (
       state <= '0;
       linkreg <= '1;
       w_enable <= 1'd0;
-      reg0 <= init_a;
-      reg1 <= init_b;
-      reg2 <= init_c;
-      reg3 <= init_d;
-      reg4 <= init_e;
-      reg5 <= init_f;
-      reg6 <= init_g;
+      reg0 <= {54'd0, init_a};
+      reg1 <= {54'd0, init_b};
+      reg2 <= {54'd0, init_c};
+      reg3 <= {54'd0, init_d};
+      reg4 <= {51'd0, init_e};
+      reg5 <= {54'd0, init_f};
+      reg6 <= {51'd0, init_g};
     end else begin
       case(state)
         '1: begin
           w_enable <= 1'd1;
-          result <= reg0;
+          result <= reg0[12:0];
         end
         3'd5: state <= 3'd6;
         3'd2: state <= 3'd3;

@@ -47,7 +47,8 @@ class GraphDrawer(
 
         j.match
           case Jump.StartFun(i, ob) =>
-            r ++= s"$i[label = <$label<br/>${graph.main.params.map(_.str).mkString(",")}>; " +
+            r ++= s"$i[label = <$label<br/>" +
+                  s"${graph.main.params.map(e => idStr(e.name)).mkString(",")}>; " +
                    "shape = component];"
             r ++= s"$i -> $ob;"
           case Jump.Return(i, v, ib) =>
@@ -134,9 +135,13 @@ class GraphDrawer(
               if nodes(fromID).isMemoryRelated
               to <- arrayDeps.goForward(fromID)
             yield fromID -> to
-         ).toSeq.sorted.foreach((f, t) =>
-            r ++= s"""$f -> $t [style = dotted];"""
-          )
+          ).toSeq.sorted.foreach { (f, t) =>
+            val style =
+              nodes(f) match
+                case Node.GetReq(_, awa, _, _) if awa == t => "solid"
+                case _ => "dotted"
+            r ++= s"""$f -> $t [style = $style];"""
+          }
       end for
 
     r.toString

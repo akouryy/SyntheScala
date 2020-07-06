@@ -2,7 +2,7 @@ digraph Program_ {
   graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];
   node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
   edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
-  Jump0[label = <StartFun.0<font color="#ff4411" point-size="8"><sup>q0</sup></font><br/>a,b,c,d,e,f,g>; shape = component];
+  Jump0[label = <StartFun.0<font color="#ff4411" point-size="8"><sup>q0</sup></font><br/>a<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>,b<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>,c<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>,d<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r3</sup></font>,e<font color="#00aa11" point-size="8"><sup>U13</sup></font><font color="#3311ff" point-size="8"><sup>r4</sup></font>,f<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r5</sup></font>,g<font color="#00aa11" point-size="8"><sup>U13</sup></font><font color="#3311ff" point-size="8"><sup>r6</sup></font>>; shape = component];
   Jump0 -> Block0;
   Jump1[label = <Return.1<font color="#ff4411" point-size="8"><sup>q6</sup></font>>; shape = lpromoter];
   Block0 -> Jump1 [label="@f"];

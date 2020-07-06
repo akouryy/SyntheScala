@@ -2,7 +2,7 @@ digraph Program_ {
   graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];
   node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
   edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
-  Jump0[label = <StartFun.0<font color="#ff4411" point-size="8"><sup>q0</sup></font><br/>i,acc>; shape = component];
+  Jump0[label = <StartFun.0<font color="#ff4411" point-size="8"><sup>q0</sup></font><br/>i<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>,acc<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>>; shape = component];
   Jump0 -> Block0;
   Jump1[
     label = <Branch.1<font color="#ff4411" point-size="8"><sup>q2</sup></font>>;
@@ -66,7 +66,7 @@ digraph Program_ {
     16 -> 2;
     16 -> 4;
     16 -> 9;
-    2 -> 3 [style = dotted];
-    4 -> 5 [style = dotted];
+    2 -> 3 [style = solid];
+    4 -> 5 [style = solid];
   }
 }

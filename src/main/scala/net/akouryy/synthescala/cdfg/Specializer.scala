@@ -136,7 +136,7 @@ class Specializer:
   end specializeExpr
 
   def apply(prog: toki.Program): CDFG = // synchronized:
-    currentGraph = CDFGFun(prog.main.name, prog.main.params.map(_.name))
+    currentGraph = CDFGFun(prog.main.name, prog.main.ret, prog.main.params)
     val dest = Label.temp()
     currentInputJumpIndex = JumpIndex.generate()
     currentBlockIndex = BlockIndex.generate()

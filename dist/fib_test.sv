@@ -2,11 +2,11 @@
 module top();
 
   reg clk, r_enable, controlArr;
-  wire[63:0] init_n = 64'd40;
-  wire[63:0] init_a = 64'd1;
-  wire[63:0] init_b = 64'd0;
+  wire[5:0] init_n = 6'd40;
+  wire[31:0] init_a = 32'd1;
+  wire[31:0] init_b = 32'd0;
   wire w_enable;
-  wire[63:0] result;
+  wire[31:0] result;
 
   main main(.*);
 

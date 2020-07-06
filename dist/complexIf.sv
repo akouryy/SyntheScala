@@ -1,9 +1,9 @@
 `default_nettype none
 module main (
   input wire clk, r_enable, controlArr,
-  input wire[63:0] init_i,
+  input wire init_i,
   output reg w_enable,
-  output reg[63:0] result
+  output reg[1:0] result
 );
   reg[3:0] state;
   reg[3:0] linkreg;
@@ -38,12 +38,12 @@ module main (
       state <= '0;
       linkreg <= '1;
       w_enable <= 1'd0;
-      reg0 <= init_i;
+      reg0 <= {63'd0, init_i};
     end else begin
       case(state)
         '1: begin
           w_enable <= 1'd1;
-          result <= reg0;
+          result <= reg0[1:0];
         end
         4'd5: state <= 4'd6;
         4'd2: state <= reg0 ? 4'd4 : 4'd5;

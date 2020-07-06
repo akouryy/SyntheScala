@@ -2,10 +2,10 @@
 module top();
 
   reg clk, r_enable, controlArr;
-  wire[63:0] init_i = 64'd0;
-  wire[63:0] init_acc = 64'd0;
+  wire[9:0] init_i = 10'd0;
+  wire signed[63:0] init_acc = 64'd0;
   wire w_enable;
-  wire[63:0] result;
+  wire signed[63:0] result;
 
   reg controlArrWEnable_a;
   reg[9:0] controlArrAddr_a;

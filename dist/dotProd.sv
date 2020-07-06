@@ -1,8 +1,8 @@
 `default_nettype none
 module main (
   input wire clk, r_enable, controlArr,
-  input wire[63:0] init_i,
-  input wire[63:0] init_acc,
+  input wire[9:0] init_i,
+  input wire signed[63:0] init_acc,
   input wire controlArrWEnable_a,
   input wire[9:0] controlArrAddr_a,
   output wire signed[26:0] controlArrRData_a,
@@ -12,7 +12,7 @@ module main (
   output wire signed[26:0] controlArrRData_b,
   input wire signed[26:0] controlArrWData_b,
   output reg w_enable,
-  output reg[63:0] result
+  output reg signed[63:0] result
 );
   reg[3:0] state;
   reg[3:0] linkreg;
@@ -100,7 +100,7 @@ module main (
       state <= '0;
       linkreg <= '1;
       w_enable <= 1'd0;
-      reg0 <= init_i;
+      reg0 <= {54'd0, init_i};
       reg1 <= init_acc;
     end else begin
       case(state)

@@ -37,7 +37,9 @@
 <polyline fill="none" stroke="black" points="32.86,-500.67 36.86,-500.67 36.86,-496.67 32.86,-496.67 "/>
 <text text-anchor="start" x="40.66" y="-513.87" font-family="Monaco" font-size="11.00">StartFun.0</text>
 <text text-anchor="start" x="106.68" y="-513.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q0</text>
-<text text-anchor="start" x="75.17" y="-502.87" font-family="Monaco" font-size="11.00">i</text>
+<text text-anchor="start" x="65.57" y="-502.87" font-family="Monaco" font-size="11.00">i</text>
+<text text-anchor="start" x="72.17" y="-502.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U1</text>
+<text text-anchor="start" x="81.77" y="-502.87" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r0</text>
 </g>
 <!-- Block0 -->
 <g id="node2" class="node">
