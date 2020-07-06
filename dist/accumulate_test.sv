@@ -5,7 +5,8 @@ module top();
   wire[63:0] init_i = 64'd0;
   wire[63:0] init_acc = 64'd0;
   wire w_enable;
-  wire[0:0] result;
+  wire[63:0] result;
+  // wire[0:0] result;
 
   reg controlArrWEnable_a;
   reg[9:0] controlArrAddr_a;
@@ -31,7 +32,8 @@ module top();
     for(i = 0; i < 1000; i += 1) begin
       controlArrWEnable_a <= 1;
       controlArrAddr_a <= i;
-      da = $urandom_range(0, (1 << 31) - 1);
+      da = ($urandom_range(0, (1 << 16) - 1) << 16 | $urandom_range(0, (1 << 16) - 1))
+           - (1 << 31);
       controlArrWData_a <= da;
       acc += da;
       ans[i] = acc;

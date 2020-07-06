@@ -36,11 +36,12 @@ module top();
       controlArrWEnable_b <= 1;
       controlArrAddr_a <= i;
       controlArrAddr_b <= i;
-      da = $urandom_range(0, (1 << 26) - 1);
-      db = $urandom_range(0, (1 << 26) - 1);
+      da = $urandom_range(0, (1 << 27) - 1) - (1 << 26);
+      db = $urandom_range(0, (1 << 27) - 1) - (1 << 26);
       controlArrWData_a <= da;
       controlArrWData_b <= db;
       ans += {32'd0, da} * db;
+      $write(i, da, db, ans, "\n");
       #4 ;
     end
 
@@ -52,7 +53,7 @@ module top();
 
   always @(posedge clk) begin
     if(w_enable) begin
-      $write("ans = %d, result = %d\n", ans, result);
+      $write("ans = %d, result = %d\n", ans, $signed(result));
       $finish;
     end
   end

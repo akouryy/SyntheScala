@@ -30,7 +30,7 @@ module top();
     for(i = 0; i < 1000; i = i + 1) begin
       controlArrWEnable_a <= 1;
       controlArrAddr_a <= i;
-      da = $urandom_range(0, (1 << 26) - 1);
+      da = $urandom_range(-(1 << 26), (1 << 26) - 1);
       controlArrWData_a <= da;
       ans += {32'd0, da} * da;
       #4 ;
@@ -44,7 +44,7 @@ module top();
 
   always @(posedge clk) begin
     if(w_enable) begin
-      $write("ans = %d, result = %d\n", ans, result);
+      $write("ans = %d, result = %d\n", ans, $signed(result));
       $finish;
     end
   end
