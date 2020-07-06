@@ -12,5 +12,5 @@ EXPERIMENTAL high-level synthesizer from Scala 3
 
 ## Examples
 
-* Input Scala programs: [Main.scala](src/main/scala/net/akouryy/synthescala/Main.scala)
+* Input Scala programs: [Examples.scala](src/main/scala/net/akouryy/synthescala/Examples.scala)
 * Generated SystemVerilog programs: [dist/](dist)
