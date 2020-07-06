@@ -18,7 +18,7 @@ object Main:
     println(s"$ok succeeded, $ng failed.")
 
   private def f(prog: Program): Unit =
-    println(s"[${prog.main.name}]")
+    println(fansi.Color.Full(214)(s"[${prog.main.name}]"))
     reset()
     // PP.pprintln(prog)
     val (typeEnv, kProg) = KNormalizer(prog).normalize

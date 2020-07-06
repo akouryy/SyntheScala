@@ -11,8 +11,6 @@ class GraphDrawer(
   regs: bind.RegisterAllocator.Allocations = Map.empty,
   bindings: bind.Binder.Bindings = Map.empty,
 ):
-  private val current = new StringBuilder
-
   private def unsafeEscape(str: String): String =
     str.replaceAll("&", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
        .replaceAll("\"", "&quot;").replaceAll("\n", "<br />")
@@ -35,115 +33,105 @@ class GraphDrawer(
 
   //noinspection SpellCheckingInspection
   def draw: String =
-    current.clear()
-    current ++=
-      s"""digraph Program_ {
-          |graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];
-          |node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
-          |edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
-          |""".stripMargin
+    val r = util.IndentedStringBuilder()
 
-    for (ji -> j) <- graph.main.jumps do
-      val label = s"""${j.productPrefix}.${ji.indexString}
-                      ${stateStr(sche.jumpStates.get(ji))}
-                      """.singleLine
+    r.indent("digraph Program_ {", "}"):
+      r ++= """graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];"""
+      r ++= """node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];"""
+      r ++= """edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];"""
 
-      current ++= j.match
-        case Jump.StartFun(i, ob) =>
-          s"""$i[label = <$label<br/>${graph.main.params.map(_.str).mkString(",")}>; shape = component];
-              |$i -> $ob;
-              |""".stripMargin
-        case Jump.Return(i, v, ib) =>
-          s"""$i[label = <$label>; shape = lpromoter];
-              |$ib -> $i [label="${v.str}"];
-              |""".stripMargin
-        case Jump.TailCall(i, fn, args, ib) =>
-          s"""$i[label = <$label<br/>$fn(${args.map(_.str).mkString(",")})>; shape = component];
-              |$ib -> $i;
-              |""".stripMargin
-        case Jump.Branch(i, cond, ib, tob, fob) =>
-          s"""$i[
-              |  label = <$label>;
-              |  shape = trapezium; style = rounded;
-              |];
-              |$ib -> $i;
-              |$i -> $tob [label="${cond.str}"];
-              |$i -> $fob [label="!${cond.str}"];
-              |""".stripMargin
-        case Jump.Merge(i, ibs, inss, ob, ons) =>
-          val inputEdges =
-            ibs.zip(inss).map((ib, ins) =>
-              s"""$ib -> $i [label="${ins.map(_.str).mkString(",")}"];"""
-            ).mkString
-          s"""$i[label = <$label>; shape = invtrapezium; style = rounded];
-              |$inputEdges
-              |$i -> $ob [label="${ons.map(_.str).mkString(",")}"];
-              |""".stripMargin
-      // end match
-    end for
+      for (ji -> j) <- graph.main.jumps do
+        val label = s"""${j.productPrefix}.${ji.indexString}
+                        ${stateStr(sche.jumpStates.get(ji))}
+                        """.singleLine
 
-    for Block(i, nodes, _, _, _) <- graph.main.blocks.valuesIterator do
-      if nodes.isEmpty then
-        current ++= s"""$i [label = "$i\\l(0行)"]""" + "\n"
-      else
-        current ++= s"""$i [label = "$i"];""" + "\n"
+        j.match
+          case Jump.StartFun(i, ob) =>
+            r ++= s"$i[label = <$label<br/>${graph.main.params.map(_.str).mkString(",")}>; shape = component];"
+            r ++= s"$i -> $ob;"
+          case Jump.Return(i, v, ib) =>
+            r ++= s"$i[label = <$label>; shape = lpromoter];"
+            r ++= s"""$ib -> $i [label="${v.str}"];"""
+          case Jump.TailCall(i, fn, args, ib) =>
+            r ++= s"$i[label = <$label<br/>$fn(${args.map(_.str).mkString(",")})>; shape = component];"
+            r ++= s"$ib -> $i;"
+          case Jump.Branch(i, cond, ib, tob, fob) =>
+            r.indent(s"$i[", "];"):
+              r ++= s"label = <$label>;"
+              r ++= s"shape = trapezium; style = rounded;"
+            r ++= s"$ib -> $i;"
+            r ++= s"""$i -> $tob [label="${cond.str}"];"""
+            r ++= s"""$i -> $fob [label="!${cond.str}"];"""
+          case Jump.Merge(i, ibs, inss, ob, ons) =>
+            r ++= s"$i[label = <$label>; shape = invtrapezium; style = rounded];"
+            for (ib, ins) <- ibs.zip(inss) do
+              r ++= s"""$ib -> $i [label="${ins.map(_.str).mkString(",")}"];"""
+            r ++= s"""$i -> $ob [label="${ons.map(_.str).mkString(",")}"];"""
+      end for
 
-    for
-      Block(bi, nodes, arrayDeps, _, _) <- graph.main.blocks.valuesIterator
-      if nodes.nonEmpty
-    do
-      val ids = mutable.Map.empty[Node, Int]
-      def id(node: Node) = s"nd${bi}_${ids.getOrElseUpdate(node, ids.size)}"
-
-      current ++=
-        s"""|subgraph cluster_dfg_$bi{
-            |node [shape = oval];
-            |label = "$bi";
-            |""".stripMargin
-
-      for nd <- nodes do
-        val labelBase = nd match
-          case Node.Input(n) => s"""${idStr(n)}:in"""
-          case Node.Const(v, n) => s"""${idStr(n)}:$v"""
-          case Node.Output(n) => s"""out(${n.str})"""
-          case Node.BinOp(op, l, r, a) =>
-            val bound = sup("#3311ff", unsafeEscape(
-              bindings.get(bi, nd).fold("?")(_.shortString)
-            ))
-            s"""${idStr(a)}:${l.str}${unsafeEscape(op.operatorString)}$bound${r.str}"""
-          case Node.Call(fn, args, ret) =>
-            s"""${idStr(ret)}:$fn(${args.map(_.str).mkString(",")})"""
-          case Node.Get(arr, index, ret) =>
-            s"""${idStr(ret)}:${arr.str}[${index.str}]"""
-          case Node.Put(arr, index, value) =>
-            s"""${arr.str}[${index.str}]=${value.str}"""
-
-        current ++=
-          s"""${id(nd)} [label=<
-                $labelBase
-                ${stateStr(sche.getStateOf(graph, bi, nd))}
-              >];""".singleLine
+      for Block(i, nodes, _, _, _) <- graph.main.blocks.valuesIterator do
+        if nodes.isEmpty then
+          r ++= s"""$i [label = "$i\\l(0行)"];"""
+        else
+          r ++= s"""$i [label = "$i"];"""
 
       for
-        to <- nodes
-        read = to.read
-        from <- nodes
-        a <- from.written
-        i = read.indexOf(a)
-        if i >= 0
+        Block(bi, nodes, arrayDeps, _, _) <- graph.main.blocks.valuesIterator
+        if nodes.nonEmpty
       do
-        current ++= s"""${id(from)} -> ${id(to)};""" + "\n"
+        val ids = mutable.Map.empty[Node, Int]
+        def id(node: Node) = s"nd${bi}_${ids.getOrElseUpdate(node, ids.size)}"
 
-      for
-        (from: (Node.Get | Node.Put)) <- nodes
-        to <- arrayDeps.goForward(from)
-      do
-        current ++= s"""${id(from)} -> ${id(to)} [style = dotted];""" + "\n"
+        r.indent(s"subgraph cluster_dfg_$bi {", "}"):
+          r ++= s"node [shape = oval];"
+          r ++= s"""label = "$bi";"""
 
-      current ++= "}"
-    end for
+          for nd <- nodes do
+            val labelBase = nd match
+              case Node.Input(n) => s"""${idStr(n)}:in"""
+              case Node.Const(v, n) => s"""${idStr(n)}:$v"""
+              case Node.Output(n) => s"""out(${n.str})"""
+              case Node.BinOp(op, l, r, a) =>
+                val bound = sup("#3311ff", unsafeEscape(
+                  bindings.get(bi, nd).fold("?")(_.shortString)
+                ))
+                s"""${idStr(a)}:${l.str}${unsafeEscape(op.operatorString)}$bound${r.str}"""
+              case Node.Call(fn, args, ret) =>
+                s"""${idStr(ret)}:$fn(${args.map(_.str).mkString(",")})"""
+              case Node.Get(arr, index, ret) =>
+                s"""${idStr(ret)}:${arr.str}[${index.str}]"""
+              case Node.Put(arr, index, value) =>
+                s"""${arr.str}[${index.str}]=${value.str}"""
 
-    current ++= s"}\n"
-    current.toString
+            r ++=
+              s"""${id(nd)} [label=<
+                    $labelBase
+                    ${stateStr(sche.getStateOf(graph, bi, nd))}
+                  >];""".singleLine
+
+          (
+            for
+              to <- nodes
+              read = to.read
+              from <- nodes
+              a <- from.written
+              i = read.indexOf(a)
+              if i >= 0
+            yield id(from) -> id(to)
+          ).toSeq.sorted.foreach((f, t) =>
+            r ++= s"""$f -> $t;"""
+          )
+
+          (
+            for
+              (from: (Node.Get | Node.Put)) <- nodes
+              to <- arrayDeps.goForward(from)
+            yield id(from) -> id(to)
+          ).toSeq.sorted.foreach((f, t) =>
+            r ++= s"""$f -> $t [style = dotted];"""
+          )
+      end for
+
+    r.toString
   end draw
 end GraphDrawer
