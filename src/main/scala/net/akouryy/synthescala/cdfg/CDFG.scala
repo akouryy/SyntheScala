@@ -86,6 +86,9 @@ case class Block(
     else
       readMap(label)
 
+  def states(using sche: schedule.Schedule): IndexedSeq[State] =
+    stateToNodes(sche).keySet.toIndexedSeq.sorted
+
   def stateToNodes(sche: schedule.Schedule): collection.MultiDict[State, Node] =
     mutable.SortedMultiDict.from:
       for (nid -> node) <- nodes.toSeq yield
