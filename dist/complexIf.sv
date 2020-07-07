@@ -9,8 +9,8 @@ module main (
   output reg w_enable,
   output reg[1:0] result
 );
-  reg[3:0] stateR;
-  reg[3:0] linkreg;
+  reg[2:0] stateR;
+  reg[2:0] linkreg;
   reg[63:0] reg0;
   wire[63:0] stationReg0;
   reg[63:0] reg1;
@@ -34,48 +34,46 @@ module main (
   arr_a arr_a(.*);
 
   assign in0_Bin1 =
-    stateR == 4'd7 ? 2'd1 :
+    stateR == 3'd5 ? 2'd1 :
     'x;
   assign in1_Bin1 =
-    stateR == 4'd7 ? reg0[1:0] :
+    stateR == 3'd5 ? reg0[1:0] :
     'x;
   assign in0_Bin0 =
-    stateR == 4'd1 ? reg0[0:0] :
+    stateR == 3'd1 ? reg0[0:0] :
     'x;
   assign in1_Bin0 =
-    stateR == 4'd1 ? 1'd0 :
+    stateR == 3'd1 ? 1'd0 :
     'x;
 
   assign arrWEnable_a =
     controlArr ? controlArrWEnable_a :
-    stateR == 4'd3 ? 1'd1 :
+    stateR == 3'd3 ? 1'd1 :
     1'd0;
   assign arrAddr_a =
     controlArr ? controlArrAddr_a :
-    stateR == 4'd3 ? reg2[0:0] :
+    stateR == 3'd3 ? reg2[0:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
-    stateR == 4'd3 ? reg0[0:0] :
+    stateR == 3'd3 ? reg0[0:0] :
     'x;
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
   assign stationReg0 =
-    stateR == 4'd4 ? reg3 :
-    stateR == 4'd5 ? 64'd2 :
-    stateR == 4'd6 ? reg0 :
-    stateR == 4'd7 ? {62'd0, out0_Bin1} :
-    stateR == 4'd8 ? reg0 :
+    stateR == 3'd4 ? 64'd2 :
+    stateR == 3'd5 ? {62'd0, out0_Bin1} :
+    stateR == 3'd6 ? reg0 :
     reg0;
   assign stationReg1 =
-    stateR == 4'd1 ? 64'd1 :
+    stateR == 3'd1 ? 64'd1 :
     reg1;
   assign stationReg2 =
-    stateR == 4'd1 ? {63'd0, out0_Bin0} :
-    stateR == 4'd2 ? 64'd0 :
+    stateR == 3'd1 ? {63'd0, out0_Bin0} :
+    stateR == 3'd2 ? 64'd0 :
     reg2;
   assign stationReg3 =
-    stateR == 4'd2 ? 64'd1 :
+    stateR == 3'd2 ? 64'd1 :
     reg3;
 
   always @(posedge clk) begin
@@ -90,20 +88,28 @@ module main (
           w_enable <= 1'd1;
           result <= reg0[1:0];
         end
-        4'd0: stateR <= 4'd1;
-        4'd1: stateR <= (stationReg2) ? 4'd2 : 4'd5;
-        4'd2: stateR <= 4'd3;
-        4'd3: stateR <= 4'd4;
-        4'd4: stateR <= 4'd7;
-        4'd5: stateR <= 4'd6;
-        4'd6: stateR <= 4'd7;
-        4'd7: stateR <= 4'd8;
-        4'd8: stateR <= linkreg;
+        3'd0: stateR <= 3'd1;
+        3'd1: stateR <= (stationReg2) ? 3'd2 : 3'd4;
+        3'd2: stateR <= 3'd3;
+        3'd3: stateR <= 3'd5;
+        3'd4: stateR <= 3'd5;
+        3'd5: stateR <= 3'd6;
+        3'd6: stateR <= linkreg;
       endcase
-      reg0 <= stationReg0;
-      reg1 <= stationReg1;
-      reg2 <= stationReg2;
-      reg3 <= stationReg3;
+      case(stateR)
+        3'd3: reg0 <= stationReg3;
+        3'd4: reg0 <= stationReg0;
+        default: reg0 <= stationReg0;
+      endcase
+      case(stateR)
+        default: reg1 <= stationReg1;
+      endcase
+      case(stateR)
+        default: reg2 <= stationReg2;
+      endcase
+      case(stateR)
+        default: reg3 <= stationReg3;
+      endcase
     end
   end
 endmodule // main

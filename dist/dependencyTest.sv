@@ -33,11 +33,11 @@ module main (
 
   assign in0_Bin1 =
     stateR == 5'd10 ? reg0 :
-    stateR == 5'd14 ? reg0 :
+    stateR == 5'd13 ? reg0 :
     'x;
   assign in1_Bin1 =
     stateR == 5'd10 ? $signed(64'd2) :
-    stateR == 5'd14 ? (-$signed(64'd3)) :
+    stateR == 5'd13 ? (-$signed(64'd3)) :
     'x;
   assign in0_Bin0 =
     stateR == 5'd7 ? reg0 :
@@ -53,9 +53,9 @@ module main (
     stateR == 5'd4 ? 1'd1 :
     stateR == 5'd5 ? 1'd0 :
     stateR == 5'd8 ? 1'd0 :
-    stateR == 5'd12 ? 1'd0 :
-    stateR == 5'd16 ? 1'd1 :
-    stateR == 5'd17 ? 1'd0 :
+    stateR == 5'd11 ? 1'd0 :
+    stateR == 5'd14 ? 1'd1 :
+    stateR == 5'd15 ? 1'd0 :
     1'd0;
   assign arrAddr_a =
     controlArr ? controlArrAddr_a :
@@ -64,16 +64,16 @@ module main (
     stateR == 5'd4 ? reg2[0:0] :
     stateR == 5'd5 ? reg2[0:0] :
     stateR == 5'd8 ? reg2[0:0] :
-    stateR == 5'd12 ? reg2[0:0] :
-    stateR == 5'd16 ? reg2[0:0] :
-    stateR == 5'd17 ? reg2[0:0] :
+    stateR == 5'd11 ? reg2[0:0] :
+    stateR == 5'd14 ? reg2[0:0] :
+    stateR == 5'd15 ? reg2[0:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
     stateR == 5'd2 ? reg0 :
     stateR == 5'd3 ? reg1 :
     stateR == 5'd4 ? reg0 :
-    stateR == 5'd16 ? reg0 :
+    stateR == 5'd14 ? reg0 :
     'x;
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
@@ -82,12 +82,10 @@ module main (
     stateR == 5'd7 ? {63'd0, out0_Bin0} :
     stateR == 5'd9 ? arrRData_a :
     stateR == 5'd10 ? out0_Bin1 :
-    stateR == 5'd11 ? reg0 :
-    stateR == 5'd13 ? arrRData_a :
-    stateR == 5'd14 ? out0_Bin1 :
-    stateR == 5'd15 ? reg0 :
-    stateR == 5'd18 ? arrRData_a :
-    stateR == 5'd19 ? reg0 :
+    stateR == 5'd12 ? arrRData_a :
+    stateR == 5'd13 ? out0_Bin1 :
+    stateR == 5'd16 ? arrRData_a :
+    stateR == 5'd17 ? reg0 :
     reg0;
   assign stationReg1 =
     stateR == 5'd1 ? 64'd1 :
@@ -115,23 +113,29 @@ module main (
         5'd4: stateR <= 5'd5;
         5'd5: stateR <= 5'd6;
         5'd6: stateR <= 5'd7;
-        5'd7: stateR <= (stationReg0) ? 5'd8 : 5'd12;
+        5'd7: stateR <= (stationReg0) ? 5'd8 : 5'd11;
         5'd8: stateR <= 5'd9;
         5'd9: stateR <= 5'd10;
-        5'd10: stateR <= 5'd11;
-        5'd11: stateR <= 5'd16;
+        5'd10: stateR <= 5'd14;
+        5'd11: stateR <= 5'd12;
         5'd12: stateR <= 5'd13;
         5'd13: stateR <= 5'd14;
         5'd14: stateR <= 5'd15;
         5'd15: stateR <= 5'd16;
         5'd16: stateR <= 5'd17;
-        5'd17: stateR <= 5'd18;
-        5'd18: stateR <= 5'd19;
-        5'd19: stateR <= linkreg;
+        5'd17: stateR <= linkreg;
       endcase
-      reg0 <= stationReg0;
-      reg1 <= stationReg1;
-      reg2 <= stationReg2;
+      case(stateR)
+        5'd10: reg0 <= stationReg0;
+        5'd13: reg0 <= stationReg0;
+        default: reg0 <= stationReg0;
+      endcase
+      case(stateR)
+        default: reg1 <= stationReg1;
+      endcase
+      case(stateR)
+        default: reg2 <= stationReg2;
+      endcase
     end
   end
 endmodule // main

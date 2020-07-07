@@ -112,10 +112,18 @@ module main (
         4'd7: stateR <= 4'd8;
         4'd8: stateR <= 4'd0;
       endcase
-      reg0 <= stationReg0;
-      reg1 <= stationReg1;
-      reg2 <= stationReg2;
-      reg3 <= stationReg3;
+      case(stateR)
+        default: reg0 <= stationReg0;
+      endcase
+      case(stateR)
+        default: reg1 <= stationReg1;
+      endcase
+      case(stateR)
+        default: reg2 <= stationReg2;
+      endcase
+      case(stateR)
+        default: reg3 <= stationReg3;
+      endcase
     end
   end
 endmodule // main

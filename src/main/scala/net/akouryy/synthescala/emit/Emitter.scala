@@ -13,6 +13,8 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
   private val calculators = immutable.SortedMap.from:
     bindings.valuesIterator.toSeq.distinct.map(c => c.id -> c)
 
+  private val stateBitLen = (fsmd.fsm.keys.map(_.id).max + 1).width
+
   private val varTyps = mutable.Map.empty[String, Type]
 
   private def lab2sv(lab: Label): String =
@@ -57,6 +59,8 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     case Some(toTyp) => convBitWidth(varTyps(v) -> toTyp, v)
     case None => v
 
+  private def state2sv(state: State): String = s"$stateBitLen'd${state.id}"
+
   private def connSrc2sv(src: ConnPort.Src, dst: ConnPort.Dst, reqTyp: Option[Type]): String =
     src match
       case ConnPort.CalcOut(cid, port) => out(calculators(cid), port) :> reqTyp
@@ -89,7 +93,6 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
 
   def emit: String =
     val r = util.IndentedStringBuilder()
-    val stateBitLen = (fsmd.fsm.keys.map(_.id).max + 1).width
     val regSet = immutable.SortedSet.from(regs.valuesIterator)
 
     val regDatapath = immutable.SortedMap.from:
@@ -222,19 +225,24 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
             r.indent("'1: begin", "end"):
               r ++= "w_enable <= 1'd1;"
               r ++= s"result <= ${convBitWidth(Type.U(64) -> cdfg.main.retTyp, "reg0")};"
-            for (State(q1) -> next) <- fsmd.fsm do
-              r ++= s"$stateBitLen'd$q1: ${reg2sv(Register.STATE)} <= " + next.match
-                case Transition.Always(State(q2)) =>
-                  s"$stateBitLen'd$q2;"
-                case Transition.Conditional(cond, condReg, State(q2), State(q3)) =>
-                  s"(${source2sv(cond, condReg, None)}) ? " +
-                  s"$stateBitLen'd$q2 : $stateBitLen'd$q3;"
+            for (q1 -> next) <- fsmd.fsm do
+              r ++= s"${state2sv(q1)}: ${reg2sv(Register.STATE)} <= " + next.match
+                case Transition.Always(q2) =>
+                  s"${state2sv(q2)};"
+                case Transition.Conditional(cond, condReg, q2, q3) =>
+                  s"(${source2sv(cond, condReg, None)}) ? ${state2sv(q2)} : ${state2sv(q3)};"
                 case Transition.LinkReg =>
                   "linkreg;"
 
           // registers form stations
           for (reg, _) <- regDatapath do
-            r ++= s"${reg2sv(reg)} <= ${reg2svStation(reg)};"
+            r.indent(s"case(${reg2sv(Register.STATE)})", "endcase"):
+              for
+                merges <- fsmd.datapath.merges.get(reg)
+                (q1 -> station) <- merges
+              do
+                r ++= s"${state2sv(q1)}: ${reg2sv(reg)} <= ${reg2svStation(station.reg)};"
+              r ++= s"default: ${reg2sv(reg)} <= ${reg2svStation(reg)};"
 
     // array modules
     /**

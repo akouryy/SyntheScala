@@ -10,11 +10,12 @@ class Composer(
 ):
   val fsm = mutable.SortedMap.empty[State, Transition]
   val datapath = mutable.Map.empty[ConnPort.Dst, mutable.SortedMap[State, Source]]
+  val merges = mutable.Map.empty[Register, mutable.SortedMap[State, ConnPort.RegStation]]
 
   def compose: FSMD =
     composeDatapath(graph.main)
     composeFSM(graph.main)
-    FSMD(fsm, Datapath(datapath))
+    FSMD(fsm, Datapath(datapath, merges))
 
   private def blockFirstState(fn: CDFGFun, bi: cdfg.BlockIndex): State =
     val b = fn.blocks(bi)
@@ -65,6 +66,10 @@ class Composer(
 
     datapath(pin)(q) = newSrc
   end mergeDatapath
+
+  private def mergeMerge(to: Register, q: State, from: Register): Unit =
+    merges.getOrElseUpdate(to, mutable.SortedMap.empty)(q) = new ConnPort.RegStation(from)
+  end mergeMerge
 
   private def vc2connSrc(vc: VC): ConnPort.Src = vc match
     case VC.V(v) => new ConnPort.Reg(regs(v))
@@ -136,11 +141,7 @@ class Composer(
             (ibi, inLabs) <- ibis.zipStrict(inLabss)
             (inLab, outLab) <- inLabs.zipStrict(outLabs)
           do
-            mergeDatapath(
-              new ConnPort.Reg(regs(outLab)),
-              sche.jumpStates(ji)(ibi),
-              Source.Always(new ConnPort.Reg(regs(inLab))),
-            )
+            mergeMerge(regs(outLab), sche.jumpStates(ji)(ibi), regs(inLab))
         case Jump.TailCall(ji, _, params, ibi) =>
           for (param, i) <- params.zipWithIndex do
             mergeDatapath(

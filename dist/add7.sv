@@ -36,21 +36,21 @@ module main (
   wire[12:0] out0_Bin1 = in0_Bin1 + in1_Bin1;
 
   assign in0_Bin1 =
-    stateR == 3'd1 ? reg3[9:0] :
+    stateR == 3'd1 ? reg5[9:0] :
     'x;
   assign in1_Bin1 =
-    stateR == 3'd1 ? reg4[12:0] :
+    stateR == 3'd1 ? reg6[12:0] :
     'x;
   assign in0_Bin0 =
-    stateR == 3'd1 ? reg5[12:0] :
-    stateR == 3'd2 ? reg4[12:0] :
+    stateR == 3'd1 ? reg3[12:0] :
+    stateR == 3'd2 ? reg3[12:0] :
     stateR == 3'd3 ? reg2[12:0] :
     stateR == 3'd4 ? reg1[12:0] :
     stateR == 3'd5 ? reg0[12:0] :
     'x;
   assign in1_Bin0 =
-    stateR == 3'd1 ? reg6[12:0] :
-    stateR == 3'd2 ? reg3[12:0] :
+    stateR == 3'd1 ? reg4[12:0] :
+    stateR == 3'd2 ? reg4[12:0] :
     stateR == 3'd3 ? reg3[12:0] :
     stateR == 3'd4 ? reg2[12:0] :
     stateR == 3'd5 ? reg1[12:0] :
@@ -100,11 +100,21 @@ module main (
         3'd5: stateR <= 3'd6;
         3'd6: stateR <= linkreg;
       endcase
-      reg0 <= stationReg0;
-      reg1 <= stationReg1;
-      reg2 <= stationReg2;
-      reg3 <= stationReg3;
-      reg4 <= stationReg4;
+      case(stateR)
+        default: reg0 <= stationReg0;
+      endcase
+      case(stateR)
+        default: reg1 <= stationReg1;
+      endcase
+      case(stateR)
+        default: reg2 <= stationReg2;
+      endcase
+      case(stateR)
+        default: reg3 <= stationReg3;
+      endcase
+      case(stateR)
+        default: reg4 <= stationReg4;
+      endcase
     end
   end
 endmodule // main

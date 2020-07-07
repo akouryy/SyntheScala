@@ -11,11 +11,11 @@ digraph Program_ {
   Block0 -> Jump1;
   Jump1 -> Block1 [label="@c"];
   Jump1 -> Block2 [label="!@c"];
-  Jump2[label = <<font color="#ff4411" point-size="8"><sup>q4|q6</sup></font>Merge.2>; shape = invtrapezium; style = rounded];
+  Jump2[label = <<font color="#ff4411" point-size="8"><sup>q3|q4</sup></font>Merge.2>; shape = invtrapezium; style = rounded];
   Block1 -> Jump2 [label="b"];
   Block2 -> Jump2 [label="@e"];
   Jump2 -> Block3 [label="@f"];
-  Jump3[label = <<font color="#ff4411" point-size="8"><sup>q8</sup></font>Return.3>; shape = lpromoter];
+  Jump3[label = <<font color="#ff4411" point-size="8"><sup>q6</sup></font>Return.3>; shape = lpromoter];
   Block3 -> Jump3 [label="@g"];
   Block0 [label = "Block0"];
   Block1 [label = "Block1"];
@@ -38,11 +38,11 @@ digraph Program_ {
   subgraph cluster_dfg_Block2 {
     node [shape = oval];
     label = <Block2<br/>(@a<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>=&gt;@a<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>,@e<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>)>;
-    6 [label=<<font color="#ff4411" point-size="8"><sup>q5</sup></font>@e<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:2>];
+    6 [label=<<font color="#ff4411" point-size="8"><sup>q4</sup></font>@e<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:2>];
   }
   subgraph cluster_dfg_Block3 {
     node [shape = oval];
     label = <Block3<br/>(@a<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>,@f<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>=&gt;@g<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>)>;
-    7 [label=<<font color="#ff4411" point-size="8"><sup>q7</sup></font>@g<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:1<font color="#00aa11" point-size="8"><sup>U2</sup></font>+<font color="#3311ff" point-size="8"><sup>Bin1</sup></font>@f>];
+    7 [label=<<font color="#ff4411" point-size="8"><sup>q5</sup></font>@g<font color="#00aa11" point-size="8"><sup>U2</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:1<font color="#00aa11" point-size="8"><sup>U2</sup></font>+<font color="#3311ff" point-size="8"><sup>Bin1</sup></font>@f>];
   }
 }
