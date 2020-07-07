@@ -13,9 +13,13 @@ module main (
   reg[3:0] stateR;
   reg[3:0] linkreg;
   reg[63:0] reg0;
+  wire[63:0] stationReg0;
   reg[63:0] reg1;
+  wire[63:0] stationReg1;
   reg[63:0] reg2;
+  wire[63:0] stationReg2;
   reg[63:0] reg3;
+  wire[63:0] stationReg3;
 
   wire[9:0] in0_Bin0;
   wire[9:0] in1_Bin0;
@@ -76,6 +80,24 @@ module main (
     'x;
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
+  assign stationReg0 =
+    stateR == 4'd2 ? reg1 :
+    stateR == 4'd4 ? {{37{arrRData_a[26]}}, arrRData_a} :
+    stateR == 4'd6 ? out0_Bin2 :
+    stateR == 4'd8 ? reg2 :
+    reg0;
+  assign stationReg1 =
+    stateR == 4'd7 ? out0_Bin3 :
+    stateR == 4'd8 ? reg1 :
+    reg1;
+  assign stationReg2 =
+    stateR == 4'd1 ? {63'd0, out0_Bin0} :
+    stateR == 4'd3 ? {54'd0, out0_Bin1} :
+    reg2;
+  assign stationReg3 =
+    stateR == 4'd5 ? {{37{arrRData_a[26]}}, arrRData_a} :
+    reg3;
+
   always @(posedge clk) begin
     if(r_enable) begin
       stateR <= '0;
@@ -90,7 +112,7 @@ module main (
           result <= reg0;
         end
         4'd0: stateR <= 4'd1;
-        4'd1: stateR <= (out0_Bin0) ? 4'd2 : 4'd3;
+        4'd1: stateR <= (stationReg2) ? 4'd2 : 4'd3;
         4'd2: stateR <= linkreg;
         4'd3: stateR <= 4'd4;
         4'd4: stateR <= 4'd5;
@@ -99,23 +121,10 @@ module main (
         4'd7: stateR <= 4'd8;
         4'd8: stateR <= 4'd0;
       endcase
-      case(stateR)
-        4'd2: reg0 <= reg1;
-        4'd4: reg0 <= {{37{arrRData_a[26]}}, arrRData_a};
-        4'd6: reg0 <= out0_Bin2;
-        4'd8: reg0 <= reg2;
-      endcase
-      case(stateR)
-        4'd7: reg1 <= out0_Bin3;
-        4'd8: reg1 <= reg1;
-      endcase
-      case(stateR)
-        4'd1: reg2 <= {63'd0, out0_Bin0};
-        4'd3: reg2 <= {54'd0, out0_Bin1};
-      endcase
-      case(stateR)
-        4'd5: reg3 <= {{37{arrRData_a[26]}}, arrRData_a};
-      endcase
+      reg0 <= stationReg0;
+      reg1 <= stationReg1;
+      reg2 <= stationReg2;
+      reg3 <= stationReg3;
     end
   end
 endmodule // main

@@ -12,8 +12,11 @@ module main (
   reg[4:0] stateR;
   reg[4:0] linkreg;
   reg[63:0] reg0;
+  wire[63:0] stationReg0;
   reg[63:0] reg1;
+  wire[63:0] stationReg1;
   reg[63:0] reg2;
+  wire[63:0] stationReg2;
 
   wire signed[63:0] in0_Bin0;
   wire signed[0:0] in1_Bin0;
@@ -74,6 +77,25 @@ module main (
     'x;
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
+  assign stationReg0 =
+    stateR == 5'd6 ? arrRData_a :
+    stateR == 5'd7 ? {63'd0, out0_Bin0} :
+    stateR == 5'd9 ? arrRData_a :
+    stateR == 5'd10 ? out0_Bin1 :
+    stateR == 5'd11 ? reg0 :
+    stateR == 5'd13 ? arrRData_a :
+    stateR == 5'd14 ? out0_Bin1 :
+    stateR == 5'd15 ? reg0 :
+    stateR == 5'd18 ? arrRData_a :
+    stateR == 5'd19 ? reg0 :
+    reg0;
+  assign stationReg1 =
+    stateR == 5'd1 ? 64'd1 :
+    reg1;
+  assign stationReg2 =
+    stateR == 5'd1 ? 64'd0 :
+    reg2;
+
   always @(posedge clk) begin
     if(r_enable) begin
       stateR <= '0;
@@ -93,7 +115,7 @@ module main (
         5'd4: stateR <= 5'd5;
         5'd5: stateR <= 5'd6;
         5'd6: stateR <= 5'd7;
-        5'd7: stateR <= (out0_Bin0) ? 5'd8 : 5'd12;
+        5'd7: stateR <= (stationReg0) ? 5'd8 : 5'd12;
         5'd8: stateR <= 5'd9;
         5'd9: stateR <= 5'd10;
         5'd10: stateR <= 5'd11;
@@ -107,24 +129,9 @@ module main (
         5'd18: stateR <= 5'd19;
         5'd19: stateR <= linkreg;
       endcase
-      case(stateR)
-        5'd6: reg0 <= arrRData_a;
-        5'd7: reg0 <= {63'd0, out0_Bin0};
-        5'd9: reg0 <= arrRData_a;
-        5'd10: reg0 <= out0_Bin1;
-        5'd11: reg0 <= reg0;
-        5'd13: reg0 <= arrRData_a;
-        5'd14: reg0 <= out0_Bin1;
-        5'd15: reg0 <= reg0;
-        5'd18: reg0 <= arrRData_a;
-        5'd19: reg0 <= reg0;
-      endcase
-      case(stateR)
-        5'd1: reg1 <= 64'd1;
-      endcase
-      case(stateR)
-        5'd1: reg2 <= 64'd0;
-      endcase
+      reg0 <= stationReg0;
+      reg1 <= stationReg1;
+      reg2 <= stationReg2;
     end
   end
 endmodule // main

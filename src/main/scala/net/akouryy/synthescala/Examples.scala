@@ -1,7 +1,5 @@
 package net.akouryy.synthescala
 
-import java.nio.charset.StandardCharsets
-import java.nio.file.{Paths, Files}
 import dsl.{_, given _}
 import toki._
 

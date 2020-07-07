@@ -14,12 +14,19 @@ module main (
   reg[2:0] stateR;
   reg[2:0] linkreg;
   reg[63:0] reg0;
+  wire[63:0] stationReg0;
   reg[63:0] reg1;
+  wire[63:0] stationReg1;
   reg[63:0] reg2;
+  wire[63:0] stationReg2;
   reg[63:0] reg3;
+  wire[63:0] stationReg3;
   reg[63:0] reg4;
+  wire[63:0] stationReg4;
   reg[63:0] reg5;
+  wire[63:0] stationReg5;
   reg[63:0] reg6;
+  wire[63:0] stationReg6;
 
   wire[12:0] in0_Bin0;
   wire[12:0] in1_Bin0;
@@ -27,7 +34,6 @@ module main (
   wire[9:0] in0_Bin1;
   wire[12:0] in1_Bin1;
   wire[12:0] out0_Bin1 = in0_Bin1 + in1_Bin1;
-
 
   assign in0_Bin1 =
     stateR == 3'd1 ? reg3[9:0] :
@@ -50,6 +56,23 @@ module main (
     stateR == 3'd5 ? reg1[12:0] :
     'x;
 
+  assign stationReg0 =
+    stateR == 3'd5 ? {51'd0, out0_Bin0} :
+    stateR == 3'd6 ? reg0 :
+    reg0;
+  assign stationReg1 =
+    stateR == 3'd4 ? {51'd0, out0_Bin0} :
+    reg1;
+  assign stationReg2 =
+    stateR == 3'd3 ? {51'd0, out0_Bin0} :
+    reg2;
+  assign stationReg3 =
+    stateR == 3'd1 ? {51'd0, out0_Bin0} :
+    stateR == 3'd2 ? {51'd0, out0_Bin0} :
+    reg3;
+  assign stationReg4 =
+    stateR == 3'd1 ? {51'd0, out0_Bin1} :
+    reg4;
 
   always @(posedge clk) begin
     if(r_enable) begin
@@ -77,23 +100,11 @@ module main (
         3'd5: stateR <= 3'd6;
         3'd6: stateR <= linkreg;
       endcase
-      case(stateR)
-        3'd5: reg0 <= {51'd0, out0_Bin0};
-        3'd6: reg0 <= reg0;
-      endcase
-      case(stateR)
-        3'd4: reg1 <= {51'd0, out0_Bin0};
-      endcase
-      case(stateR)
-        3'd3: reg2 <= {51'd0, out0_Bin0};
-      endcase
-      case(stateR)
-        3'd1: reg3 <= {51'd0, out0_Bin0};
-        3'd2: reg3 <= {51'd0, out0_Bin0};
-      endcase
-      case(stateR)
-        3'd1: reg4 <= {51'd0, out0_Bin1};
-      endcase
+      reg0 <= stationReg0;
+      reg1 <= stationReg1;
+      reg2 <= stationReg2;
+      reg3 <= stationReg3;
+      reg4 <= stationReg4;
     end
   end
 endmodule // main

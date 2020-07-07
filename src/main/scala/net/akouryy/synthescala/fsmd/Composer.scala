@@ -42,9 +42,9 @@ class Composer(
             fsm(q1) = Transition.Always(blockFirstState(fn, bi))
         case Jump.Branch(ji, cond, ibi, tbi, fbi) =>
           val q1 = sche.jumpStates(ji)(ibi)
-          val port = new ConnPort.Reg(regs(cond))
           fsm(q1) = Transition.Conditional(
-            datapath(port).getOrElse(q1, Source.Always(ConnPort.Inherit)), port,
+            Source.Always(new ConnPort.RegStation(regs(cond))),
+            new ConnPort.Reg(regs(cond)),
             blockFirstState(fn, tbi), blockFirstState(fn, fbi),
           )
   end composeFSM

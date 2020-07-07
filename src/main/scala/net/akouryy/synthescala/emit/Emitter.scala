@@ -36,6 +36,8 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     case Register.STATE => s"stateR"
     case _ => s"reg${reg.id}"
 
+  private def reg2svStation(reg: Register): String = "station" + reg2sv(reg).capitalize
+
   private def convBitWidth(typs: (Type, Type), v: String): String =
     import Type._
     typs match
@@ -60,6 +62,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
       case ConnPort.CalcOut(cid, port) => out(calculators(cid), port) :> reqTyp
       case ConnPort.ArrReadValue(arr) => readData(arr) :> reqTyp
       case ConnPort.Reg(reg) => reg2sv(reg) :> reqTyp
+      case ConnPort.RegStation(reg) => reg2svStation(reg) :> reqTyp
       case ConnPort.Const(num) =>
         def base(w: Int) = if num >= 0 then s"$w'd$num" else s"(-$$signed($w'd${num.abs}))"
         reqTyp.get match
@@ -89,6 +92,10 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     val stateBitLen = (fsmd.fsm.keys.map(_.id).max + 1).width
     val regSet = immutable.SortedSet.from(regs.valuesIterator)
 
+    val regDatapath = immutable.SortedMap.from:
+      for (ConnPort.Reg(reg), paths) <- fsmd.datapath.map
+      yield (reg, paths)
+
     // header
     r ++= "`default_nettype none"
     r ++= s"module main ("
@@ -112,6 +119,10 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
         val name = reg2sv(reg)
         varTyps(name) = Type.U(64)
         r ++= defReg(name)
+
+        val station = reg2svStation(reg)
+        varTyps(station) = Type.U(64)
+        r ++= defWire(station)
       r ++= ""
 
       // definitions: calculator ports
@@ -150,7 +161,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
         r ++= defWire(readData(arr))
         r ++= defWire(writeData(arr))
         r ++= s"arr_${lab2sv(arr)} arr_${lab2sv(arr)}(.*);"
-      r ++= ""
+      if cdfg.arrayDefs.nonEmpty then r ++= ""
 
       // calculator input port selectors
       for (dst: ConnPort.CalcIn, paths) <- fsmd.datapath.map do
@@ -183,6 +194,17 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
               case _ => r ++= s"'x;"
         val rd = readData(arr)
         r ++= s"assign ${ctrl(rd)} = controlArr ? ${rd} : 'x;"
+      if cdfg.arrayDefs.nonEmpty then r ++= ""
+
+      // register station selectors
+      for (reg, paths) <- regDatapath do
+        val name = reg2svStation(reg)
+        val typ = Some(varTyps(name))
+        r.indent(s"assign $name =", ""):
+          for (state -> source) <- paths do
+            r ++= s"${reg2sv(Register.STATE)} == $stateBitLen'd${state.id} ? " +
+                  s"${source2sv(source, new ConnPort.Reg(reg), typ)} :"
+          r ++= s"${reg2sv(reg)};"
       r ++= ""
 
       r.indent("always @(posedge clk) begin", "end"):
@@ -210,17 +232,9 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
                 case Transition.LinkReg =>
                   "linkreg;"
 
-          // register selectors
-          val regDatapath = immutable.SortedMap.from:
-            for (ConnPort.Reg(reg), paths) <- fsmd.datapath.map
-            yield (reg, paths)
-          for (reg, paths) <- regDatapath do
-            val name = reg2sv(reg)
-            val typ = Some(varTyps(name))
-            r.indent(s"case(${reg2sv(Register.STATE)})", "endcase"):
-              for (state -> source) <- paths do
-                r ++= s"$stateBitLen'd${s"${state.id}:"} $name <= " +
-                      s"${source2sv(source, new ConnPort.Reg(reg), typ)};"
+          // registers form stations
+          for (reg, _) <- regDatapath do
+            r ++= s"${reg2sv(reg)} <= ${reg2svStation(reg)};"
 
     // array modules
     /**
