@@ -12,8 +12,8 @@ class Composer(
   val datapath = mutable.Map.empty[ConnPort.Dst, mutable.SortedMap[State, Source]]
 
   def compose: FSMD =
-    composeFSM(graph.main)
     composeDatapath(graph.main)
+    composeFSM(graph.main)
     FSMD(fsm, Datapath(datapath))
 
   private def blockFirstState(fn: CDFGFun, bi: cdfg.BlockIndex): State =
@@ -42,8 +42,10 @@ class Composer(
             fsm(q1) = Transition.Always(blockFirstState(fn, bi))
         case Jump.Branch(ji, cond, ibi, tbi, fbi) =>
           val q1 = sche.jumpStates(ji)(ibi)
+          val port = new ConnPort.Reg(regs(cond))
           fsm(q1) = Transition.Conditional(
-            regs(cond), blockFirstState(fn, tbi), blockFirstState(fn, fbi),
+            datapath(port).getOrElse(q1, Source.Always(ConnPort.Inherit)), port,
+            blockFirstState(fn, tbi), blockFirstState(fn, fbi),
           )
   end composeFSM
 

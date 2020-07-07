@@ -11,13 +11,23 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
   val interferenceGraph: IGraph =
     val liveInsForState = Liveness.liveInsForState(graph.main, sche)
 
-    mutable.MultiDict.from:
-      for liveIn <- liveInsForState.valuesIterator
-          v <- liveIn
-          w <- liveIn
-          if v != w
-          intf <- Seq(v -> w, w -> v)
+    mutable.MultiDict.from((
+      for
+        liveIn <- liveInsForState.valuesIterator
+        v <- liveIn
+        w <- liveIn
+        if v != w
+        intf <- Seq(v -> w, w -> v)
       yield intf
+    ) ++ (
+      for
+        b <- graph.main.blocks.valuesIterator
+        v <- b.outputs
+        w <- b.outputs
+        if v != w
+        intf <- Seq(v -> w, w -> v)
+      yield intf
+    ))
   end interferenceGraph
 
   def allocate(fn: CDFGFun): Allocations =

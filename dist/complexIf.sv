@@ -30,10 +30,10 @@ module main (
   arr_a arr_a(.*);
 
   assign in0_Bin1 =
-    stateR == 4'd9 ? reg1[1:0] :
+    stateR == 4'd8 ? reg1[1:0] :
     'x;
   assign in1_Bin1 =
-    stateR == 4'd9 ? reg0[1:0] :
+    stateR == 4'd8 ? reg0[1:0] :
     'x;
   assign in0_Bin0 =
     stateR == 4'd2 ? reg0[0:0] :
@@ -44,15 +44,15 @@ module main (
 
   assign arrWEnable_a =
     controlArr ? controlArrWEnable_a :
-    stateR == 4'd5 ? 1'd1 :
+    stateR == 4'd4 ? 1'd1 :
     1'd0;
   assign arrAddr_a =
     controlArr ? controlArrAddr_a :
-    stateR == 4'd5 ? reg2[0:0] :
+    stateR == 4'd4 ? reg2[0:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
-    stateR == 4'd5 ? reg0[0:0] :
+    stateR == 4'd4 ? reg0[0:0] :
     'x;
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
@@ -70,22 +70,21 @@ module main (
         end
         4'd0: stateR <= 4'd1;
         4'd1: stateR <= 4'd2;
-        4'd2: stateR <= 4'd3;
-        4'd3: stateR <= reg2 ? 4'd4 : 4'd7;
+        4'd2: stateR <= (out0_Bin0) ? 4'd3 : 4'd6;
+        4'd3: stateR <= 4'd4;
         4'd4: stateR <= 4'd5;
-        4'd5: stateR <= 4'd6;
-        4'd6: stateR <= 4'd9;
+        4'd5: stateR <= 4'd8;
+        4'd6: stateR <= 4'd7;
         4'd7: stateR <= 4'd8;
         4'd8: stateR <= 4'd9;
-        4'd9: stateR <= 4'd10;
-        4'd10: stateR <= linkreg;
+        4'd9: stateR <= linkreg;
       endcase
       case(stateR)
-        4'd6: reg0 <= reg3;
-        4'd7: reg0 <= 64'd2;
-        4'd8: reg0 <= reg0;
-        4'd9: reg0 <= {62'd0, out0_Bin1};
-        4'd10: reg0 <= reg0;
+        4'd5: reg0 <= reg3;
+        4'd6: reg0 <= 64'd2;
+        4'd7: reg0 <= reg0;
+        4'd8: reg0 <= {62'd0, out0_Bin1};
+        4'd9: reg0 <= reg0;
       endcase
       case(stateR)
         4'd1: reg1 <= 64'd1;
@@ -93,10 +92,10 @@ module main (
       case(stateR)
         4'd1: reg2 <= 64'd0;
         4'd2: reg2 <= {63'd0, out0_Bin0};
-        4'd4: reg2 <= 64'd0;
+        4'd3: reg2 <= 64'd0;
       endcase
       case(stateR)
-        4'd4: reg3 <= 64'd1;
+        4'd3: reg3 <= 64'd1;
       endcase
     end
   end

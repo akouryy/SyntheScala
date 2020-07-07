@@ -204,8 +204,9 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
               r ++= s"$stateBitLen'd$q1: ${reg2sv(Register.STATE)} <= " + next.match
                 case Transition.Always(State(q2)) =>
                   s"$stateBitLen'd$q2;"
-                case Transition.Conditional(reg, State(q2), State(q3)) =>
-                  s"${reg2sv(reg)} ? $stateBitLen'd$q2 : $stateBitLen'd$q3;"
+                case Transition.Conditional(cond, condReg, State(q2), State(q3)) =>
+                  s"(${source2sv(cond, condReg, None)}) ? " +
+                  s"$stateBitLen'd$q2 : $stateBitLen'd$q3;"
                 case Transition.LinkReg =>
                   "linkreg;"
 

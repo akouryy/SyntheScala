@@ -97,6 +97,7 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
     jumpStates.getOrElseUpdate(ji, mutable.Map.empty)
     jump match
       case _: Jump.StartFun =>
+      case _: Jump.Branch =>
       case _ => maxState = maxState.succ
     jumpStates(ji)(ibi) = maxState
     if jump.inBlocks.forall(visited)

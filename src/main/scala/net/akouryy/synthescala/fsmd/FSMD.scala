@@ -10,7 +10,7 @@ case class FSMD(
 
 enum Transition:
   case Always(result: State)
-  case Conditional(reg: Register, tru: State, fls: State)
+  case Conditional(cond: Source, condReg: ConnPort.Reg, tru: State, fls: State)
   case LinkReg
 
 enum Source:
