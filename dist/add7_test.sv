@@ -27,7 +27,7 @@ module top();
   end
 
   always @(posedge w_enable) begin
-    $write("result = %d\n", result);
+    $write("ans = 3192, result = %d\n", result);
     $finish;
   end
 

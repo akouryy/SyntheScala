@@ -30,6 +30,20 @@ object Label:
 
   def reset(): Unit = maxTemp = 9
 
+enum VC derives Eql:
+  case V(v: Label)
+  case C(c: Long, typ: toki.Type)
+
+  def fold[T](fv: Label => T)(fc: (Long, toki.Type) => T) = this match
+    case V(v) => fv(v)
+    case C(c, typ) => fc(c, typ)
+
+  def getV: Option[Label] = fold(Some(_))((_, _) => None)
+
+  def getC: Option[(Long, toki.Type)] = fold(_ => None)(Some(_, _))
+
+  def shortString: String = fold(_.str)((c, _) => c.toString)
+
 given[T](using Eql[T, T]) as Eql[Option[T], Option[T]] = Eql.derived
 
 enum BinOp:

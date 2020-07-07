@@ -32,11 +32,11 @@ module top();
   end
 
   always @(posedge w_enable1) begin
-    $write("result1 = %d\n", result1);
+    $write("ans1 = 3, result1 = %d\n", result1);
   end
 
   always @(posedge w_enable2) begin
-    $write("result2 = %d\n", result2);
+    $write("ans2 = 2, result2 = %d\n", result2);
   end
 
   always @(negedge clk) begin

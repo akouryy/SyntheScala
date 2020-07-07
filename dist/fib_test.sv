@@ -26,7 +26,7 @@ module top();
   end
 
   always @(posedge w_enable) begin
-    $write("result: fib(%d) = %d\n", init_n, result);
+    $write("fib(%d) = 165580141, result = %d\n", init_n, result);
     $finish;
   end
 

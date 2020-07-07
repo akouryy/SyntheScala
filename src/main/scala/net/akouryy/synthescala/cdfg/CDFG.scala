@@ -93,7 +93,7 @@ enum Node derives Eql:
   val id: NodeID
 
   case Const(val id: NodeID, value: Long, name: Label)
-  case BinOp(val id: NodeID, op: base.BinOp, left: Label, right: Label, ans: Label)
+  case BinOp(val id: NodeID, op: base.BinOp, left: VC, right: VC, ans: Label)
   case Call(val id: NodeID, fn: String, args: Seq[Label], ret: Label)
   case GetReq(val id: NodeID, awa: NodeID, arr: Label, index: Label)
   /** GetAwait */
@@ -110,7 +110,7 @@ enum Node derives Eql:
 
   def read: Seq[Label] = this match
     case _: Const => Nil
-    case BinOp(_, _, l, r, _) => Seq(l, r)
+    case BinOp(_, _, l, r, _) => Seq(l.getV, r.getV).flatten
     case Call(_, _, as, _) => as
     case GetReq(_, _, _, index) => Seq(index)
     case _: GetAwa => Nil

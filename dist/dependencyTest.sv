@@ -14,7 +14,6 @@ module main (
   reg[63:0] reg0;
   reg[63:0] reg1;
   reg[63:0] reg2;
-  reg[63:0] reg3;
 
   wire signed[63:0] in0_Bin0;
   wire signed[0:0] in1_Bin0;
@@ -30,18 +29,18 @@ module main (
   arr_a arr_a(.*);
 
   assign in0_Bin1 =
-    stateR == 5'd10 ? reg1 :
-    stateR == 5'd14 ? reg1 :
-    'x;
-  assign in1_Bin1 =
     stateR == 5'd10 ? reg0 :
     stateR == 5'd14 ? reg0 :
+    'x;
+  assign in1_Bin1 =
+    stateR == 5'd10 ? $signed(64'd2) :
+    stateR == 5'd14 ? (-$signed(64'd3)) :
     'x;
   assign in0_Bin0 =
     stateR == 5'd7 ? reg0 :
     'x;
   assign in1_Bin0 =
-    stateR == 5'd7 ? {reg2[63], reg2[0:0]} :
+    stateR == 5'd7 ? $signed(1'd0) :
     'x;
 
   assign arrWEnable_a =
@@ -57,14 +56,14 @@ module main (
     1'd0;
   assign arrAddr_a =
     controlArr ? controlArrAddr_a :
-    stateR == 5'd2 ? reg3[0:0] :
-    stateR == 5'd3 ? reg3[0:0] :
-    stateR == 5'd4 ? reg3[0:0] :
-    stateR == 5'd5 ? reg3[0:0] :
-    stateR == 5'd8 ? reg3[0:0] :
-    stateR == 5'd12 ? reg3[0:0] :
-    stateR == 5'd16 ? reg3[0:0] :
-    stateR == 5'd17 ? reg3[0:0] :
+    stateR == 5'd2 ? reg2[0:0] :
+    stateR == 5'd3 ? reg2[0:0] :
+    stateR == 5'd4 ? reg2[0:0] :
+    stateR == 5'd5 ? reg2[0:0] :
+    stateR == 5'd8 ? reg2[0:0] :
+    stateR == 5'd12 ? reg2[0:0] :
+    stateR == 5'd16 ? reg2[0:0] :
+    stateR == 5'd17 ? reg2[0:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
@@ -111,10 +110,10 @@ module main (
       case(stateR)
         5'd6: reg0 <= arrRData_a;
         5'd7: reg0 <= {63'd0, out0_Bin0};
-        5'd8: reg0 <= 64'd2;
+        5'd9: reg0 <= arrRData_a;
         5'd10: reg0 <= out0_Bin1;
         5'd11: reg0 <= reg0;
-        5'd12: reg0 <= $unsigned(-$signed(64'd3));
+        5'd13: reg0 <= arrRData_a;
         5'd14: reg0 <= out0_Bin1;
         5'd15: reg0 <= reg0;
         5'd18: reg0 <= arrRData_a;
@@ -122,14 +121,9 @@ module main (
       endcase
       case(stateR)
         5'd1: reg1 <= 64'd1;
-        5'd9: reg1 <= arrRData_a;
-        5'd13: reg1 <= arrRData_a;
       endcase
       case(stateR)
         5'd1: reg2 <= 64'd0;
-      endcase
-      case(stateR)
-        5'd1: reg3 <= 64'd0;
       endcase
     end
   end

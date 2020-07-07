@@ -64,6 +64,11 @@ class Composer(
           Conditional(reg, tru, fls)
 
     datapath(pin)(q) = newSrc
+  end mergeDatapath
+
+  private def vc2connSrc(vc: VC): ConnPort.Src = vc match
+    case VC.V(v) => new ConnPort.Reg(regs(v))
+    case VC.C(c, _) => new ConnPort.Const(c)
 
   private def composeDatapath(fn: CDFGFun): Unit =
     for b <- fn.blocks.valuesIterator
@@ -84,11 +89,11 @@ class Composer(
           val calc = bindings(b.i, nid)
           mergeDatapath(
             new ConnPort.CalcIn(calc.id, 0), q,
-            Source.Always(new ConnPort.Reg(regs(l))),
+            Source.Always(vc2connSrc(l)),
           )
           mergeDatapath(
             new ConnPort.CalcIn(calc.id, 1), q,
-            Source.Always(new ConnPort.Reg(regs(r))),
+            Source.Always(vc2connSrc(r)),
           )
           mergeDatapath(
             new ConnPort.Reg(regs(a)), q,

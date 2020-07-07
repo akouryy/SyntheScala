@@ -42,8 +42,8 @@ class AllocatingBinder(graph: CDFG, typeEnv: toki.TypeEnv, sche: Schedule):
 
       nodes.foreach:
         case node @ Node.BinOp(_, op, l, r, _) =>
-          val lt = typeEnv(l)
-          val rt = typeEnv(r)
+          val lt = l.fold(typeEnv)((_, typ) => typ)
+          val rt = r.fold(typeEnv)((_, typ) => typ)
           bindCalc(b.i, node, Calculator.Bin(op, lt, rt)) {
             case Calculator.Bin(_, `op`, clt, crt) =>
               clt.getMax(lt) == Some(clt) && crt.getMax(rt) == Some(crt)

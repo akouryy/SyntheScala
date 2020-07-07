@@ -29,6 +29,9 @@ class GraphDrawer(
       typeEnv.get(id).fold("")(t => sup("#00aa11", t.toString)) +
       sup("#3311ff", regs.getOrElse(id, "r?"))
 
+  private def vcStr(vc: VC): String = vc.fold(_.str):
+    (c, typ) => c.toString + sup("#00aa11", typ.toString)
+
   private def (s: String).singleLine: String = s"""\n *""".r.replaceAllIn(s, "")
 
   //noinspection SpellCheckingInspection
@@ -41,8 +44,8 @@ class GraphDrawer(
       r ++= """edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];"""
 
       for (ji -> j) <- graph.main.jumps do
-        val label = s"""${j.productPrefix}.${ji.indexString}
-                        ${stateStr(sche.jumpStates.get(ji).map(_.values.toSet))}
+        val label = s"""${stateStr(sche.jumpStates.get(ji).map(_.values.toSet))}
+                        ${j.productPrefix}.${ji.indexString}
                         """.singleLine
 
         j.match
@@ -96,7 +99,7 @@ class GraphDrawer(
                 val bound = sup("#3311ff", unsafeEscape(
                   bindings.get(bi, nid).fold("?")(_.shortString)
                 ))
-                s"""${idStr(a)}:${l.str}${unsafeEscape(op.operatorString)}$bound${r.str}"""
+                s"""${idStr(a)}:${vcStr(l)}${unsafeEscape(op.operatorString)}$bound${vcStr(r)}"""
               case Node.Call(_, fn, args, ret) =>
                 s"""${idStr(ret)}:$fn(${args.map(_.str).mkString(",")})"""
               case Node.GetReq(_, _, arr, index) =>
@@ -108,8 +111,8 @@ class GraphDrawer(
 
             r ++=
               s"""${nd.id} [label=<
-                    $labelBase
                     ${stateStr(sche.nodeStates.get(bi -> nd.id))}
+                    $labelBase
                   >];""".singleLine
 
           (

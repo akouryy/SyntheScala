@@ -48,7 +48,7 @@ class Specializer:
         aliasMap(dest) = normalize(n)
       case Bin(op, Ref(l), Ref(r)) =>
         writtenLabel += dest
-        addNode(Node.BinOp(NodeID.generate(), op, normalize(l), normalize(r), dest))
+        addNode(Node.BinOp(NodeID.generate(), op, VC.V(normalize(l)), VC.V(normalize(r)), dest))
       case Call(fn, args) =>
         writtenLabel += dest
         addNode(Node.Call(

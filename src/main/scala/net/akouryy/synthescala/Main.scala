@@ -33,8 +33,12 @@ object Main:
     cdfg.Liveness.insertInOuts(graph)
     // PP.pprintln(graph)
     print(fansi.Color.Full(69)(s"CO; "))
-    cdfg.optimize.Optimizer(graph)
+    cdfg.optimize.Optimizer(graph, typeEnv)
     // PP.pprintln(graph)
+    Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
+      cdfg.GraphDrawer(graph, typeEnv)
+          .draw.getBytes(StandardCharsets.UTF_8),
+    )
     print(fansi.Color.Full(69)(s"SC; "))
     val schedule = cdfg.schedule.GorgeousScheduler(graph).schedule
     // PP.pprintln(schedule)
