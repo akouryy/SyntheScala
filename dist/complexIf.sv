@@ -9,8 +9,8 @@ module main (
   output reg w_enable,
   output reg[1:0] result
 );
-  reg[2:0] stateR;
-  reg[2:0] linkreg;
+  reg[3:0] stateR;
+  reg[3:0] linkreg;
   reg[63:0] reg0;
   reg[63:0] reg1;
   reg[63:0] reg2;
@@ -30,29 +30,29 @@ module main (
   arr_a arr_a(.*);
 
   assign in0_Bin1 =
-    stateR == 3'd5 ? reg1[1:0] :
+    stateR == 4'd9 ? reg1[1:0] :
     'x;
   assign in1_Bin1 =
-    stateR == 3'd5 ? reg0[1:0] :
+    stateR == 4'd9 ? reg0[1:0] :
     'x;
   assign in0_Bin0 =
-    stateR == 3'd1 ? reg0[0:0] :
+    stateR == 4'd2 ? reg0[0:0] :
     'x;
   assign in1_Bin0 =
-    stateR == 3'd1 ? reg2[0:0] :
+    stateR == 4'd2 ? reg2[0:0] :
     'x;
 
   assign arrWEnable_a =
     controlArr ? controlArrWEnable_a :
-    stateR == 3'd3 ? 1'd1 :
+    stateR == 4'd5 ? 1'd1 :
     1'd0;
   assign arrAddr_a =
     controlArr ? controlArrAddr_a :
-    stateR == 3'd3 ? reg3[0:0] :
+    stateR == 4'd5 ? reg2[0:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
-    stateR == 3'd3 ? reg0[0:0] :
+    stateR == 4'd5 ? reg0[0:0] :
     'x;
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
@@ -68,31 +68,35 @@ module main (
           w_enable <= 1'd1;
           result <= reg0[1:0];
         end
-        3'd5: stateR <= 3'd6;
-        3'd2: stateR <= reg2 ? 3'd3 : 3'd4;
-        3'd6: stateR <= linkreg;
-        3'd3: stateR <= 3'd5;
-        3'd4: stateR <= 3'd5;
-        3'd1: stateR <= 3'd2;
-        3'd0: stateR <= 3'd1;
+        4'd0: stateR <= 4'd1;
+        4'd1: stateR <= 4'd2;
+        4'd2: stateR <= 4'd3;
+        4'd3: stateR <= reg2 ? 4'd4 : 4'd7;
+        4'd4: stateR <= 4'd5;
+        4'd5: stateR <= 4'd6;
+        4'd6: stateR <= 4'd9;
+        4'd7: stateR <= 4'd8;
+        4'd8: stateR <= 4'd9;
+        4'd9: stateR <= 4'd10;
+        4'd10: stateR <= linkreg;
       endcase
       case(stateR)
-        3'd2: reg0 <= reg2 ? reg0 : 64'd2;
-        3'd3: reg0 <= reg2;
-        3'd4: reg0 <= reg0;
-        3'd5: reg0 <= {62'd0, out0_Bin1};
-        3'd6: reg0 <= reg0;
+        4'd6: reg0 <= reg3;
+        4'd7: reg0 <= 64'd2;
+        4'd8: reg0 <= reg0;
+        4'd9: reg0 <= {62'd0, out0_Bin1};
+        4'd10: reg0 <= reg0;
       endcase
       case(stateR)
-        3'd0: reg1 <= 64'd1;
+        4'd1: reg1 <= 64'd1;
       endcase
       case(stateR)
-        3'd0: reg2 <= 64'd0;
-        3'd1: reg2 <= {63'd0, out0_Bin0};
-        3'd2: reg2 <= reg2 ? 64'd1 : reg2;
+        4'd1: reg2 <= 64'd0;
+        4'd2: reg2 <= {63'd0, out0_Bin0};
+        4'd4: reg2 <= 64'd0;
       endcase
       case(stateR)
-        3'd2: reg3 <= reg2 ? 64'd0 : reg3;
+        4'd4: reg3 <= 64'd1;
       endcase
     end
   end

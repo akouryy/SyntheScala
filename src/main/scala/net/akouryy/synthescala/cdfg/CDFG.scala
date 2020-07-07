@@ -56,17 +56,14 @@ object JumpIndex:
 
 case class Block(
   i: BlockIndex,
+  inputs: Seq[Label], outputs: Seq[Label],
   /*names: Map[String, Int /* node idx */],*/ nodes: Map[NodeID, Node],
   arrayDeps: UnweightedGraph[NodeID],
   inJumpIndex: JumpIndex, outJump: JumpIndex,
 ):
-  def defs: Iterable[Label] = nodes.values.flatMap:
-    case _: Node.Input => Nil
-    case nd => nd.written
+  def defs: Iterable[Label] = nodes.values.flatMap(_.written)
 
-  def uses: Iterable[Label] = nodes.values.flatMap:
-    case _: Node.Output => Nil
-    case nd => nd.read
+  def uses: Iterable[Label] = nodes.values.flatMap(_.read)
 
   lazy val writeMap: Map[Label, NodeID] =
     nodes.valuesIterator.flatMap(nd => nd.written.map(_ -> nd.id)).toMap
@@ -77,20 +74,25 @@ case class Block(
       res(lab) = nd.id :: res.getOrElse(lab, Nil)
     res.toMap
 
-  lazy val inputs: Set[Node] = nodes.valuesIterator.filter(_.isInput).toSet
+  def getWritingNode(label: Label): Option[NodeID] =
+    Option.unless(inputs.contains(label))(writeMap(label))
+
+  def getReadingNodes(label: Label): Seq[NodeID] =
+    if outputs.contains(label)
+      readMap.getOrElse(label, Seq.empty)
+    else
+      readMap(label)
 
   def stateToNodes(sche: schedule.Schedule): collection.MultiDict[State, Node] =
     mutable.SortedMultiDict.from:
-      for (nid -> node) <- nodes.toSeq if !node.isInput yield
+      for (nid -> node) <- nodes.toSeq yield
         sche.nodeStates(i, nid) -> node
 end Block
 
 enum Node derives Eql:
   val id: NodeID
 
-  case Input(val id: NodeID, name: Label)
   case Const(val id: NodeID, value: Long, name: Label)
-  case Output(val id: NodeID, name: Label)
   case BinOp(val id: NodeID, op: base.BinOp, left: Label, right: Label, ans: Label)
   case Call(val id: NodeID, fn: String, args: Seq[Label], ret: Label)
   case GetReq(val id: NodeID, awa: NodeID, arr: Label, index: Label)
@@ -102,18 +104,12 @@ enum Node derives Eql:
 
   def withID: (NodeID, Node) = id -> this
 
-  def isInput: Boolean = this match
-    case _: (Input | Const) => true
-    case _ => false
-
   def isMemoryRelated: Boolean = this match
     case _: (GetReq | GetAwa | Put) => true
     case _ => false
 
   def read: Seq[Label] = this match
-    case _: Input => Nil
     case _: Const => Nil
-    case Output(_, n) => Seq(n)
     case BinOp(_, _, l, r, _) => Seq(l, r)
     case Call(_, _, as, _) => as
     case GetReq(_, _, _, index) => Seq(index)
@@ -121,9 +117,7 @@ enum Node derives Eql:
     case Put(_, _, index, value) => Seq(index, value)
 
   def written: Option[Label] = this match
-    case Input(_, n) => Some(n)
     case Const(_, _, n) => Some(n)
-    case _: Output => None
     case BinOp(_, _, _, _, a) => Some(a)
     case Call(_, _, _, r) => Some(r)
     case _: GetReq => None

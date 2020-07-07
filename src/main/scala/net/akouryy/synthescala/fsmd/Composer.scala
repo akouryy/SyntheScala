@@ -8,7 +8,7 @@ class Composer(
   graph: CDFG, sche: cdfg.schedule.Schedule,
   regs: bind.RegisterAllocator.Allocations, bindings: bind.Binder.Bindings,
 ):
-  val fsm = mutable.Map.empty[State, Transition]
+  val fsm = mutable.SortedMap.empty[State, Transition]
   val datapath = mutable.Map.empty[ConnPort.Dst, mutable.SortedMap[State, Source]]
 
   def compose: FSMD =
@@ -16,15 +16,17 @@ class Composer(
     composeDatapath(graph.main)
     FSMD(fsm, Datapath(datapath))
 
-  private def blockFirstState(fn: CDFGFun, bi: cdfg.BlockIndex) =
-    fn.blocks(bi).stateToNodes(sche).keySet.head
+  private def blockFirstState(fn: CDFGFun, bi: cdfg.BlockIndex): State =
+    val b = fn.blocks(bi)
+    b.stateToNodes(sche).keySet.headOption
+     .getOrElse(sche.jumpStates(b.outJump)(bi))
 
   private def composeFSM(fn: CDFGFun): Unit =
-    for
-      b <- fn.blocks.valuesIterator
-      Seq(q1, q2) <- b.stateToNodes(sche).keySet.toList.sliding(2)
-    do
-      fsm(q1) = Transition.Always(q2)
+    for b <- fn.blocks.valuesIterator do
+      for Seq(q1, q2) <- b.stateToNodes(sche).keySet.toList.sliding(2) do
+        fsm(q1) = Transition.Always(q2)
+      for q1 <- b.stateToNodes(sche).keySet.maxOption do
+        fsm(q1) = Transition.Always(sche.jumpStates(b.outJump)(b.i))
 
     for j <- fn.jumps.valuesIterator do
       j match
@@ -69,27 +71,13 @@ class Composer(
       lazy val q = sche.nodeStates(b.i, nid)
 
       node match
-        case _: (Input | Output) => // nothing to do
         case Const(_, num, ident) =>
           import Jump._
-          fn.jumps(b.inJumpIndex) match
-            case Branch(ji1, cond, ibi, tru, fls) =>
-              mergeDatapath(
-                new ConnPort.Reg(regs(ident)),
-                sche.jumpStates(ji1)(ibi),
-                Source.Conditional(
-                  regs(cond),
-                  if tru == b.i then new ConnPort.Const(num) else ConnPort.Inherit,
-                  if fls == b.i then new ConnPort.Const(num) else ConnPort.Inherit,
-                )
-              )
-            case j1 =>
-              for q <- sche.jumpStates(j1.i).valuesIterator do
-                mergeDatapath(
-                  new ConnPort.Reg(regs(ident)),
-                  q,
-                  Source.Always(new ConnPort.Const(num))
-                )
+          mergeDatapath(
+            new ConnPort.Reg(regs(ident)),
+            q,
+            Source.Always(new ConnPort.Const(num))
+          )
         case BinOp(_, _, l, r, a) =>
           val calc = bindings(b.i, nid)
           mergeDatapath(

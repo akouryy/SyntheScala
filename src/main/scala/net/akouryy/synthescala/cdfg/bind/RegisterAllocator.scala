@@ -46,7 +46,8 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
         case Jump.Branch(_, cond, _, _, _) => getOrAlloc(cond)
         case _ =>
 
-      for node <- b.inputs.iterator ++ b.stateToNodes(sche).values
+      b.inputs.foreach(getOrAlloc)
+      for node <- b.stateToNodes(sche).values
           w <- node.written
       do getOrAlloc(w)
 

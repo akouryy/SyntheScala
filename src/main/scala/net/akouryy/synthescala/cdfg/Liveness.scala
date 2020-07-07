@@ -32,37 +32,23 @@ object Liveness:
           liveIns(bi) = liveOut ++ block.uses -- block.defs
 
           prog.main.blocks(bi) = block.copy(
-            nodes = block.nodes ++
-                    liveIns(bi).map(Node.Input(NodeID.generate(), _).withID) ++
-                    liveOut.map(Node.Output(NodeID.generate(), _).withID)
+            inputs = liveIns(bi).toSeq,
+            outputs = liveOut.toSeq,
           )
   end insertInOuts
 
   def liveInsForState(graph: CDFGFun, sche: schedule.Schedule): collection.Map[State, Set[Label]] =
     val ret = mutable.Map.empty[State, Set[Label]]
 
-    /*for (ji -> j) <- graph.jumps do
-      j match
-        case Jump.Branch(_, cond, _, _, obi) =>
-          val sc = sche.jumpStates(ji)
-          ret(sc) = graph.blocks(obi).nodes.flatMap:
-            case Node.Input(id) => Some(id)
-            case _ => None
-          ret(sc) += cond
-        case _ => // TODO: Merge*/
-
     for (bi -> b) <- graph.blocks do
-      val live = mutable.Set.from:
-        for Node.Output(_, lab) <- b.nodes.valuesIterator
-        yield lab
+      var live = Set.from(b.outputs)
+      ret(sche.jumpStates(b.outJump)(bi)) = live
 
       for (state -> nodes) <- b.stateToNodes(sche).sets.toSeq.reverseIterator do
         for node <- nodes do
           live ++= node.read
           live --= node.written
-        ret(state) = live.toSet
-
-      // ignore input nodes
+        ret(state) = live
 
     ret
   end liveInsForState

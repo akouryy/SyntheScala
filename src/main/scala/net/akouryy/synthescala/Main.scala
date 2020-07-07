@@ -45,7 +45,7 @@ object Main:
       System.err.print(fansi.Color.Red(s"[GraphDrawer] "))
       err.printStackTrace()
     val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
-    // PP.pprintln(fd)
+    PP.pprintln(fd)
     val sv = emit.Emitter(graph, regAlloc, bindings, fd).emit
     // println(sv)
     Files.write(Paths.get(s"dist/${prog.main.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))

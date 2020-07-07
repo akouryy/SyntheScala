@@ -11,6 +11,9 @@ module top();
   main main(.*);
 
   initial begin
+    $dumpfile("fib.vcd");
+    $dumpvars(0, main);
+
     clk = 0;
     controlArr = 0;
     forever #10 clk = ~clk;

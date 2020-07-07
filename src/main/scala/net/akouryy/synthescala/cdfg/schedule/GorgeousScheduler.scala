@@ -21,17 +21,14 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
     scheduleJump(graph.main, null, graph.main.jumps.firstKey) // TODO
     Schedule(jumpStates.toMap, nodeStates.toMap)
 
-  private def stateOf(bi: BlockIndex, nid: NodeID): Option[State] =
-    graph.node(bi, nid) match
-      case _: (Node.Input | Node.Const) => Some(maxState)
-      case _ => nodeStates.get(bi, nid)
-
   private def scheduleBlock(fn: CDFGFun, bi: BlockIndex): Unit =
     val block = fn.blocks(bi)
     val nodes = block.nodes
     visited += bi
 
-    def nodeVisited(nid: NodeID): Boolean = stateOf(bi, nid).nonEmpty
+    def nodeVisited(nid: NodeID): Boolean = nodeStates contains (bi -> nid)
+    def labelDefVisited(label: Label): Boolean =
+      block.getWritingNode(label).forall(nodeVisited)
 
     def parents(nid: NodeID) =
       if nodes(nid).isMemoryRelated
@@ -45,35 +42,42 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
       else
         Set.empty
 
-    val q = mutable.Queue.from:
-      import scala.language.implicitConversions
-      nodes.keysIterator.filter(nodes(_).isInput)
+    def isNodeReady(nid: NodeID): Boolean =
+      nodes(nid).read.forall(labelDefVisited) &&
+      parents(nid).forall(nodeVisited)
+
+    val q = mutable.Queue.from(nodes.keysIterator.filter(isNodeReady))
 
     while q.nonEmpty do
       val nid = q.dequeue()
 
-      if !nodeStates.contains(bi, nid)
+      if !nodeVisited(nid)
         val node = nodes(nid)
-        if !node.isInput
-          var state =
-            (
-              node.read.map(r => stateOf(bi, block.writeMap(r)).get).maxOption.toList ++
-              parents(nid).map(par => stateOf(bi, par).get).maxOption
-            ).max.succ
-          node match
-            case Node.GetReq(_, _, arr, _) =>
-              while arrayAccessedAfter(state, arr) do
-                state = state.succ
-              arrayAccessedAfter += state -> arr
-            case Node.GetAwa(_, reqID, _, _) =>
-              state = nodeStates(bi, reqID).succ
-            case _ =>
-          nodeStates((bi, nid)) = state
+
+        var state =
+          (
+            node.read.map(r =>
+              if block.inputs.contains(r)
+                maxState
+              else
+                nodeStates(bi -> block.writeMap(r))
+            ).maxOption.toList ++
+            parents(nid).map(par => nodeStates(bi, par)).maxOption ++
+            Some(maxState)
+          ).max.succ
+        node match
+          case Node.GetReq(_, _, arr, _) =>
+            while arrayAccessedAfter(state, arr) do
+              state = state.succ
+            arrayAccessedAfter += state -> arr
+          case Node.GetAwa(_, reqID, _, _) =>
+            state = nodeStates(bi, reqID).succ
+          case _ =>
+        nodeStates((bi, nid)) = state
 
         for
-          nid2 <- node.written.iterator.flatMap(block.readMap) ++ children(nid)
-          if nodes(nid2).read.forall(r => nodeVisited(block.writeMap(r))) &&
-             parents(nid2).forall(nodeVisited)
+          nid2 <- node.written.iterator.flatMap(block.getReadingNodes) ++ children(nid)
+          if isNodeReady(nid2)
         do
           q.enqueue(nid2)
     end while
@@ -81,17 +85,9 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
     maxState =
       import scala.language.implicitConversions
       // TODO: そもそもmapでなくflatMapなのはおかしい(生存解析失敗)
-      block.nodes.keysIterator.flatMap(nid => stateOf(bi, nid))
-        .maxOption.fold(maxState)(maxState.max)
-
-    /*if graph.main.jumps(block.outJump).isInstanceOf[Jump.Branch]
-      val maxNodes = nodeStates.iterator.filter(_._2 == maxState).toSeq
-      if maxNodes.forall(kv => nodes(kv._1._2).isInstanceOf[Node.Output])
-        maxState = maxState.pred*/
-
-    // align Outputs
-    for (nid, node: Node.Output) <- block.nodes do
-      nodeStates((bi, nid)) = maxState
+      block.nodes.keysIterator.flatMap(nid =>
+        Option.when(!block.inputs.contains(nid))(nodeStates(bi -> nid))
+      ).maxOption.fold(maxState)(maxState.max)
 
     scheduleJump(fn, bi, block.outJump)
   end scheduleBlock
@@ -99,6 +95,9 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
   private def scheduleJump(fn: CDFGFun, ibi: BlockIndex, ji: JumpIndex): Unit =
     val jump = fn.jumps(ji)
     jumpStates.getOrElseUpdate(ji, mutable.Map.empty)
+    jump match
+      case _: Jump.StartFun =>
+      case _ => maxState = maxState.succ
     jumpStates(ji)(ibi) = maxState
     if jump.inBlocks.forall(visited)
       jump.outBlocks.foreach(scheduleBlock(fn, _))

@@ -11,14 +11,9 @@ object EarlyReturn:
   private def traverse(fn: CDFGFun, ji0: JumpIndex): Unit =
     fn.jumps(ji0) match
       case Jump.Return(_, retLab, bi1) =>
-        val b1 @ Block(_, nodes, _, ji2, _) = fn.blocks(bi1)
+        val b1 @ Block(_, _, _, nodes, _, ji2, _) = fn.blocks(bi1)
 
-        if
-          nodes.valuesIterator.forall:
-            case Node.Input(_, lab) => lab == retLab
-            case Node.Output(_, lab) => lab == retLab
-            case _ => false
-        then
+        if nodes.isEmpty
           fn.jumps(ji2) match
             case Jump.Merge(_, ibs, inIDss, _, ons) if ons.contains(retLab) =>
               val retIdx = ons.indexOf(retLab)
@@ -37,17 +32,16 @@ object EarlyReturn:
             case _ =>
         end if
 
-        b1.nodes.valuesIterator.filter(_.isInstanceOf[Node.Output]).toSeq match
-          case Seq(outputNode: Node.Output) => // one element
-            b1.writeMap.get(outputNode.name).map(b1.nodes) match
+        b1.outputs match
+          case Seq(lab) => // one element
+            b1.writeMap.get(lab).map(b1.nodes) match
               case Some(node @ Node.Call(nid, callee, args, _)) =>
                 fn.jumps -= ji0
                 val ji0p = JumpIndex.generate(ji0)
                 fn.jumps(ji0p) = Jump.TailCall(ji0p, callee, args, bi1)
                 fn.blocks(bi1) = b1.copy(
-                  nodes =
-                    b1.nodes - nid - outputNode.id
-                    ++ args.map(Node.Output(NodeID.generate(), _).withID),
+                  outputs = args,
+                  nodes = b1.nodes - nid,
                   outJump = ji0p
                 )
                 return

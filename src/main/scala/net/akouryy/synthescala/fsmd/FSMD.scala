@@ -4,7 +4,7 @@ package fsmd
 import scala.collection.mutable
 
 case class FSMD(
-  fsm: collection.Map[State, Transition],
+  fsm: collection.SortedMap[State, Transition],
   datapath: Datapath,
 )
 

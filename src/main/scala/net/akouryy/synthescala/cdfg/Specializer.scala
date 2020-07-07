@@ -82,8 +82,9 @@ class Specializer:
         val truDest, flsDest = Label.temp()
 
         // ifの前のブロックを登録
-        currentGraph.blocks(beginBI) =
-          Block(beginBI, extractNodes(), currentArrayDeps, currentInputJumpIndex, branchJI)
+        currentGraph.blocks(beginBI) = Block(
+          beginBI, Nil, Nil, extractNodes(), currentArrayDeps, currentInputJumpIndex, branchJI,
+        )
         currentArrayDeps = UnweightedGraph()
         currentArrayLastGet.clear()
         currentArrayLastPut.clear()
@@ -97,8 +98,9 @@ class Specializer:
         specializeExpr(truDest, truExpr)
         // 真分岐の最後のブロックを登録
         val truLastBI = currentBlockIndex
-        currentGraph.blocks(truLastBI) =
-          Block(truLastBI, extractNodes(), currentArrayDeps, currentInputJumpIndex, mergeJI)
+        currentGraph.blocks(truLastBI) = Block(
+          truLastBI, Nil, Nil, extractNodes(), currentArrayDeps, currentInputJumpIndex, mergeJI,
+        )
         currentArrayDeps = UnweightedGraph()
         currentArrayLastGet.clear()
         currentArrayLastPut.clear()
@@ -110,8 +112,9 @@ class Specializer:
         specializeExpr(flsDest, flsExpr)
         // 偽分岐の最後のブロックを登録
         val flsLastBI = currentBlockIndex
-        currentGraph.blocks(flsLastBI) =
-          Block(flsLastBI, extractNodes(), currentArrayDeps, currentInputJumpIndex, mergeJI)
+        currentGraph.blocks(flsLastBI) = Block(
+          flsLastBI, Nil, Nil, extractNodes(), currentArrayDeps, currentInputJumpIndex, mergeJI,
+        )
         currentArrayDeps = UnweightedGraph()
         currentArrayLastGet.clear()
         currentArrayLastPut.clear()
@@ -148,8 +151,9 @@ class Specializer:
 
     val normalizedDest = normalize(dest, checkWritten=false)
     val retJI = JumpIndex.generate()
-    currentGraph.blocks(currentBlockIndex) =
-      Block(currentBlockIndex, extractNodes(), currentArrayDeps, currentInputJumpIndex, retJI)
+    currentGraph.blocks(currentBlockIndex) = Block(
+      currentBlockIndex, Nil, Nil, extractNodes(), currentArrayDeps, currentInputJumpIndex, retJI,
+    )
     currentArrayDeps = UnweightedGraph()
     currentArrayLastGet.clear()
     currentArrayLastPut.clear()

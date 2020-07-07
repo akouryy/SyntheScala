@@ -72,27 +72,26 @@ class GraphDrawer(
             r ++= s"""$i -> $ob [label="${ons.map(_.str).mkString(",")}"];"""
       end for
 
-      for Block(i, nodes, _, _, _) <- graph.main.blocks.valuesIterator do
+      for Block(i, _, _, nodes, _, _, _) <- graph.main.blocks.valuesIterator do
         if nodes.isEmpty then
           r ++= s"""$i [label = "$i\\l(0行)"];"""
         else
           r ++= s"""$i [label = "$i"];"""
 
       for
-        Block(bi, nodes, arrayDeps, _, _) <- graph.main.blocks.valuesIterator
+        Block(bi, inputs, outputs, nodes, arrayDeps, _, _) <- graph.main.blocks.valuesIterator
         if nodes.nonEmpty
       do
         val ids = mutable.Map.empty[Node, Int]
 
         r.indent(s"subgraph cluster_dfg_$bi {", "}"):
           r ++= s"node [shape = oval];"
-          r ++= s"""label = "$bi";"""
+          r ++= s"""label = <$bi<br/>(${inputs.map(idStr).mkString(",")}=&gt;""" +
+                s"""${outputs.map(idStr).mkString(",")})>;"""
 
           for nd <- nodes.valuesIterator do
             val labelBase = nd match
-              case Node.Input(_, n) => s"""${idStr(n)}:in"""
               case Node.Const(_, v, n) => s"""${idStr(n)}:$v"""
-              case Node.Output(_, n) => s"""out(${n.str})"""
               case Node.BinOp(nid, op, l, r, a) =>
                 val bound = sup("#3311ff", unsafeEscape(
                   bindings.get(bi, nid).fold("?")(_.shortString)
@@ -107,16 +106,11 @@ class GraphDrawer(
               case Node.Put(_, arr, index, value) =>
                 s"""${arr.str}[${index.str}]=${value.str}"""
 
-            val style = nd match
-              case Node.Input(_, _) => """style="filled"; fillcolor="#ffeeff";"""
-              case Node.Output(_, _) => """style="filled"; fillcolor="#ffffee";"""
-              case _ => ""
-
             r ++=
               s"""${nd.id} [label=<
                     $labelBase
-                    ${stateStr(sche.getStateOf(graph, bi, nd.id))}
-                  >; $style];""".singleLine
+                    ${stateStr(sche.nodeStates.get(bi -> nd.id))}
+                  >];""".singleLine
 
           (
             for
