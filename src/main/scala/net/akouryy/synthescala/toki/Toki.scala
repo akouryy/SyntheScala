@@ -1,7 +1,7 @@
 package net.akouryy.synthescala
 package toki
 
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 
 case class Program(arrayDefs: ArrayDefMap, main: Fun)
 

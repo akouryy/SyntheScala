@@ -24,7 +24,7 @@ object Main:
     reset()
     // PP.pprintln(prog)
     print(fansi.Color.Full(69)(s"KN; "))
-    val (typeEnv, kProg) = KNormalizer(prog).normalize
+    val (typeEnv1, kProg) = KNormalizer(prog).normalize
     // PP.pprintln(kProg)
     print(fansi.Color.Full(69)(s"SP; "))
     val graph = cdfg.Specializer()(kProg)
@@ -33,31 +33,30 @@ object Main:
     cdfg.Liveness.insertInOuts(graph)
     // PP.pprintln(graph)
     print(fansi.Color.Full(69)(s"CO; "))
-    cdfg.optimize.Optimizer(graph, typeEnv)
+    cdfg.optimize.Optimizer(graph, typeEnv1)
     // PP.pprintln(graph)
-    Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
-      cdfg.GraphDrawer(graph, typeEnv)
-          .draw.getBytes(StandardCharsets.UTF_8),
-    )
     print(fansi.Color.Full(69)(s"SC; "))
-    val schedule = cdfg.schedule.GorgeousScheduler(graph).schedule
+    val schedule1 = cdfg.schedule.GorgeousScheduler(graph).schedule
     // PP.pprintln(schedule)
+    print(fansi.Color.Full(69)(s"SO; "))
+    val (typeEnv2, schedule2) = cdfg.optimize.ScheduledOptimizer(graph, typeEnv1, schedule1)
+    // PP.pprintln(graph)
     print(fansi.Color.Full(69)(s"RA; "))
-    val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule).allocate(graph.main)
+    val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule2).allocate(graph.main)
     // PP.pprintln(regAlloc)
     print(fansi.Color.Full(69)(s"BI; "))
-    val bindings = cdfg.bind.AllocatingBinder(graph, typeEnv, schedule).bind
+    val bindings = cdfg.bind.AllocatingBinder(graph, typeEnv2, schedule2).bind
     // PP.pprintln(bindings)
     try
       Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
-        cdfg.GraphDrawer(graph, typeEnv, schedule, regAlloc, bindings)
+        cdfg.GraphDrawer(graph, typeEnv2, schedule2, regAlloc, bindings)
             .draw.getBytes(StandardCharsets.UTF_8),
       )
     catch err =>
       System.err.print(fansi.Color.Red(s"\n[GD] "))
       err.printStackTrace()
     print(fansi.Color.Full(69)(s"CP; "))
-    val fd = fsmd.Composer(graph, schedule, regAlloc, bindings).compose
+    val fd = fsmd.Composer(graph, schedule2, regAlloc, bindings).compose
     // PP.pprintln(fd)
     print(fansi.Color.Full(69)(s"EM; "))
     val sv = emit.Emitter(graph, regAlloc, bindings, fd).emit

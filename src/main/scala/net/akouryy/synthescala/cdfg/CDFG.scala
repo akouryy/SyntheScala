@@ -16,6 +16,9 @@ final class CDFGFun(val fnName: String, val retTyp: toki.Type, val params: Seq[t
 
   def inJump(b: Block) = jumps(b.inJumpIndex)
 
+  def apply(bi: BlockIndex): Block = blocks(bi)
+  def apply(ji: JumpIndex): Jump = jumps(ji)
+
 final case class BlockIndex(indices: List[Int]) extends Ordered[BlockIndex] derives Eql:
   override def toString: String = s"Block$indexString"
 
