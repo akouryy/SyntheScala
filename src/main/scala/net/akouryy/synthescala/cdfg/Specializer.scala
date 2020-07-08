@@ -58,8 +58,8 @@ class Specializer:
       case Get(arr, Ref(index)) =>
         // writtenLabel += dest
         val reqID = NodeID.generate()
-        val awa = addNode(Node.GetAwa(NodeID.generate(), reqID, arr, dest))
-        val req = addNode(Node.GetReq(reqID, awa.id, arr, normalize(index)))
+        val awa = addNode(Node.GetAwa(NodeID.generate(), Some(reqID), arr, dest))
+        val req = addNode(Node.GetReq(reqID, Some(awa.id), arr, normalize(index)))
         for parent <- arrayLastPut(arr) do
           currentArrayDeps.addEdge(parent -> reqID)
         currentArrayDeps.addEdge(reqID -> awa.id)

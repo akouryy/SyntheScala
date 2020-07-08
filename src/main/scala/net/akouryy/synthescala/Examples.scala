@@ -37,6 +37,18 @@ def Examples = Seq[Program](
         dotProd(i + 1.U[1], acc + a64 * b(i)),
 
   TastyReflector.reflect:
+    val a = new Array[S[27]](1000)
+    val b = new Array[S[27]](1000)
+
+    def dotProdOpt(i: U[10], acc: S[64]): S[64] =
+      val i1 = i + 1.U[1]
+      if i == 1000.U[10]
+        acc
+      else
+        val a64 = a(i).cast[64]
+        dotProdOpt(i1, acc + a64 * b(i)),
+
+  TastyReflector.reflect:
     val a = new Array[S[64]](1000)
 
     def accumulate(i: U[10], acc: S[64]): U[1] =

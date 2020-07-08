@@ -20,7 +20,7 @@ module top();
 
   longint clkcnt = 0;
   initial begin
-    $dumpfile("dotProd.vcd");
+    $dumpfile("dotProdOpt.vcd");
     $dumpvars(0, main);
 
     clk <= 0;

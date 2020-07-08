@@ -56,8 +56,8 @@ module main (
     stateR == 4'd7 ? reg1 :
     'x;
   assign in1_Bin2 =
-    stateR == 4'd5 ? reg6 :
-    stateR == 4'd7 ? reg6 :
+    stateR == 4'd5 ? reg5 :
+    stateR == 4'd7 ? reg5 :
     'x;
   assign in0_Bin0 =
     stateR == 4'd1 ? reg0[9:0] :
@@ -93,7 +93,7 @@ module main (
 
   assign stationReg0 =
     stateR == 4'd4 ? 64'd0 :
-    stateR == 4'd6 ? {63'd0, out0_Bin0} :
+    stateR == 4'd6 ? arrRData_a :
     stateR == 4'd9 ? 64'd0 :
     reg0;
   assign stationReg1 =
@@ -110,11 +110,11 @@ module main (
     stateR == 4'd2 ? {54'd0, out0_Bin1} :
     reg4;
   assign stationReg5 =
-    stateR == 4'd3 ? {63'd0, out0_Bin0} :
+    stateR == 4'd3 ? arrRData_a :
+    stateR == 4'd6 ? {63'd0, out0_Bin0} :
     reg5;
   assign stationReg6 =
-    stateR == 4'd3 ? arrRData_a :
-    stateR == 4'd6 ? arrRData_a :
+    stateR == 4'd3 ? {63'd0, out0_Bin0} :
     reg6;
 
   always @(posedge clk) begin
@@ -133,10 +133,10 @@ module main (
         4'd0: stateR <= 4'd1;
         4'd1: stateR <= (stationReg3) ? 4'd4 : 4'd2;
         4'd2: stateR <= 4'd3;
-        4'd3: stateR <= (stationReg5) ? 4'd7 : 4'd5;
+        4'd3: stateR <= (stationReg6) ? 4'd7 : 4'd5;
         4'd4: stateR <= linkreg;
         4'd5: stateR <= 4'd6;
-        4'd6: stateR <= (stationReg0) ? 4'd7 : 4'd5;
+        4'd6: stateR <= (stationReg5) ? 4'd7 : 4'd5;
         4'd7: stateR <= 4'd8;
         4'd8: stateR <= 4'd9;
         4'd9: stateR <= linkreg;
@@ -155,7 +155,7 @@ module main (
         default: reg2 <= stationReg2;
       endcase
       case(stateR)
-        4'd6: reg3 <= stationReg5;
+        4'd6: reg3 <= stationReg6;
         default: reg3 <= stationReg3;
       endcase
       case(stateR)
@@ -167,7 +167,7 @@ module main (
         default: reg5 <= stationReg5;
       endcase
       case(stateR)
-        4'd6: reg6 <= stationReg6;
+        4'd6: reg6 <= stationReg5;
         default: reg6 <= stationReg6;
       endcase
     end

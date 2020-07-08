@@ -171,7 +171,7 @@ class GraphDrawer(
           ).toSeq.sorted.foreach { (f, t) =>
             val style =
               nodes(f) match
-                case Node.GetReq(_, awa, _, _) if awa == t => "solid"
+                case Node.GetReq(_, Some(awa), _, _) if awa == t => "solid"
                 case _ => "dotted"
             r ++= s"""$f -> $t [style = $style];"""
           }

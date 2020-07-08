@@ -70,7 +70,7 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
               state = state.succ
             arrayAccessedAfter += state -> arr
           case Node.GetAwa(_, reqID, _, _) =>
-            state = nodeStates(reqID).succ
+            state = nodeStates(reqID.get).succ
           case _ =>
         nodeStates(nid) = state
 

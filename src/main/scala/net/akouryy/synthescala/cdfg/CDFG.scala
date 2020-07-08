@@ -112,9 +112,9 @@ enum Node derives Eql:
   case Const(val id: NodeID, value: Long, name: Label)
   case BinOp(val id: NodeID, op: base.BinOp, left: VC, right: VC, ans: Label)
   case Call(val id: NodeID, fn: String, args: Seq[Label], ret: Label)
-  case GetReq(val id: NodeID, awa: NodeID, arr: Label, index: Label)
+  case GetReq(val id: NodeID, awa: Option[NodeID], arr: Label, index: Label)
   /** GetAwait */
-  case GetAwa(val id: NodeID, req: NodeID, arr: Label, ret: Label)
+  case GetAwa(val id: NodeID, req: Option[NodeID], arr: Label, ret: Label)
   case Put(val id: NodeID, arr: Label, index: Label, value: Label)
 
   override lazy val hashCode = scala.util.hashing.MurmurHash3.productHash(this)

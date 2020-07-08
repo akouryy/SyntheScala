@@ -103,9 +103,9 @@
 <text text-anchor="start" x="469.71" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q1</text>
 <text text-anchor="start" x="479.31" y="-339.2" font-family="Monaco" font-size="11.00">@f</text>
 <text text-anchor="start" x="492.52" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U13</text>
-<text text-anchor="start" x="506.92" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r3</text>
+<text text-anchor="start" x="506.92" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r4</text>
 <text text-anchor="start" x="516.52" y="-339.2" font-family="Monaco" font-size="11.00">:d+</text>
-<text text-anchor="start" x="536.32" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
+<text text-anchor="start" x="536.32" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin1</text>
 <text text-anchor="start" x="555.53" y="-339.2" font-family="Monaco" font-size="11.00">e</text>
 </g>
 <!-- 2 -->
@@ -145,9 +145,9 @@
 <text text-anchor="start" x="311.71" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#ff4411">q1</text>
 <text text-anchor="start" x="321.31" y="-339.2" font-family="Monaco" font-size="11.00">@i</text>
 <text text-anchor="start" x="334.52" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#00aa11">U13</text>
-<text text-anchor="start" x="348.92" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r4</text>
+<text text-anchor="start" x="348.92" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">r3</text>
 <text text-anchor="start" x="358.52" y="-339.2" font-family="Monaco" font-size="11.00">:f+</text>
-<text text-anchor="start" x="378.32" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin1</text>
+<text text-anchor="start" x="378.32" y="-339.2" font-family="Monaco" baseline-shift="super" font-size="8.00" fill="#3311ff">Bin0</text>
 <text text-anchor="start" x="397.53" y="-339.2" font-family="Monaco" font-size="11.00">g</text>
 </g>
 <!-- 1&#45;&gt;2 -->

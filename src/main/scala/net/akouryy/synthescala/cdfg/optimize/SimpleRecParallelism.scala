@@ -123,7 +123,9 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
             .map(sche.nodeStates)
           ++ Option.when(param == pack.branch.cond)(sche.jumpStates(pack.branch.i)(pack.prim.i))
         ).min
-        states.getIndexOf(defState).get - states.getIndexOf(firstUseState).get
+        val diff = states.getIndexOf(defState).get - states.getIndexOf(firstUseState).get
+        println(("param", param, diff))
+        diff
     ).iterator ++ {
       val arrAccesses = immutable.MultiDict.from:
         for
@@ -139,7 +141,9 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
         accessStates = arrAccesses.get(arr).map(sche.nodeStates)
         if accessStates.nonEmpty
       yield
-        states.getIndexOf(accessStates.last).get - states.getIndexOf(accessStates.head).get + 1
+        val diff = states.getIndexOf(accessStates.last).get - states.getIndexOf(accessStates.head).get + 1
+        println((arr, diff))
+        diff
     }).max.clamp(pack.prim.states.size + 1, Int.MaxValue)
 
   /**
@@ -241,7 +245,7 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       if pack.isSecoTruBody then secoIndices(ri) else exitBI,
       if pack.isSecoTruBody then exitBI else secoIndices(ri),
     )
-    addJumpState(branchIndices(ri), inputBI, newNodeStates(newFn(inputBI).nodes.last._1))
+    addJumpState(branchIndices(ri), inputBI, maxStateOf(inputBI, newFn))
 
     buildNewExit(oldFn, newFn, round, ri, exitBI)
   end buildNewMiddleJump
@@ -354,11 +358,9 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
           for parent <- arrayLastPut(arr) do
             currentArrayDeps.addEdge(parent -> node.id)
           currentArrayLastGet(arr) = node.id :: arrayLastGet(arr)
-        case Node.GetAwa(_, reqID, _, _) =>
-          if currentArrayDeps.edges.contains(reqID) // GetReq may belong to another Block
-            currentArrayDeps.addEdge(reqID -> node.id)
-          else
-            throw CancelOptimizationException(s"req_awa_interblock:$reqID,${node.id}") // TODO
+        case Node.GetAwa(_, Some(reqID), _, _) =>
+          assert(!currentArrayDeps.edges.contains(reqID)) // GetReq does not belong to another Block
+          currentArrayDeps.addEdge(reqID -> node.id)
         case Node.Put(_, arr, _, _) =>
           for parent <- arrayLastGet(arr).iterator ++ arrayLastPut(arr) do
             currentArrayDeps.addEdge(parent -> node.id)
@@ -386,15 +388,15 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       newNodeStates(newID) = newState
       node.copyWithID(newID).mapLabel(l => newLabs(l, ri)) match
         case newNode: Node.GetReq =>
-          val awaID = NodeID.generate()
-          oldReqIDToNewReqID(node.id) = newID
-          oldReqIDToNewAwaID(node.id) = awaID
-          newNode.copy(awa = awaID)
+          // val awaID = NodeID.generate()
+          // oldReqIDToNewReqID(node.id) = newID
+          // oldReqIDToNewAwaID(node.id) = awaID
+          newNode.copy(awa = None)
         case newNode: Node.GetAwa =>
-          val awaID = oldReqIDToNewAwaID(newNode.req)
-          newNodeStates -= newID
-          newNodeStates(awaID) = newState
-          newNode.copy(id = awaID, req = oldReqIDToNewReqID(newNode.req))
+          // val awaID = oldReqIDToNewAwaID(newNode.req)
+          // newNodeStates -= newID
+          // newNodeStates(awaID) = newState
+          newNode.copy(/*id = awaID,*/ req = None)
         case newNode => newNode
   end registerFromParallelState
 
