@@ -36,7 +36,9 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       val ret = mutable.Map.empty[State, List[(BlockIndex, Node)]]
       for (nid -> st) <- sche.nodeStates do
         val b = oldFn(oldNodeIDToBlockIndex(nid))
-        ret(st) = b.i -> b.nodes(nid) :: ret.getOrElse(st, Nil)
+        val node = b.nodes(nid)
+        if !node.isNop
+          ret(st) = b.i -> node :: ret.getOrElse(st, Nil)
       ret.toMap
 
     given pack as BlockPack = detectProperPath(oldFn).getOrElse:
@@ -50,9 +52,6 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       interval, pack.prim.states, pack.seco.states,
       oldFn,
     )
-    println(interval)
-    PP.pprintln(primPSS)
-    PP.pprintln(rounds)
 
     given newLabs as NewLabs = locally:
       val newLabs = mutable.Map.empty[(Label, Int), Label]
@@ -204,8 +203,9 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
 
     for ps <- primPSs do
       val nodes = registerFromParallelState(ps)
-      newNodes ++= nodes.map(_.pairWithID)
-      newSortedNodess += nodes
+      if nodes.nonEmpty
+        newNodes ++= nodes.map(_.pairWithID)
+        newSortedNodess += nodes
 
     newFn.blocks(pack.prim.i) = Block(
       pack.prim.i,
@@ -221,8 +221,9 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
 
     for ps <- round.secoPSs do
       val nodes = registerFromParallelState(ps)
-      newNodes ++= nodes.map(_.pairWithID)
-      newSortedNodess += nodes
+      if nodes.nonEmpty
+        newNodes ++= nodes.map(_.pairWithID)
+        newSortedNodess += nodes
 
     newFn.blocks(secoIndices(ri)) = Block(
       secoIndices(ri), Nil, Nil,
@@ -292,18 +293,21 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       val oldBlock = oldFn(oldBI)
       for (st -> nodes) <- oldBlock.stateToNodes(sche).sets do
         val newState = generateState()
-        newSortedNodess += (
-          for node <- nodes.toSeq yield
+        val ns = (
+          for node <- nodes.toSeq if !node.isNop yield
             val newID = NodeID.generate()
             newNodeStates(newID) = newState
             val newNode = node.copyWithID(newID).mapLabel(convLab)
             newNodes(newID) = newNode
             newNode
         )
+        if ns.nonEmpty then newSortedNodess += ns
 
       val newJI = JumpIndex.generate(oldBlock.outJump)
       val newBlock = Block(
-        newBI, Nil, Nil, newNodes.toMap, buildArrayDeps(newSortedNodess), newParentJI, newJI,
+        newBI, Nil, Nil,
+        Node.compensateNop(newNodes.toMap)(nopID => newNodeStates(nopID) = generateState()),
+        buildArrayDeps(newSortedNodess), newParentJI, newJI,
       )
       newFn.blocks(newBI) = newBlock
 
@@ -328,8 +332,9 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       val newSortedNodess = mutable.ListBuffer.empty[Seq[Node]]
       for ps <- round.exitPSs do
         val nodes = registerFromParallelState(ps)
-        newNodes ++= nodes.map(_.pairWithID)
-        newSortedNodess += nodes
+        if nodes.nonEmpty
+          newNodes ++= nodes.map(_.pairWithID)
+          newSortedNodess += nodes
       traverseBlock(pack.exit.i, exitBI, branchIndices(ri), newNodes, newSortedNodess)
   end buildNewExit
 
@@ -378,7 +383,7 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
     val newState = generateState()
     for
       (ri -> q) <- ps.states
-      (_ -> node) <- oldStateToNodes(q)
+      (_ -> node) <- oldStateToNodes.getOrElse(q, Nil)
     yield
       val newID = NodeID.generate()
       newNodeStates(newID) = newState

@@ -108,6 +108,7 @@ end Block
 enum Node derives Eql:
   val id: NodeID
 
+  case Nop(val id: NodeID)
   case Const(val id: NodeID, value: Long, name: Label)
   case BinOp(val id: NodeID, op: base.BinOp, left: VC, right: VC, ans: Label)
   case Call(val id: NodeID, fn: String, args: Seq[Label], ret: Label)
@@ -121,6 +122,7 @@ enum Node derives Eql:
   def pairWithID: (NodeID, Node) = id -> this
 
   def copyWithID(id: NodeID): Node = this match
+    case node: Nop => node.copy(id = id)
     case node: Const => node.copy(id = id)
     case node: BinOp => node.copy(id = id)
     case node: Call => node.copy(id = id)
@@ -128,27 +130,26 @@ enum Node derives Eql:
     case node: GetAwa => node.copy(id = id)
     case node: Put => node.copy(id = id)
 
-  def isMemoryRelated: Boolean = this match
-    case _: (GetReq | GetAwa | Put) => true
-    case _ => false
+  def isNop: Boolean = this.isInstanceOf[Nop]
+
+  def isMemoryRelated: Boolean = this.isInstanceOf[GetReq | GetAwa | Put]
 
   def read: Seq[Label] = this match
-    case _: Const => Nil
+    case _: (Nop | Const | GetAwa) => Nil
     case BinOp(_, _, l, r, _) => Seq(l.getV, r.getV).flatten
     case Call(_, _, as, _) => as
     case GetReq(_, _, _, index) => Seq(index)
-    case _: GetAwa => Nil
     case Put(_, _, index, value) => Seq(index, value)
 
   def written: Option[Label] = this match
+    case _: (Nop | GetReq | Put) => None
     case Const(_, _, n) => Some(n)
     case BinOp(_, _, _, _, a) => Some(a)
     case Call(_, _, _, r) => Some(r)
-    case _: GetReq => None
     case GetAwa(_, _, _, ret) => Some(ret)
-    case _: Put => None
 
   def mapLabel(fn: Label => Label): Node = this match
+    case nd: Nop => nd
     case nd @ Const(_, _, name) => nd.copy(name = fn(name))
     case nd @ BinOp(_, _, left, right, ans) =>
       nd.copy(left = left.mapV(fn), right = right.mapV(fn), ans = fn(ans))
@@ -160,8 +161,18 @@ enum Node derives Eql:
       nd.copy(ret = fn(ret))
     case nd @ Put(_, _/*arr*/, index, value) =>
       nd.copy(index = fn(index), value = fn(value))
+  end mapLabel
 
 end Node
+
+object Node:
+  def compensateNop(nodes: Map[NodeID, Node])(onCreate: NodeID => Unit): Map[NodeID, Node] =
+    if nodes.isEmpty
+      val nid = NodeID.generate()
+      onCreate(nid)
+      Map(nid -> Nop(nid))
+    else
+      nodes
 
 enum Jump:
   val i: JumpIndex
@@ -206,8 +217,8 @@ enum Jump:
     case ForLoopBottom(_, _, ibi, _) => Seq(ibi)
 
   def outBlocks: Seq[BlockIndex] = this match
-    case StartFun(_, ob) => Seq(ob)
     case _: (Return | TailCall | ForLoopBottom) => Nil
+    case StartFun(_, ob) => Seq(ob)
     case Branch(_, _, _, tb, fb) => Seq(tb, fb)
     case Merge(_, _, _, ob, _) => Seq(ob)
     case ForLoopTop(_, _, _, _, _, sbi, xbi, _) => Seq(sbi, xbi)

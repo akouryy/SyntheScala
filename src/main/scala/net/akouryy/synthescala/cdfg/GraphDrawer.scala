@@ -129,6 +129,7 @@ class GraphDrawer(
 
           for nd <- nodes.valuesIterator do
             val labelBase = nd match
+              case Node.Nop(_) => "nop"
               case Node.Const(_, v, n) => s"""${idStr(n)}:$v"""
               case Node.BinOp(nid, op, l, r, a) =>
                 val bound = sup("#3311ff", unsafeEscape(

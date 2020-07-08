@@ -20,7 +20,7 @@ class RemoveUnused(graph: CDFG):
     graph.main.blocks.mapValuesInPlace:
       (bi, b) =>
         b.copy(nodes = b.nodes.filter { (_, node) =>
-          node.isMemoryRelated || node.written.forall(used)
+          node.isMemoryRelated || node.isNop || node.written.forall(used)
         })
   end run
 

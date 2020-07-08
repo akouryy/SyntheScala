@@ -11,7 +11,8 @@ object EarlyReturn:
   private def traverse(fn: CDFGFun, ji0: JumpIndex): Unit =
     fn.jumps(ji0) match
       case Jump.Return(_, retLab, bi1) =>
-        val b1 @ Block(_, _, _, nodes, _, ji2, _) = fn.blocks(bi1)
+        val b1 @ Block(_, _, _, rawNodes, _, ji2, _) = fn.blocks(bi1)
+        val nodes = rawNodes.filter(!_._2.isNop)
 
         if nodes.isEmpty
           fn.jumps(ji2) match
@@ -39,9 +40,10 @@ object EarlyReturn:
                 fn.jumps -= ji0
                 val ji0p = JumpIndex.generate(ji0)
                 fn.jumps(ji0p) = Jump.TailCall(ji0p, callee, args, bi1)
+                var newNodes = b1.nodes - nid
                 fn.blocks(bi1) = b1.copy(
                   outputs = args,
-                  nodes = b1.nodes - nid,
+                  nodes = Node.compensateNop(newNodes)(_ => ()),
                   outJump = ji0p
                 )
                 return

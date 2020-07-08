@@ -35,7 +35,7 @@ class Specializer:
   private def extractNodes(): Map[NodeID, Node] =
     val ret = currentNodes.map(n => n.id -> n).toMap
     currentNodes.clear()
-    ret
+    Node.compensateNop(ret)(_ => ())
 
   private def specializeExpr(dest: Label, expr: toki.Expr): Unit =
     import toki.Expr._

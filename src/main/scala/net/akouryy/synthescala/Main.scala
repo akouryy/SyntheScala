@@ -46,7 +46,7 @@ object Main:
     if graph1 ne graph2
       print(fansi.Color.Full(69)(s"IO2; "))
       cdfg.Liveness.insertInOuts(graph2)
-    PP.pprintln(graph2)
+    // PP.pprintln(graph2)
     Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
       cdfg.GraphDrawer(graph2, typeEnv2, schedule2)
           .draw.getBytes(StandardCharsets.UTF_8),

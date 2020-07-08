@@ -103,6 +103,7 @@ class Composer(
       println((fansi.Color.Full(100)("b"), q, node))
 
       node match
+        case Nop(_) =>
         case Const(_, num, ident) =>
           import Jump._
           mergeDatapath(
