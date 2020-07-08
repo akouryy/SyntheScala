@@ -15,6 +15,8 @@ class GraphDrawer(
     str.replaceAll("&", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
        .replaceAll("\"", "&quot;").replaceAll("\n", "<br />")
 
+  private def e(str: String) = unsafeEscape(str)
+
   private def sup(color: String, escapedText: Any): String =
     s"""<font color="$color" point-size="8"><sup>$escapedText</sup></font>"""
 
@@ -37,6 +39,7 @@ class GraphDrawer(
   //noinspection SpellCheckingInspection
   def draw: String =
     val r = util.IndentedStringBuilder()
+    val forColors = mutable.Map[JumpIndex, Int]()
 
     r.indent("digraph Program_ {", "}"):
       r ++= """graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];"""
@@ -73,6 +76,27 @@ class GraphDrawer(
             for (ib, ins) <- ibs.zip(inss) do
               r ++= s"""$ib -> $i [label="${ins.map(_.str).mkString(",")}"];"""
             r ++= s"""$i -> $ob [label="${ons.map(_.str).mkString(",")}"];"""
+          case Jump.ForLoopTop(i, bottom, cond, isSecoTru, ibi, sbi, xbi, names) =>
+            forColors(i) = forColors.size % 5 + 1
+            val secoStr = if isSecoTru then cond.str else s"!${cond.str}"
+            val exitStr = if isSecoTru then s"!${cond.str}" else cond.str
+            val namesStr = names.map(_.str).mkString(", ")
+            r.indent(s"$i[", "];"):
+              r ++= s"""label = <$label>;"""
+              r ++= "shape = house; style = filled;"
+              r ++= s"fillcolor = ${forColors(i)};"
+            r ++= s"""$ibi -> $i [label = "$namesStr"];"""
+            r ++= s"""$i -> $sbi [label = "$secoStr"];"""
+            r ++= s"""$bottom -> $i [constraint = false; color = ${forColors(i)}];"""
+            r ++= s"""$i -> $xbi [label = "$exitStr"];"""
+          case Jump.ForLoopBottom(i, top, ibi, names) =>
+            val namesStr = names.map(_.str).mkString(", ")
+
+            r.indent(s"$i[", "];"):
+              r ++= s"""label = <$label>"""
+              r ++= "shape = invhouse; style = filled;"
+              r ++= s"fillcolor = ${forColors(top)};"
+            r ++= s"""$ibi -> $i [label = "$namesStr"];"""
       end for
 
       for Block(i, _, _, nodes, _, _, _) <- graph.main.blocks.valuesIterator do
@@ -101,13 +125,13 @@ class GraphDrawer(
                 ))
                 s"""${idStr(a)}:${vcStr(l)}${unsafeEscape(op.operatorString)}$bound${vcStr(r)}"""
               case Node.Call(_, fn, args, ret) =>
-                s"""${idStr(ret)}:$fn(${args.map(_.str).mkString(",")})"""
+                s"""${idStr(ret)}:$fn(${args.map(a => e(a.str)).mkString(",")})"""
               case Node.GetReq(_, _, arr, index) =>
-                s"""req ${arr.str}[${index.str}]"""
+                s"""req ${e(arr.str)}[${e(index.str)}]"""
               case Node.GetAwa(_, _, arr, ret) =>
-                s"""${idStr(ret)}:${arr.str}[]"""
+                s"""${idStr(ret)}:${e(arr.str)}[]"""
               case Node.Put(_, arr, index, value) =>
-                s"""${arr.str}[${index.str}]=${value.str}"""
+                s"""${e(arr.str)}[${e(index.str)}]=${e(value.str)}"""
 
             r ++=
               s"""${nd.id} [label=<
@@ -126,7 +150,7 @@ class GraphDrawer(
             r ++= s"""$f -> $t;"""
           )
 
-          (
+          /*(
             for
               fromID <- nodes.keysIterator
               if nodes(fromID).isMemoryRelated
@@ -138,7 +162,7 @@ class GraphDrawer(
                 case Node.GetReq(_, awa, _, _) if awa == t => "solid"
                 case _ => "dotted"
             r ++= s"""$f -> $t [style = $style];"""
-          }
+          }*/
       end for
 
     r.toString

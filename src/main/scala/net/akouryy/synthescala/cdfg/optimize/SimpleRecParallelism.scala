@@ -26,7 +26,8 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
         newTypEnv.toMap,
         schedule.Schedule(newJumpStates, newNodeStates),
       )
-    catch CancelOptimizationException =>
+    catch case CancelOptimizationException(msg) =>
+      print(s"${fansi.Color.LightMagenta(s"SRP.cancel:$msg")}; ")
       (graph, typEnv, sche)
 
   private def traverseFn(oldFn: CDFGFun, newFn: CDFGFun): Unit =
@@ -38,7 +39,8 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
         ret(st) = b.i -> b.nodes(nid) :: ret.getOrElse(st, Nil)
       ret.toMap
 
-    given pack as BlockPack = detectProperPath(oldFn).getOrElse(throw CancelOptimizationException)
+    given pack as BlockPack = detectProperPath(oldFn).getOrElse:
+      throw CancelOptimizationException("detect")
 
     val interval = intervalFromBlocks(oldFn)
     val (primPSS, rounds) = parallelizedStates(
@@ -207,7 +209,9 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
 
     newFn.jumps(branchIndices(ri)) = Jump.ForLoopTop(
       branchIndices(ri), branchIndices(ri + 1), newLabs(pack.branch.cond, ri),
-      pack.isSecoTruBody, secoIndices(ri - 1), secoIndices(ri), exitBI,
+      pack.isSecoTruBody,
+      if ri == 0 then pack.prim.i else secoIndices(ri - 1),
+      secoIndices(ri), exitBI,
       IndexedSeq.empty, // TODO
     )
 
@@ -244,9 +248,10 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
         newBI, Nil, Nil, newNodes.toMap, UnweightedGraph(), newParentJI, newJI,
       )
       oldFn(oldBlock.outJump) match
-        case j @ Jump.Return(_, value, _) =>
-          newFn.jumps(newJI) = j.copy(value = convLab(value))
-        case _ => throw CancelOptimizationException
+        case Jump.Return(_, value, _) =>
+          newFn.jumps(newJI) = Jump.Return(newJI, convLab(value), newBI)
+        case j =>
+          throw CancelOptimizationException(j.productPrefix)
 
     locally:
       val newNodes = mutable.Map.empty[NodeID, Node]
@@ -286,4 +291,4 @@ object SimpleRecParallelism:
 
   type NewLabs = Map[(Label, Int), Label]
 
-  object CancelOptimizationException extends RuntimeException
+  final case class CancelOptimizationException(val msg: String) extends RuntimeException
