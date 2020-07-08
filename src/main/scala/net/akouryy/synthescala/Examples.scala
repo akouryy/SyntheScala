@@ -10,11 +10,10 @@ def Examples = Seq[Program](
 
   TastyReflector.reflect:
     def fib(n: U[6], a: U[32], b: U[32]): U[32] =
-      val n0 = n + 0.U[1]
-      if n0 == 0.U[1]
+      if n == 0.U[1]
         a
       else
-        fib(n0 - 1.U[1], a + b, a),
+        fib(n - 1.U[1], a + b, a),
 
   TastyReflector.reflect:
     val a = new Array[S[27]](1000)

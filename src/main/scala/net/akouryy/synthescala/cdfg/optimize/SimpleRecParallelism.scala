@@ -3,7 +3,7 @@ package cdfg
 package optimize
 
 import toki.Type
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 
 final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: schedule.Schedule):
   import SimpleRecParallelism._
@@ -13,14 +13,14 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
   private var oldStateToNodes: Map[State, Seq[(BlockIndex, Node)]] = _
   private val newJumpStates = mutable.Map.empty[JumpIndex, mutable.Map[BlockIndex, State]]
   private val newNodeStates = mutable.Map.empty[NodeID, State]
+  private val oldReqIDToNewReqID = mutable.Map.empty[NodeID, NodeID]
+  private val oldReqIDToNewAwaID = mutable.Map.empty[NodeID, NodeID]
   private var branchIndices: IndexedSeq[JumpIndex] = _
   private var secoIndices: IndexedSeq[BlockIndex] = _
 
   def run(): (CDFG, toki.TypeEnv, schedule.Schedule) =
-    val newMain = CDFGFun(graph.main.fnName, graph.main.retTyp, graph.main.params)
-
     try
-      traverseFn(graph.main, newMain)
+      val newMain = traverseFn(graph.main)
       (
         CDFG(graph.arrayDefs, newMain),
         newTypEnv.toMap,
@@ -30,7 +30,7 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       print(s"${fansi.Color.LightMagenta(s"SRP.cancel:$msg")}; ")
       (graph, typEnv, sche)
 
-  private def traverseFn(oldFn: CDFGFun, newFn: CDFGFun): Unit =
+  private def traverseFn(oldFn: CDFGFun): CDFGFun =
     val oldNodeIDToBlockIndex = oldFn.nodeIDToBlockIndex
     oldStateToNodes = locally:
       val ret = mutable.Map.empty[State, List[(BlockIndex, Node)]]
@@ -54,7 +54,7 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
     PP.pprintln(primPSS)
     PP.pprintln(rounds)
 
-    given NewLabs = locally:
+    given newLabs as NewLabs = locally:
       val newLabs = mutable.Map.empty[(Label, Int), Label]
       for
         i <- 0 to rounds.length
@@ -69,8 +69,15 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
               Label.generate(lab)
       newLabs.toMap
 
+    val newFn = CDFGFun(
+      graph.main.fnName, graph.main.retTyp,
+      graph.main.params.map(e => e.copy(name = newLabs(e.name -> 0))),
+    )
+
     rewriteTyps()
     buildNewGraph(oldFn, newFn, primPSS, rounds)
+
+    newFn
   end traverseFn
 
   /**
@@ -104,7 +111,7 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
     val recArgs = pack.rec.args
     val states = pack.prim.states ++ pack.seco.states
 
-    (
+    ((
       for
         (toki.Entry(param, _), arg) <- oldFn.params.zipStrict(recArgs)
         if !oldFn.params.exists(_.name == arg)
@@ -117,10 +124,26 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
             .map(sche.nodeStates)
           ++ Option.when(param == pack.branch.cond)(sche.jumpStates(pack.branch.i)(pack.prim.i))
         ).min
-        val diff = states.indexOf(defState) - states.indexOf(firstUseState)
+        val diff = states.getIndexOf(defState).get - states.getIndexOf(firstUseState).get
         println((param, arg, diff))
         diff
-    ).max.clamp(pack.prim.states.size + 1, Int.MaxValue)
+    ).iterator ++ {
+      val arrAccesses = immutable.MultiDict.from:
+        for
+          node <- pack.prim.nodes.valuesIterator ++ pack.seco.nodes.valuesIterator
+          arr <- node match
+            case Node.GetReq(_, _, arr, _) => Some(arr)
+            case Node.Put(_, arr, _, _) => Some(arr)
+            case _ => None
+        yield
+          arr -> node.id
+      for
+        arr <- graph.arrayDefs.keysIterator
+        accessStates = arrAccesses.get(arr).map(sche.nodeStates)
+        if accessStates.nonEmpty
+      yield
+        states.getIndexOf(accessStates.last).get - states.getIndexOf(accessStates.head).get + 1
+    }).max.clamp(pack.prim.states.size + 1, Int.MaxValue)
 
   /**
     並列化後の `(
@@ -176,28 +199,36 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
   private def buildNewPrim(oldFn: CDFGFun, newFn: CDFGFun, primPSs: Seq[ParallelState])
   (using pack: BlockPack, newLabs: NewLabs): Unit =
     addJumpState(pack.start.i, null, generateState())
-    newFn.jumps(pack.start.i) = pack.start//.mapLabel(l => newLabs(l -> 0))
+    newFn.jumps(pack.start.i) = pack.start
 
     val newNodes = mutable.Map.empty[NodeID, Node]
+    val newSortedNodess = mutable.ListBuffer.empty[Seq[Node]]
 
     for ps <- primPSs do
-      newNodes ++= registerFromParallelState(ps).map(_.pairWithID)
+      val nodes = registerFromParallelState(ps)
+      newNodes ++= nodes.map(_.pairWithID)
+      newSortedNodess += nodes
 
     newFn.blocks(pack.prim.i) = Block(
       pack.prim.i,
-      Nil, Nil, /*pack.prim.inputs.map(newLabs(_, 0)), pack.prim.outputs.map(newLabs(_, 0)),*/
-      newNodes.toMap, UnweightedGraph(), pack.start.i, branchIndices(0),
+      Nil, Nil,
+      newNodes.toMap, buildArrayDeps(newSortedNodess), pack.start.i, branchIndices(0),
     )
   end buildNewPrim
 
   private def buildNewSeco(oldFn: CDFGFun, newFn: CDFGFun, round: Round, ri: Int)
   (using pack: BlockPack, newLabs: NewLabs): Unit =
     val newNodes = mutable.Map.empty[NodeID, Node]
+    val newSortedNodess = mutable.ListBuffer.empty[Seq[Node]]
+
     for ps <- round.secoPSs do
-      newNodes ++= registerFromParallelState(ps).map(_.pairWithID)
+      val nodes = registerFromParallelState(ps)
+      newNodes ++= nodes.map(_.pairWithID)
+      newSortedNodess += nodes
+
     newFn.blocks(secoIndices(ri)) = Block(
       secoIndices(ri), Nil, Nil,
-      newNodes.toMap, UnweightedGraph(), branchIndices(ri), branchIndices(ri + 1),
+      newNodes.toMap, buildArrayDeps(newSortedNodess), branchIndices(ri), branchIndices(ri + 1),
     )
 
   private def buildNewMiddleJump(oldFn: CDFGFun, newFn: CDFGFun, round: Round, ri: Int)
@@ -256,21 +287,23 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
 
     def traverseBlock(
       oldBI: BlockIndex, newBI: BlockIndex, newParentJI: JumpIndex,
-      newNodes: mutable.Map[NodeID, Node],
+      newNodes: mutable.Map[NodeID, Node], newSortedNodess: mutable.ListBuffer[Seq[Node]]
     ): Unit =
       val oldBlock = oldFn(oldBI)
-      for
-        (st -> nodes) <- oldBlock.stateToNodes(sche).sets
-        newState = generateState()
-        node <- nodes
-      do
-        val newID = NodeID.generate()
-        newNodeStates(newID) = newState
-        newNodes(newID) = node.copyWithID(newID).mapLabel(l => newLabs(l, ri))
+      for (st -> nodes) <- oldBlock.stateToNodes(sche).sets do
+        val newState = generateState()
+        newSortedNodess += (
+          for node <- nodes.toSeq yield
+            val newID = NodeID.generate()
+            newNodeStates(newID) = newState
+            val newNode = node.copyWithID(newID).mapLabel(convLab)
+            newNodes(newID) = newNode
+            newNode
+        )
 
       val newJI = JumpIndex.generate(oldBlock.outJump)
       val newBlock = Block(
-        newBI, Nil, Nil, newNodes.toMap, UnweightedGraph(), newParentJI, newJI,
+        newBI, Nil, Nil, newNodes.toMap, buildArrayDeps(newSortedNodess), newParentJI, newJI,
       )
       newFn.blocks(newBI) = newBlock
       addJumpState(newJI, newBI,
@@ -285,10 +318,45 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
 
     locally:
       val newNodes = mutable.Map.empty[NodeID, Node]
+      val newSortedNodess = mutable.ListBuffer.empty[Seq[Node]]
       for ps <- round.exitPSs do
-        newNodes ++= registerFromParallelState(ps).map(_.pairWithID)
-      traverseBlock(pack.exit.i, exitBI, branchIndices(ri), newNodes)
+        val nodes = registerFromParallelState(ps)
+        newNodes ++= nodes.map(_.pairWithID)
+        newSortedNodess += nodes
+      traverseBlock(pack.exit.i, exitBI, branchIndices(ri), newNodes, newSortedNodess)
   end buildNewExit
+
+  private def buildArrayDeps(sortedNodess: collection.Seq[Seq[Node]]): UnweightedGraph[NodeID] =
+    val currentArrayDeps = UnweightedGraph[NodeID]()
+    val currentArrayLastGet = mutable.Map.empty[Label, List[NodeID]]
+    val currentArrayLastPut = mutable.Map.empty[Label, Option[NodeID]]
+    def arrayLastGet(lab: Label): List[NodeID] =
+      currentArrayLastGet.getOrElseUpdate(lab, Nil)
+    def arrayLastPut(lab: Label): Option[NodeID] =
+      currentArrayLastPut.getOrElseUpdate(lab, None)
+
+    for
+      nodes <- sortedNodess
+      node <- nodes
+    do
+      currentArrayDeps.addVertex(node.id)
+      PP.pprintln((node, currentArrayDeps))
+      node match
+        case Node.GetReq(_, _, arr, _) =>
+          for parent <- arrayLastPut(arr) do
+            currentArrayDeps.addEdge(parent -> node.id)
+          currentArrayLastGet(arr) = node.id :: arrayLastGet(arr)
+        case Node.GetAwa(_, reqID, _, _) =>
+          currentArrayDeps.addEdge(reqID -> node.id)
+        case Node.Put(_, arr, _, _) =>
+          for parent <- arrayLastGet(arr).iterator ++ arrayLastPut(arr) do
+            currentArrayDeps.addEdge(parent -> node.id)
+          currentArrayLastGet(arr) = Nil
+          currentArrayLastPut(arr) = Some(node.id)
+        case _ =>
+
+    currentArrayDeps
+  end buildArrayDeps
 
   private def generateState(): State =
     stateCnt += 1
@@ -305,8 +373,19 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
     yield
       val newID = NodeID.generate()
       newNodeStates(newID) = newState
-      node.copyWithID(newID).mapLabel(l => newLabs(l, ri))
-
+      node.copyWithID(newID).mapLabel(l => newLabs(l, ri)) match
+        case newNode: Node.GetReq =>
+          val awaID = NodeID.generate()
+          oldReqIDToNewReqID(node.id) = newID
+          oldReqIDToNewAwaID(node.id) = awaID
+          newNode.copy(awa = awaID)
+        case newNode: Node.GetAwa =>
+          val awaID = oldReqIDToNewAwaID(newNode.req)
+          newNodeStates -= newID
+          newNodeStates(awaID) = newState
+          newNode.copy(id = awaID, req = oldReqIDToNewReqID(newNode.req))
+        case newNode => newNode
+  end registerFromParallelState
 end SimpleRecParallelism
 
 object SimpleRecParallelism:

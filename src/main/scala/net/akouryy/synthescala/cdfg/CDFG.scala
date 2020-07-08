@@ -158,8 +158,8 @@ enum Node derives Eql:
       nd.copy(index = fn(index))
     case nd @ GetAwa(_, _, _/*arr*/, ret) =>
       nd.copy(ret = fn(ret))
-    case nd @ Put(_, arr, index, value) =>
-      nd.copy(arr = fn(arr), index = fn(index), value = fn(value))
+    case nd @ Put(_, _/*arr*/, index, value) =>
+      nd.copy(index = fn(index), value = fn(value))
 
 end Node
 
@@ -207,11 +207,10 @@ enum Jump:
 
   def outBlocks: Seq[BlockIndex] = this match
     case StartFun(_, ob) => Seq(ob)
-    case _: (Return | TailCall) => Nil
+    case _: (Return | TailCall | ForLoopBottom) => Nil
     case Branch(_, _, _, tb, fb) => Seq(tb, fb)
     case Merge(_, _, _, ob, _) => Seq(ob)
     case ForLoopTop(_, _, _, _, _, sbi, xbi, _) => Seq(sbi, xbi)
-    case ForLoopBottom(_, _, _, _) => Nil
 
   def mapLabel(fn: Label => Label): Jump = (this: @unchecked) match
     case _: StartFun => this

@@ -115,14 +115,17 @@ class GraphDrawer(
 
       for
         Block(bi, inputs, outputs, nodes, arrayDeps, _, _) <- graph.main.blocks.valuesIterator
-        if nodes.nonEmpty
+        // if nodes.nonEmpty
       do
         val ids = mutable.Map.empty[Node, Int]
 
         r.indent(s"subgraph cluster_dfg_$bi {", "}"):
           r ++= s"node [shape = oval];"
-          r ++= s"""label = <$bi<br/>(${inputs.map(idStr).mkString(",")}=&gt;""" +
+          r ++= s"""label = <$bi<br/>(${inputs.map(idStr).mkString(",")}<br/>=&gt;""" +
                 s"""${outputs.map(idStr).mkString(",")})>;"""
+
+          if nodes.isEmpty
+            r ++= "dummy [style=invis];"
 
           for nd <- nodes.valuesIterator do
             val labelBase = nd match
@@ -158,7 +161,7 @@ class GraphDrawer(
             r ++= s"""$f -> $t;"""
           )
 
-          /*(
+          (
             for
               fromID <- nodes.keysIterator
               if nodes(fromID).isMemoryRelated
@@ -170,7 +173,7 @@ class GraphDrawer(
                 case Node.GetReq(_, awa, _, _) if awa == t => "solid"
                 case _ => "dotted"
             r ++= s"""$f -> $t [style = $style];"""
-          }*/
+          }
       end for
 
     r.toString

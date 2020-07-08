@@ -5,9 +5,8 @@ import scala.collection.mutable
 
 object Liveness:
   def insertInOuts(prog: CDFG): Unit =
-    val jis = prog.main.jumps.filter(_._2.isInstanceOf[Jump.Return]).keysIterator.to:
-      import scala.language.implicitConversions
-      mutable.Stack
+    val jis = mutable.Stack.from:
+      prog.main.jumps.iterator.filter(_._2.outBlocks.isEmpty).map(_._1)
 
     val visited = mutable.Set.empty[BlockIndex]
     val liveIns = mutable.Map.empty[BlockIndex, Set[Label]]
@@ -28,6 +27,8 @@ object Liveness:
             case Jump.Branch(_, cond, _, _, _) => liveOutBase + cond
             case Jump.Merge(_, ibs, ins, _, ons) => liveOutBase -- ons ++ ins(ibs.indexOf(bi))
             case Jump.Return(_, v, _) => liveOutBase + v
+            case _: Jump.ForLoopTop => liveOutBase
+            case Jump.ForLoopBottom(_, _, _, names) => liveOutBase ++ names
 
           liveIns(bi) = liveOut ++ block.uses -- block.defs
 

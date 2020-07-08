@@ -34,20 +34,22 @@ object Main:
     // PP.pprintln(graph)
     print(fansi.Color.Full(69)(s"CO; "))
     cdfg.optimize.Optimizer(graph1, typeEnv1)
-    PP.pprintln(graph1)
+    // PP.pprintln(graph1)
     print(fansi.Color.Full(69)(s"SC; "))
     val schedule1 = cdfg.schedule.GorgeousScheduler(graph1).schedule
     // PP.pprintln(schedule)
     print(fansi.Color.Full(69)(s"SO; "))
     val (graph2, typeEnv2, schedule2) =
       cdfg.optimize.ScheduledOptimizer(graph1, typeEnv1, schedule1)
+    // PP.pprintln(graph2)
+    // PP.pprintln(schedule2)
+    print(fansi.Color.Full(69)(s"IO2; "))
+    cdfg.Liveness.insertInOuts(graph2)
     PP.pprintln(graph2)
-    PP.pprintln(schedule2)
     Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
       cdfg.GraphDrawer(graph2, typeEnv2, schedule2)
           .draw.getBytes(StandardCharsets.UTF_8),
     )
-
     print(fansi.Color.Full(69)(s"RA; "))
     val regAlloc = cdfg.bind.RegisterAllocator(graph2, schedule2).allocate(graph2.main)
     // PP.pprintln(regAlloc)
