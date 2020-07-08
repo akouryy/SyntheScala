@@ -89,7 +89,7 @@ class GraphDrawer(
             forColors(i) = forColors.size % 5 + 1
             val secoStr = if isSecoTru then baseLabStr(cond) else s"!${baseLabStr(cond)}"
             val exitStr = if isSecoTru then s"!${baseLabStr(cond)}" else baseLabStr(cond)
-            val namesStr = names.map(baseLabStr).mkString(",")
+            val namesStr = names.map(idStr).mkString(",")
             r.indent(s"$i[", "];"):
               r ++= s"""label = <$label>;"""
               r ++= "shape = house; style = filled;"
@@ -99,7 +99,7 @@ class GraphDrawer(
             r ++= s"""$bottom -> $i [constraint = false; color = ${forColors(i)}];"""
             r ++= s"""$i -> $xbi [label = <$exitStr>];"""
           case Jump.ForLoopBottom(i, top, ibi, names) =>
-            val namesStr = names.map(baseLabStr).mkString(",")
+            val namesStr = names.map(idStr).mkString(",")
             r.indent(s"$i[", "];"):
               r ++= s"""label = <$label>"""
               r ++= "shape = invhouse; style = filled;"
@@ -121,7 +121,7 @@ class GraphDrawer(
 
         r.indent(s"subgraph cluster_dfg_$bi {", "}"):
           r ++= s"node [shape = oval];"
-          r ++= s"""label = <$bi<br/>(${inputs.map(idStr).mkString(",")}<br/>=&gt;""" +
+          r ++= s"""label = <$bi<br/>(${inputs.map(idStr).mkString(",")}<br/>=&gt;<br/>""" +
                 s"""${outputs.map(idStr).mkString(",")})>;"""
 
           if nodes.isEmpty

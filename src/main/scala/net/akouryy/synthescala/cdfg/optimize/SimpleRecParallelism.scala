@@ -249,11 +249,15 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
   (using pack: BlockPack, newLabs: NewLabs): Unit =
 
     val inputBI = if ri == 0 then pack.prim.i else secoIndices(ri - 1)
+    val secoBI = secoIndices(ri)
     val exitBI = BlockIndex.generate(pack.exit.i)
 
+    val secoDefs = newFn(secoBI).defs.toSet
+    println(secoDefs)
     val names =
       for
         (origLab -> rj, topLab) <- newLabs.toIndexedSeq
+        if !secoDefs(topLab)
         bottomLab <- newLabs.get(origLab -> (rj + 1))
       yield
         topLab -> bottomLab
@@ -261,18 +265,16 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
     newFn.jumps(branchIndices(ri)) = Jump.ForLoopTop(
       branchIndices(ri), branchIndices(ri + 1), newLabs(pack.branch.cond, ri),
       pack.isSecoTruBody, inputBI,
-      secoIndices(ri), exitBI,
+      secoBI, exitBI,
       names.map(_._1), // FIXME: 未使用変数は？
     )
     addJumpState(branchIndices(ri), inputBI, newNodeStates(newFn(inputBI).nodes.last._1))
 
     newFn.jumps(branchIndices(ri + 1)) = Jump.ForLoopBottom(
-      branchIndices(ri + 1), branchIndices(ri), secoIndices(ri),
+      branchIndices(ri + 1), branchIndices(ri), secoBI,
       names.map(_._2),
     )
-    addJumpState(branchIndices(ri + 1), secoIndices(ri),
-      newNodeStates(newFn(secoIndices(ri)).nodes.last._1),
-    )
+    addJumpState(branchIndices(ri + 1), secoBI, generateState())
 
     buildNewExit(oldFn, newFn, round, ri, exitBI)
   end buildNewLastJump
@@ -304,11 +306,18 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
         newBI, Nil, Nil, newNodes.toMap, buildArrayDeps(newSortedNodess), newParentJI, newJI,
       )
       newFn.blocks(newBI) = newBlock
-      addJumpState(newJI, newBI,
-        if newNodes.isEmpty then newJumpStates(newParentJI).soleElement._2
-        else newNodeStates(newNodes.last._1),
-      )
-      oldFn(oldBlock.outJump) match
+
+      var jumpState =
+        if newNodes.isEmpty
+          newJumpStates(newParentJI).soleElement._2
+        else
+          newNodeStates(newNodes.last._1)
+      val oldJump = oldFn(oldBlock.outJump)
+      oldJump match
+        case _: (Jump.StartFun | Jump.Branch | Jump.Merge) =>
+        case _ => jumpState = generateState()
+      addJumpState(newJI, newBI, jumpState)
+      oldJump match
         case Jump.Return(_, value, _) =>
           newFn.jumps(newJI) = Jump.Return(newJI, convLab(value), newBI)
         case j =>

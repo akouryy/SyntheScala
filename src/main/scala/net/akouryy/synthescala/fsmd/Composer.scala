@@ -48,11 +48,30 @@ class Composer(
             new ConnPort.Reg(regs(cond)),
             blockFirstState(fn, tbi), blockFirstState(fn, fbi),
           )
+        case Jump.ForLoopTop(ji, bottomJI, cond, isSecoTru, ibi, sbi, xbi, _) =>
+          val q1 = sche.jumpStates(ji)(ibi)
+          fsm(q1) = Transition.Conditional(
+            Source.Always(new ConnPort.RegStation(regs(cond))),
+            new ConnPort.Reg(regs(cond)),
+            blockFirstState(fn, if isSecoTru then sbi else xbi),
+            blockFirstState(fn, if isSecoTru then xbi else sbi),
+          )
+        case Jump.ForLoopBottom(ji, topJI, ibi, _) =>
+          val top = fn(topJI).asInstanceOf[Jump.ForLoopTop]
+          val q1 = sche.jumpStates(ji)(ibi)
+          fsm(q1) = Transition.Conditional(
+            Source.Always(new ConnPort.RegStation(regs(top.cond))),
+            new ConnPort.Reg(regs(top.cond)),
+            blockFirstState(fn, if top.isSecoTru then top.seco else top.exit),
+            blockFirstState(fn, if top.isSecoTru then top.exit else top.seco),
+          )
   end composeFSM
 
   private def mergeDatapath(pin: ConnPort.Dst, q: State, src: Source): Unit =
     import ConnPort._
     import Source._
+
+    println((fansi.Color.Red("md"), pin, q, src))
 
     val newSrc =
       (datapath.getOrElseUpdate(pin, mutable.SortedMap.empty).get(q), src): @unchecked match
@@ -81,7 +100,6 @@ class Composer(
     do
       import cdfg.Node._
       def q = sche.nodeStates(nid)
-
       node match
         case Const(_, num, ident) =>
           import Jump._
@@ -142,6 +160,15 @@ class Composer(
             (inLab, outLab) <- inLabs.zipStrict(outLabs)
           do
             mergeMerge(regs(outLab), sche.jumpStates(ji)(ibi), regs(inLab))
+        case Jump.ForLoopBottom(bottomJI, topJI, ibi, bottomNames) =>
+          val top = fn(topJI).asInstanceOf[Jump.ForLoopTop]
+          for (tn, bn) <- top.topNames.zipStrict(bottomNames) do
+            // mergeMerge(regs(tn), sche.jumpStates(bottomJI)(ibi), regs(bn)) // TODO: FLB-occupied
+            mergeDatapath(
+              new ConnPort.Reg(regs(tn)),
+              sche.jumpStates(bottomJI)(ibi),
+              Source.Always(new ConnPort.Reg(regs(bn))),
+            )
         case Jump.TailCall(ji, _, params, ibi) =>
           for (param, i) <- params.zipWithIndex do
             mergeDatapath(

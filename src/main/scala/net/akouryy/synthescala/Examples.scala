@@ -53,11 +53,12 @@ def Examples = Seq[Program](
     def complexIf(i: U[1]): U[2] =
       1.U[2] + (
         if i == 0.U[1]
-          val b = 1.U[2]
+          val b = 2.U[2]
           a(0.U[1]) = i
           b
         else
-          2.U[2]
+          val k = i.cast[2]
+          k
       ),
 
   TastyReflector.reflect:

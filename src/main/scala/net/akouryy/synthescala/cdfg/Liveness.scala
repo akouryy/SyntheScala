@@ -27,7 +27,7 @@ object Liveness:
             case Jump.Branch(_, cond, _, _, _) => liveOutBase + cond
             case Jump.Merge(_, ibs, ins, _, ons) => liveOutBase -- ons ++ ins(ibs.indexOf(bi))
             case Jump.Return(_, v, _) => liveOutBase + v
-            case _: Jump.ForLoopTop => liveOutBase
+            case Jump.ForLoopTop(_, _, cond, _, _, _, _, _) => liveOutBase + cond
             case Jump.ForLoopBottom(_, _, _, names) => liveOutBase ++ names
 
           liveIns(bi) = liveOut ++ block.uses -- block.defs
