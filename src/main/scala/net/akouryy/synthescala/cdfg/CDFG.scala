@@ -19,6 +19,16 @@ final class CDFGFun(val fnName: String, val retTyp: toki.Type, val params: Seq[t
   def apply(bi: BlockIndex): Block = blocks(bi)
   def apply(ji: JumpIndex): Jump = jumps(ji)
 
+  def nodeIDToBlockIndex: collection.Map[NodeID, BlockIndex] =
+    val ret = mutable.Map.empty[NodeID, BlockIndex]
+    for
+      bi -> block <- blocks
+      nid <- block.nodes.keysIterator
+    do
+      ret(nid) = bi
+    ret
+end CDFGFun
+
 final case class BlockIndex(indices: List[Int]) extends Ordered[BlockIndex] derives Eql:
   override def toString: String = s"Block$indexString"
 
@@ -108,7 +118,15 @@ enum Node derives Eql:
 
   override lazy val hashCode = scala.util.hashing.MurmurHash3.productHash(this)
 
-  def withID: (NodeID, Node) = id -> this
+  def pairWithID: (NodeID, Node) = id -> this
+
+  def copyWithID(id: NodeID): Node = this match
+    case node: Const => node.copy(id = id)
+    case node: BinOp => node.copy(id = id)
+    case node: Call => node.copy(id = id)
+    case node: GetReq => node.copy(id = id)
+    case node: GetAwa => node.copy(id = id)
+    case node: Put => node.copy(id = id)
 
   def isMemoryRelated: Boolean = this match
     case _: (GetReq | GetAwa | Put) => true
@@ -136,10 +154,10 @@ enum Node derives Eql:
       nd.copy(left = left.mapV(fn), right = right.mapV(fn), ans = fn(ans))
     case nd @ Call(_, _, args, ret) =>
       nd.copy(args = args.map(fn), ret = fn(ret))
-    case nd @ GetReq(_, _, arr, index) =>
-      nd.copy(arr = fn(arr), index = fn(index))
-    case nd @ GetAwa(_, _, arr, ret) =>
-      nd.copy(arr = fn(arr), ret = fn(ret))
+    case nd @ GetReq(_, _, _/*arr*/, index) =>
+      nd.copy(index = fn(index))
+    case nd @ GetAwa(_, _, _/*arr*/, ret) =>
+      nd.copy(ret = fn(ret))
     case nd @ Put(_, arr, index, value) =>
       nd.copy(arr = fn(arr), index = fn(index), value = fn(value))
 
@@ -170,7 +188,7 @@ enum Jump:
     // assert(inputs.forall(_.bi < output))
 
   case ForLoopTop(
-    i: JumpIndex, bottom: JumpIndex, cond: Register, isSecoTru: Boolean,
+    i: JumpIndex, bottom: JumpIndex, cond: Label, isSecoTru: Boolean,
     inBlockIndex: BlockIndex, seco: BlockIndex, exit: BlockIndex, topNames: IndexedSeq[Label],
   )
 

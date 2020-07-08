@@ -10,9 +10,11 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
 
   private var stateCnt = 0
   private val newTypEnv = mutable.Map.from(typEnv)
+  private var oldStateToNodes: Map[State, Seq[(BlockIndex, Node)]] = _
   private val newJumpStates = mutable.Map.empty[JumpIndex, mutable.Map[BlockIndex, State]]
   private val newNodeStates = mutable.Map.empty[NodeID, State]
   private var branchIndices: IndexedSeq[JumpIndex] = _
+  private var secoIndices: IndexedSeq[BlockIndex] = _
 
   def run(): (CDFG, toki.TypeEnv, schedule.Schedule) =
     val newMain = CDFGFun(graph.main.fnName, graph.main.retTyp, graph.main.params)
@@ -27,6 +29,14 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       (graph, typEnv, sche)
 
   private def traverseFn(oldFn: CDFGFun, newFn: CDFGFun): Boolean =
+    val oldNodeIDToBlockIndex = oldFn.nodeIDToBlockIndex
+    oldStateToNodes = locally:
+      val ret = mutable.Map.empty[State, List[(BlockIndex, Node)]]
+      for (nid -> st) <- sche.nodeStates do
+        val b = oldFn(oldNodeIDToBlockIndex(nid))
+        ret(st) = b.i -> b.nodes(nid) :: ret.getOrElse(st, Nil)
+      ret.toMap
+
     detectProperPath(oldFn) match
       case None => false
       case Some(pack) =>
@@ -52,6 +62,7 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
         rewriteTyps()
         buildNewGraph(oldFn, newFn, primPSS, rounds)
         true
+  end traverseFn
 
   /**
     末尾再帰に至るパスが1つしかなく、さらにそのパス上に分岐が1つしかない場合、そのパスの情報を返す。
@@ -121,7 +132,7 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       primStates.map(q => ParallelState(Seq(0 -> q))),
       locally:
         val nRounds = 1 + (secoStates.length - 1) / interval
-        for round <- 0 until nRounds yield (
+        for round <- 0 until nRounds yield Round(
           for j <- 0 until interval yield
             ParallelState(
               0.to(round).flatMap(i => secoStates.lift(j + interval * (round - i)).map(i -> _)) ++
@@ -146,30 +157,69 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
     oldFn: CDFGFun, newFn: CDFGFun, primPSs: Seq[ParallelState], rounds: Seq[Round],
   )(using pack: BlockPack, newLabs: NewLabs): Unit =
     branchIndices = 0.to(rounds.size).map(_ => JumpIndex.generate(pack.branch.i))
+    secoIndices = rounds.indices.map(_ => BlockIndex.generate(pack.prim.i))
     buildNewPrim(oldFn, newFn, primPSs)
-    for (round, i) <- rounds.zipWithIndex do buildNewRound(round, i)
+    for (round, i) <- rounds.zipWithIndex do
+      buildNewSeco(oldFn, newFn, round, i)
+      if i == rounds.size - 1 then
+        buildNewLastJump(oldFn, newFn, round, i)
+      else
+        buildNewMiddleJump(oldFn, newFn, round, i)
 
   private def buildNewPrim(oldFn: CDFGFun, newFn: CDFGFun, primPSs: Seq[ParallelState])
   (using pack: BlockPack, newLabs: NewLabs): Unit =
     addJumpState(pack.start.i, null, generateState())
-    newFn.jumps(pack.start.i) = pack.start.mapLabel(l => newLabs(l -> 0))
+    newFn.jumps(pack.start.i) = pack.start//.mapLabel(l => newLabs(l -> 0))
 
-    val primStatesToNodes = pack.prim.stateToNodes(sche)
     val newNodes = mutable.Map.empty[NodeID, Node]
 
     for ps <- primPSs do
-      val st = ps.states.soleElement._2
-      val newState = generateState()
-      for node <- primStatesToNodes.get(st) do
-        newNodeStates(node.id) = newState
-        newNodes(node.id) = node.mapLabel(l => newLabs(l -> 0))
+      newNodes ++= registerFromParallelState(ps).map(_.pairWithID)
 
     newFn.blocks(pack.prim.i) = Block(
-      pack.prim.i, pack.prim.inputs.map(newLabs(_, 0)), pack.prim.outputs.map(newLabs(_, 0)),
+      pack.prim.i,
+      Nil, Nil, /*pack.prim.inputs.map(newLabs(_, 0)), pack.prim.outputs.map(newLabs(_, 0)),*/
       newNodes.toMap, UnweightedGraph(), pack.start.i, branchIndices(0),
     )
+  end buildNewPrim
 
-  private def buildNewRound(round: Round, roundIndex: Int): Unit = ()
+  private def buildNewSeco(oldFn: CDFGFun, newFn: CDFGFun, round: Round, ri: Int)
+  (using pack: BlockPack, newLabs: NewLabs): Unit =
+    val newNodes = mutable.Map.empty[NodeID, Node]
+    for ps <- round.secoPSs do
+      newNodes ++= registerFromParallelState(ps).map(_.pairWithID)
+    newFn.blocks(secoIndices(ri)) = Block(
+      secoIndices(ri), Nil, Nil,
+      newNodes.toMap, UnweightedGraph(), branchIndices(ri), branchIndices(ri + 1),
+    )
+
+  private def buildNewMiddleJump(oldFn: CDFGFun, newFn: CDFGFun, round: Round, ri: Int)
+  (using pack: BlockPack, newLabs: NewLabs): Unit =
+    val exitBI = BlockIndex.generate(pack.exit.i)
+
+    newFn.jumps(branchIndices(ri)) = Jump.Branch(
+      branchIndices(ri), newLabs(pack.branch.cond, ri),
+      if ri == 0 then pack.prim.i else secoIndices(ri - 1),
+      if pack.isSecoTruBody then secoIndices(ri) else exitBI,
+      if pack.isSecoTruBody then exitBI else secoIndices(ri),
+    )
+  end buildNewMiddleJump
+
+  private def buildNewLastJump(oldFn: CDFGFun, newFn: CDFGFun, round: Round, ri: Int)
+  (using pack: BlockPack, newLabs: NewLabs): Unit =
+    val exitBI = BlockIndex.generate(pack.exit.i)
+
+    newFn.jumps(branchIndices(ri)) = Jump.ForLoopTop(
+      branchIndices(ri), branchIndices(ri + 1), newLabs(pack.branch.cond, ri),
+      pack.isSecoTruBody, secoIndices(ri - 1), secoIndices(ri), exitBI,
+      IndexedSeq.empty, // TODO
+    )
+
+    newFn.jumps(branchIndices(ri + 1)) = Jump.ForLoopBottom(
+      branchIndices(ri + 1), branchIndices(ri), secoIndices(ri),
+      IndexedSeq.empty, // TODO
+    )
+  end buildNewLastJump
 
   private def generateState(): State =
     stateCnt += 1
@@ -178,16 +228,26 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
   private def addJumpState(ji: JumpIndex, ibi: BlockIndex, state: State): Unit =
     newJumpStates.getOrElseUpdate(ji, mutable.Map.empty)(ibi) = state
 
+  private def registerFromParallelState(ps: ParallelState)(using newLabs: NewLabs): Seq[Node] =
+    val newState = generateState()
+    for
+      (ri -> q) <- ps.states
+      (_ -> node) <- oldStateToNodes(q)
+    yield
+      val newID = NodeID.generate()
+      newNodeStates(newID) = newState
+      node.copyWithID(newID).mapLabel(l => newLabs(l, ri))
+
 end SimpleRecParallelism
 
 object SimpleRecParallelism:
-  case class BlockPack(
+  final case class BlockPack(
     start: Jump.StartFun, prim: Block, branch: Jump.Branch, isSecoTruBody: Boolean,
     seco: Block, rec: Jump.TailCall, exit: Block,
   )
 
-  case class ParallelState(states: Seq[(Int, State)])
+  final case class ParallelState(states: Seq[(Int, State)])
 
-  type Round = (Seq[ParallelState], Seq[ParallelState])
+  final case class Round(secoPSs: Seq[ParallelState], exitPSs: Seq[ParallelState])
 
   type NewLabs = Map[(Label, Int), Label]
