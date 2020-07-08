@@ -124,9 +124,7 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
             .map(sche.nodeStates)
           ++ Option.when(param == pack.branch.cond)(sche.jumpStates(pack.branch.i)(pack.prim.i))
         ).min
-        val diff = states.getIndexOf(defState).get - states.getIndexOf(firstUseState).get
-        println((param, arg, diff))
-        diff
+        states.getIndexOf(defState).get - states.getIndexOf(firstUseState).get
     ).iterator ++ {
       val arrAccesses = immutable.MultiDict.from:
         for
@@ -340,14 +338,16 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       node <- nodes
     do
       currentArrayDeps.addVertex(node.id)
-      PP.pprintln((node, currentArrayDeps))
       node match
         case Node.GetReq(_, _, arr, _) =>
           for parent <- arrayLastPut(arr) do
             currentArrayDeps.addEdge(parent -> node.id)
           currentArrayLastGet(arr) = node.id :: arrayLastGet(arr)
         case Node.GetAwa(_, reqID, _, _) =>
-          currentArrayDeps.addEdge(reqID -> node.id)
+          if currentArrayDeps.edges.contains(reqID) // GetReq may belong to another Block
+            currentArrayDeps.addEdge(reqID -> node.id)
+          else
+            throw CancelOptimizationException(s"req_awa_interblock:$reqID,${node.id}") // TODO
         case Node.Put(_, arr, _, _) =>
           for parent <- arrayLastGet(arr).iterator ++ arrayLastPut(arr) do
             currentArrayDeps.addEdge(parent -> node.id)
