@@ -100,6 +100,8 @@ class Composer(
     do
       import cdfg.Node._
       def q = sche.nodeStates(nid)
+      println((fansi.Color.Full(100)("b"), q, node))
+
       node match
         case Const(_, num, ident) =>
           import Jump._
@@ -153,6 +155,8 @@ class Composer(
     end for
 
     for j <- fn.jumps.valuesIterator do
+      println((fansi.Color.Full(100)("j"), sche.jumpStates(j.i), j))
+
       j match
         case Jump.Merge(ji, ibis, inLabss, _, outLabs) =>
           for
@@ -162,7 +166,10 @@ class Composer(
             mergeMerge(regs(outLab), sche.jumpStates(ji)(ibi), regs(inLab))
         case Jump.ForLoopBottom(bottomJI, topJI, ibi, bottomNames) =>
           val top = fn(topJI).asInstanceOf[Jump.ForLoopTop]
-          for (tn, bn) <- top.topNames.zipStrict(bottomNames) do
+          for
+            (tn, bn) <- top.topNames.zipStrict(bottomNames)
+            if regs.contains(tn) && regs.contains(bn)
+          do
             // mergeMerge(regs(tn), sche.jumpStates(bottomJI)(ibi), regs(bn)) // TODO: FLB-occupied
             mergeDatapath(
               new ConnPort.Reg(regs(tn)),

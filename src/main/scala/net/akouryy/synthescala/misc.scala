@@ -12,6 +12,8 @@ final case class State(id: Int) extends Ordered[State] derives Eql:
   def pred = State(id - 1)
   def succ = State(id + 1)
 
+final case class JNState(isJump: Boolean, state: State) derives Eql
+
 final case class Register(id: Int) extends Ordered[Register] derives Eql:
   override def toString = s"r${id.toString.replace("-", "_")}"
 

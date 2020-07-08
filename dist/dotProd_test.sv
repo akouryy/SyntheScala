@@ -2,8 +2,8 @@
 module top();
 
   reg clk, r_enable, controlArr;
-  wire[9:0] init_i = 10'd0;
-  wire signed[63:0] init_acc = 64'd0;
+  wire[9:0] init_i_t_a = 10'd0;
+  wire signed[63:0] init_acc_t_a = 64'd0;
   wire w_enable;
   wire signed[63:0] result;
 

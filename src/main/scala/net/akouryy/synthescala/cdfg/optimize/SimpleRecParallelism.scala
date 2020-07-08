@@ -253,14 +253,14 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
     val exitBI = BlockIndex.generate(pack.exit.i)
 
     val secoDefs = newFn(secoBI).defs.toSet
-    println(secoDefs)
-    val names =
+    val names = (
       for
         (origLab -> rj, topLab) <- newLabs.toIndexedSeq
         if !secoDefs(topLab)
         bottomLab <- newLabs.get(origLab -> (rj + 1))
       yield
         topLab -> bottomLab
+    ).distinct
 
     newFn.jumps(branchIndices(ri)) = Jump.ForLoopTop(
       branchIndices(ri), branchIndices(ri + 1), newLabs(pack.branch.cond, ri),

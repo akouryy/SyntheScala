@@ -38,18 +38,25 @@ object Liveness:
           )
   end insertInOuts
 
-  def liveInsForState(graph: CDFGFun, sche: schedule.Schedule): collection.Map[State, Set[Label]] =
-    val ret = mutable.Map.empty[State, Set[Label]]
+  def liveInsForState(graph: CDFGFun, sche: schedule.Schedule)
+  : collection.Map[JNState, Set[Label]] =
+    val ret = mutable.Map.empty[JNState, Set[Label]]
 
     for (bi -> b) <- graph.blocks do
       var live = Set.from(b.outputs)
-      ret(sche.jumpStates(b.outJump)(bi)) = live
+      locally:
+        val st = JNState(isJump = true, sche.jumpStates(b.outJump)(bi))
+        graph(b.outJump) match
+          case Jump.ForLoopTop(_, _, _, _, _, _, _, topNames) =>
+            live ++= topNames // TODO: define topNames properly to remove this statement
+          case _ =>
+        ret(st) = live ++ ret.getOrElse(st, Nil)
 
       for (state -> nodes) <- b.stateToNodes(sche).sets.toSeq.reverseIterator do
         for node <- nodes do
           live ++= node.read
           live --= node.written
-        ret(state) = live
+        ret(JNState(isJump = false, state)) = live
 
     ret
   end liveInsForState

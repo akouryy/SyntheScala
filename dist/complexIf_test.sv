@@ -20,6 +20,10 @@ module top();
   );
 
   initial begin
+    $dumpfile("complexIf.vcd");
+    $dumpvars(0, main1);
+    $dumpvars(0, main2);
+
     clk = 0;
     controlArr = 0;
     forever #2 clk = ~clk;
