@@ -2,32 +2,44 @@ package net.akouryy.synthescala
 package cdfg
 package optimize
 
+import toki.Type
+import scala.collection.mutable
+
 class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: schedule.Schedule):
-  import SimpleRecParallelism.ParallelState
+  import SimpleRecParallelism._
+
+  private val newTypEnv = mutable.Map.from(typEnv)
 
   def run(): (toki.TypeEnv, schedule.Schedule) =
     traverseFn(using graph.main)
-    (typEnv, sche)
+    (newTypEnv.toMap, sche)
 
   private def traverseFn(using cfn: CDFGFun): Unit =
     detectProperPath match
       case None =>
-      case Some(j -> isTruRec) =>
-        val prim = cfn(j.inBlock)
-        val seco = cfn(if isTruRec then j.truBlock else j.flsBlock)
-        val exit = cfn(if isTruRec then j.flsBlock else j.truBlock)
-        val pss = parallelizedStates(
-          prim.states.size + 1, prim.states, seco.states,
-          exit.states.headOption.getOrElse(sche.jumpStates(exit.outJump)(exit.i)),
+      case Some(pack) =>
+        val interval = intervalFromBlocks(pack)
+        val (primPSS, rounds) = parallelizedStates(
+          interval, pack.prim.states, pack.seco.states,
+          pack.exit.states.headOption.getOrElse(sche.jumpStates(pack.exit.outJump)(pack.exit.i)),
         )
-        println(prim.states.size + 1)
-        PP.pprintln(pss)
+        println(interval)
+        PP.pprintln(primPSS)
+        PP.pprintln(rounds)
+
+        val newLabs = Map.from:
+          for
+            i <- rounds.indices
+            lab <- cfn.params.map(_.name) ++ pack.prim.defs ++ pack.seco.defs
+          yield
+            (lab, i) -> Label.generate(lab)
+
+        rewriteTyps(newLabs)
 
   /**
     末尾再帰に至るパスが1つしかなく、さらにそのパス上に分岐が1つしかない場合、そのパスの情報を返す。
-    @return 見つかった場合、(その分岐, 分岐後末尾再帰に至る方が真ブロックかどうか)
   **/
-  private def detectProperPath(using cfn: CDFGFun): Option[(Jump.Branch, Boolean)] =
+  private def detectProperPath(using cfn: CDFGFun): Option[BlockPack] =
     val recs = cfn.jumps.values.flatMap:
       case j: Jump.TailCall => Some(j)
       case _ => None
@@ -36,13 +48,42 @@ class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: schedu
       None
     else
       val rec = recs.soleElement
-      val b0 = cfn(cfn.blocks.firstKey)
-      val bi1 = rec.inBlock
-      cfn(b0.outJump) match
-        case j @ Jump.Branch(_, _, _, `bi1`, _) => Some(j -> true)
-        case j @ Jump.Branch(_, _, _, _, `bi1`) => Some(j -> false)
-        case _ => None
+      val pb = cfn(cfn.blocks.firstKey)
+      val sbi = rec.inBlock
+      for
+        (branch, xbi, isSecoTruBody) <- cfn(pb.outJump) match
+          case j @ Jump.Branch(_, _, _, `sbi`, xbi) => Some((j, xbi, true))
+          case j @ Jump.Branch(_, _, _, xbi, `sbi`) => Some((j, xbi, false))
+          case _ => None
+      yield
+        BlockPack(
+          start = cfn(pb.inJumpIndex).asInstanceOf[Jump.StartFun],
+          prim = pb, seco = cfn(sbi), rec = rec,
+          branch = branch, isSecoTruBody = isSecoTruBody, exit = cfn(xbi),
+        )
   end detectProperPath
+
+  private def intervalFromBlocks(pack: BlockPack)(using cfn: CDFGFun): Int =
+    val recArgs = pack.rec.args
+    val states = pack.prim.states ++ pack.seco.states
+
+    (
+      for
+        (toki.Entry(param, _), arg) <- cfn.params.zipStrict(recArgs)
+        if !cfn.params.exists(_.name == arg)
+      yield
+        val defState = sche.nodeStates(
+          pack.prim.writeMap.getOrElse(arg, pack.seco.writeMap(arg))
+        )
+        val firstUseState = (
+          (pack.prim.readMap.getOrElse(param, Nil) ++ pack.seco.readMap.getOrElse(param, Nil))
+            .map(sche.nodeStates)
+          ++ Option.when(param == pack.branch.cond)(sche.jumpStates(pack.branch.i)(pack.prim.i))
+        ).min
+        val diff = states.indexOf(defState) - states.indexOf(firstUseState)
+        println((param, arg, diff))
+        diff
+    ).max.clamp(pack.prim.states.size + 1, Int.MaxValue)
 
   /**
     並列化後の `(
@@ -58,7 +99,7 @@ class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: schedu
   private def parallelizedStates
   (interval: Int, primStates: IndexedSeq[State], secoStates: Seq[State], exitState: State)
   (using cfn: CDFGFun)
-  : (Seq[ParallelState], Seq[(Seq[ParallelState], Seq[ParallelState])]) =
+  : (Seq[ParallelState], Seq[Round]) =
     (
       primStates.map(q => ParallelState(Seq(0 -> q))),
       locally:
@@ -80,7 +121,19 @@ class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: schedu
     )
   end parallelizedStates
 
+  private def rewriteTyps(newLabs: Map[(Label, Int), Label]): Unit =
+    for ((oldLab, _), newLab) <- newLabs do
+      newTypEnv -= oldLab
+      newTypEnv(newLab) = typEnv(oldLab)
+
 end SimpleRecParallelism
 
 object SimpleRecParallelism:
+  case class BlockPack(
+    start: Jump.StartFun, prim: Block, branch: Jump.Branch, isSecoTruBody: Boolean,
+    seco: Block, rec: Jump.TailCall, exit: Block,
+  )
+
   case class ParallelState(states: Seq[(Int, State)])
+
+  type Round = (Seq[ParallelState], Seq[ParallelState])

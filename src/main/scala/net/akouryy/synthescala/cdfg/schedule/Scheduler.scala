@@ -11,5 +11,5 @@ trait Scheduler:
 */
 case class Schedule(
   jumpStates: collection.Map[JumpIndex, collection.Map[BlockIndex, State]],
-  nodeStates: collection.Map[(BlockIndex, NodeID), State],
+  nodeStates: collection.Map[NodeID, State],
 )

@@ -4,10 +4,18 @@ def [T](seq: Iterable[T]).soleElement: T =
   assert(seq.sizeIs == 1, seq)
   seq.head
 
-def [A, B, CC[_], C](iter: collection.IterableOps[A, CC, C]).
-zipStrict(that: Iterable[B]): CC[(A, B)] =
+def [A, B, CC[_], C](iter: collection.IterableOps[A, CC, C]).zipStrict
+(that: Iterable[B]): CC[(A, B)] =
   assert(iter.sizeCompare(that) == 0)
   iter.zip(that)
+
+def [A](seq: collection.Seq[A]).getIndexOf(elem: A, from: Int = 0): Option[Int] =
+  val i = seq.indexOf(elem, from)
+  Option.when(i >= 0)(i)
+
+def [A](seq: collection.Seq[A]).getIndexWhere(pred: A => Boolean, from: Int = 0): Option[Int] =
+  val i = seq.indexWhere(pred, from)
+  Option.when(i >= 0)(i)
 
 def (self: String).tr(from: String, to: String): String =
   def trChars(s: String): Seq[Char] =
@@ -23,3 +31,11 @@ def (self: String).tr(from: String, to: String): String =
 
 def (i: Int).width: Int = i.toBinaryString.length
 def (i: Long).width: Int = i.toBinaryString.length
+
+def [T](i: T).clamp(low: T, high: T)(using ord: Ordering[T]): T =
+  if ord.lt(i, low)
+    low
+  else if ord.gt(i, high)
+    high
+  else
+    i

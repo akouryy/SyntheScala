@@ -18,7 +18,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
   private val varTyps = mutable.Map.empty[String, Type]
 
   private def lab2sv(lab: Label): String =
-    lab.str.replace("_", "__").replace("@", "_a_")
+    lab.str.replace("_", "__").replace("@", "_a_").replace("<", "_t_").replace(">", "")
 
   private def in(cal: Calculator, i: Int): String = s"in${i}_${cal.shortString}"
   private def out(cal: Calculator, i: Int): String = s"out${i}_${cal.shortString}"

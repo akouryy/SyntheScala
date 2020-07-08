@@ -92,7 +92,7 @@ case class Block(
   def stateToNodes(sche: schedule.Schedule): collection.MultiDict[State, Node] =
     mutable.SortedMultiDict.from:
       for (nid -> node) <- nodes.toSeq yield
-        sche.nodeStates(i, nid) -> node
+        sche.nodeStates(nid) -> node
 end Block
 
 enum Node derives Eql:

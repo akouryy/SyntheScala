@@ -7,7 +7,7 @@ import scala.math.Ordering.Implicits.infixOrderingOps
 
 class GorgeousScheduler(graph: CDFG) extends Scheduler:
   private val jumpStates = mutable.Map.empty[JumpIndex, mutable.Map[BlockIndex, State]]
-  private val nodeStates = mutable.Map.empty[(BlockIndex, NodeID), State]
+  private val nodeStates = mutable.Map.empty[NodeID, State]
   private val visited = mutable.Set.empty[BlockIndex]
   private val arrayAccessedAfter = mutable.Set.empty[(State, Label)]
   private var maxState: State = _
@@ -26,9 +26,8 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
     val nodes = block.nodes
     visited += bi
 
-    def nodeVisited(nid: NodeID): Boolean = nodeStates contains (bi -> nid)
     def labelDefVisited(label: Label): Boolean =
-      block.getWritingNode(label).forall(nodeVisited)
+      block.getWritingNode(label).forall(nodeStates.contains)
 
     def parents(nid: NodeID) =
       if nodes(nid).isMemoryRelated
@@ -44,14 +43,14 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
 
     def isNodeReady(nid: NodeID): Boolean =
       nodes(nid).read.forall(labelDefVisited) &&
-      parents(nid).forall(nodeVisited)
+      parents(nid).forall(nodeStates.contains)
 
     val q = mutable.Queue.from(nodes.keysIterator.filter(isNodeReady))
 
     while q.nonEmpty do
       val nid = q.dequeue()
 
-      if !nodeVisited(nid)
+      if !nodeStates.contains(nid)
         val node = nodes(nid)
 
         var state =
@@ -60,9 +59,9 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
               if block.inputs.contains(r)
                 maxState
               else
-                nodeStates(bi -> block.writeMap(r))
+                nodeStates(block.writeMap(r))
             ).maxOption.toList ++
-            parents(nid).map(par => nodeStates(bi, par)).maxOption ++
+            parents(nid).map(par => nodeStates(par)).maxOption ++
             Some(maxState)
           ).max.succ
         node match
@@ -71,9 +70,9 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
               state = state.succ
             arrayAccessedAfter += state -> arr
           case Node.GetAwa(_, reqID, _, _) =>
-            state = nodeStates(bi, reqID).succ
+            state = nodeStates(reqID).succ
           case _ =>
-        nodeStates((bi, nid)) = state
+        nodeStates(nid) = state
 
         for
           nid2 <- node.written.iterator.flatMap(block.getReadingNodes) ++ children(nid)
@@ -86,7 +85,7 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
       import scala.language.implicitConversions
       // TODO: そもそもmapでなくflatMapなのはおかしい(生存解析失敗)
       block.nodes.keysIterator.flatMap(nid =>
-        Option.when(!block.inputs.contains(nid))(nodeStates(bi -> nid))
+        Option.when(!block.inputs.contains(nid))(nodeStates(nid))
       ).maxOption.fold(maxState)(maxState.max)
 
     scheduleJump(fn, bi, block.outJump)

@@ -1,4 +1,8 @@
+// Partially forked from https://github.com/cpu2019-5/anscaml/blob/master/src/main/scala/net/akouryy/anscaml/base/ID.scala
+
 package net.akouryy.synthescala
+
+import scala.collection.mutable
 
 final case class State(id: Int) extends Ordered[State] derives Eql:
   override def toString = s"q$id"
@@ -22,13 +26,30 @@ final case class Label(str: String) extends Ordered[Label] derives Eql:
 
 /** identifier */
 object Label:
-  private var maxTemp: Int = 9
+  private[this] val cntMap = mutable.Map[String, Int]()
 
-  def temp(): Label =
-    maxTemp += 1
-    Label("@" + java.lang.Integer.toString(maxTemp, 36))
+  def suffix(c0: Int): String =
+    assert(c0 >= 0)
+    var c = c0
+    var doNext = true
+    val res = new StringBuilder
+    while (doNext) {
+      doNext = c >= 26
+      val start = 'a'
+      res += (start + c % 26).toChar
+      c = c / 26 - 1
+    }
+    res.reverseInPlace().toString
 
-  def reset(): Unit = maxTemp = 9
+  private def generateBase(str: String): String =
+    val c = cntMap.getOrElse(str, -1) + 1
+    cntMap(str) = c
+    s"${str}${suffix(c)}"
+
+  def generate(lab: Label): Label = Label(generateBase(lab.str + "<") + ">")
+  def temp(): Label = Label(generateBase("@"))
+
+  def reset(): Unit = cntMap.clear()
 
 enum VC derives Eql:
   case V(v: Label)

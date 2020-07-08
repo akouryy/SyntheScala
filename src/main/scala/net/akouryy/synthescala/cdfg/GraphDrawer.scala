@@ -111,7 +111,7 @@ class GraphDrawer(
 
             r ++=
               s"""${nd.id} [label=<
-                    ${stateStr(sche.nodeStates.get(bi -> nd.id))}
+                    ${stateStr(sche.nodeStates.get(nd.id))}
                     $labelBase
                   >];""".singleLine
 

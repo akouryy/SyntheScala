@@ -80,7 +80,7 @@ class Composer(
         (nid -> node) <- b.nodes
     do
       import cdfg.Node._
-      lazy val q = sche.nodeStates(b.i, nid)
+      def q = sche.nodeStates(nid)
 
       node match
         case Const(_, num, ident) =>
