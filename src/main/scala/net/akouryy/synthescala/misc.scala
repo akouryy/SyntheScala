@@ -59,6 +59,10 @@ enum VC derives Eql:
     case V(v) => fv(v)
     case C(c, typ) => fc(c, typ)
 
+  def mapV(fv: Label => Label) = fold(v => V(fv(v)))(C.apply)
+
+  def mapC(fc: Long => Long) = fold(V.apply)((c, typ) => C(fc(c), typ))
+
   def getV: Option[Label] = fold(Some(_))((_, _) => None)
 
   def getC: Option[(Long, toki.Type)] = fold(_ => None)(Some(_, _))

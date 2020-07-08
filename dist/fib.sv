@@ -52,14 +52,14 @@ module main (
   assign stationReg0 =
     stateR == 3'd1 ? {32'd0, out0_Bin0} :
     stateR == 3'd3 ? reg1 :
-    stateR == 3'd4 ? {58'd0, out0_Bin2} :
-    stateR == 3'd5 ? reg0 :
+    stateR == 3'd4 ? {32'd0, out0_Bin0} :
+    stateR == 3'd5 ? reg2 :
     reg0;
   assign stationReg1 =
-    stateR == 3'd5 ? reg2 :
+    stateR == 3'd5 ? reg0 :
     reg1;
   assign stationReg2 =
-    stateR == 3'd4 ? {32'd0, out0_Bin0} :
+    stateR == 3'd4 ? {58'd0, out0_Bin2} :
     stateR == 3'd5 ? reg1 :
     reg2;
   assign stationReg3 =

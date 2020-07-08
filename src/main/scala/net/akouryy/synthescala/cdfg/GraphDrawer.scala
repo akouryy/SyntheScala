@@ -25,12 +25,12 @@ class GraphDrawer(
       case None => sup("#ff4411", "q?")
 
   private def idStr(id: Label): String =
-    id.str +
-      typeEnv.get(id).fold("")(t => sup("#00aa11", t.toString)) +
-      sup("#3311ff", regs.getOrElse(id, "r?"))
+    unsafeEscape(id.str) +
+      typeEnv.get(id).fold("")(t => sup("#00aa11", unsafeEscape(t.toString))) +
+      sup("#3311ff", unsafeEscape(regs.getOrElse(id, "r?").toString))
 
-  private def vcStr(vc: VC): String = vc.fold(_.str):
-    (c, typ) => c.toString + sup("#00aa11", typ.toString)
+  private def vcStr(vc: VC): String = vc.fold(v => unsafeEscape(v.str)):
+    (c, typ) => unsafeEscape(c.toString) + sup("#00aa11", unsafeEscape(typ.toString))
 
   private def (s: String).singleLine: String = s"""\n *""".r.replaceAllIn(s, "")
 

@@ -130,6 +130,19 @@ enum Node derives Eql:
     case GetAwa(_, _, _, ret) => Some(ret)
     case _: Put => None
 
+  def mapLabel(fn: Label => Label): Node = this match
+    case nd @ Const(_, _, name) => nd.copy(name = fn(name))
+    case nd @ BinOp(_, _, left, right, ans) =>
+      nd.copy(left = left.mapV(fn), right = right.mapV(fn), ans = fn(ans))
+    case nd @ Call(_, _, args, ret) =>
+      nd.copy(args = args.map(fn), ret = fn(ret))
+    case nd @ GetReq(_, _, arr, index) =>
+      nd.copy(arr = fn(arr), index = fn(index))
+    case nd @ GetAwa(_, _, arr, ret) =>
+      nd.copy(arr = fn(arr), ret = fn(ret))
+    case nd @ Put(_, arr, index, value) =>
+      nd.copy(arr = fn(arr), index = fn(index), value = fn(value))
+
 end Node
 
 enum Jump:
@@ -156,17 +169,37 @@ enum Jump:
   )
     // assert(inputs.forall(_.bi < output))
 
+  case ForLoopTop(
+    i: JumpIndex, bottom: JumpIndex, cond: Register, isSecoTru: Boolean,
+    inBlockIndex: BlockIndex, seco: BlockIndex, exit: BlockIndex, topNames: IndexedSeq[Label],
+  )
+
+  case ForLoopBottom(
+    i: JumpIndex, top: JumpIndex, inBlockIndex: BlockIndex, bottomNames: IndexedSeq[Label],
+  )
+
   def inBlocks: Seq[BlockIndex] = this match
     case StartFun(_, _) => Nil
     case Return(_, _, ib) => Seq(ib)
     case TailCall(_, _, _, ib) => Seq(ib)
     case Branch(_, _, ib, _, _) => Seq(ib)
     case Merge(_, ibs, _, _, _) => ibs
+    case ForLoopTop(_, _, _, _, ibi, _, _, _) => Seq(ibi)
+    case ForLoopBottom(_, _, ibi, _) => Seq(ibi)
 
   def outBlocks: Seq[BlockIndex] = this match
     case StartFun(_, ob) => Seq(ob)
     case _: (Return | TailCall) => Nil
     case Branch(_, _, _, tb, fb) => Seq(tb, fb)
     case Merge(_, _, _, ob, _) => Seq(ob)
+    case ForLoopTop(_, _, _, _, _, sbi, xbi, _) => Seq(sbi, xbi)
+    case ForLoopBottom(_, _, _, _) => Nil
+
+  def mapLabel(fn: Label => Label): Jump = (this: @unchecked) match
+    case _: StartFun => this
+    case j: Return => j.copy(value = fn(j.value))
+    case j: TailCall => j.copy(args = j.args.map(fn))
+    case j: Branch => j.copy(cond = fn(j.cond))
+    case j: Merge => j.copy(inNames = j.inNames.map(_.map(fn)), outNames = j.outNames.map(fn))
 
 end Jump

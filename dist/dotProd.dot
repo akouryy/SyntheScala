@@ -2,41 +2,12 @@ digraph Program_ {
   graph [fontname = "Monaco", fontsize = 12, ranksep = 0.5];
   node [shape = box, fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
   edge [fontname = "Monaco", fontsize = 11; colorscheme = pastel19];
-  Jump0[label = <<font color="#ff4411" point-size="8"><sup>q0</sup></font>StartFun.0<br/>i<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>,acc<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>>; shape = component];
+  Jump0[label = <<font color="#ff4411" point-size="8"><sup>q0</sup></font>StartFun.0<br/>i<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>,acc<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>>; shape = component];
   Jump0 -> Block0;
-  Jump1[
-    label = <<font color="#ff4411" point-size="8"><sup>q1</sup></font>Branch.1>;
-    shape = trapezium; style = rounded;
-  ];
-  Block0 -> Jump1;
-  Jump1 -> Block1 [label="@b"];
-  Jump1 -> Block2 [label="!@b"];
-  Jump2_4[label = <<font color="#ff4411" point-size="8"><sup>q2</sup></font>Return.2_4>; shape = lpromoter];
-  Block1 -> Jump2_4 [label="acc"];
-  Jump2_5_6[label = <<font color="#ff4411" point-size="8"><sup>q7</sup></font>TailCall.2_5_6<br/>dotProd(@g,@e)>; shape = component];
-  Block2 -> Jump2_5_6;
   Block0 [label = "Block0"];
-  Block1 [label = "Block1\l(0行)"];
-  Block2 [label = "Block2"];
   subgraph cluster_dfg_Block0 {
     node [shape = oval];
-    label = <Block0<br/>(acc<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>,i<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>=&gt;acc<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>,i<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>,@b<font color="#00aa11" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>)>;
-    1 [label=<<font color="#ff4411" point-size="8"><sup>q1</sup></font>@b<font color="#00aa11" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:i==<font color="#3311ff" point-size="8"><sup>Bin0</sup></font>1000<font color="#00aa11" point-size="8"><sup>U10</sup></font>>];
-  }
-  subgraph cluster_dfg_Block2 {
-    node [shape = oval];
-    label = <Block2<br/>(acc<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>,i<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>=&gt;@g<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>,@e<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>)>;
-    5 [label=<<font color="#ff4411" point-size="8"><sup>q4</sup></font>@c<font color="#00aa11" point-size="8"><sup>S27</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:b[]>];
-    6 [label=<<font color="#ff4411" point-size="8"><sup>q5</sup></font>@d<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r2</sup></font>:a64*<font color="#3311ff" point-size="8"><sup>Bin2</sup></font>@c>];
-    9 [label=<<font color="#ff4411" point-size="8"><sup>q3</sup></font>@g<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r0</sup></font>:i+<font color="#3311ff" point-size="8"><sup>Bin1</sup></font>1<font color="#00aa11" point-size="8"><sup>U1</sup></font>>];
-    2 [label=<<font color="#ff4411" point-size="8"><sup>q3</sup></font>req a[i]>];
-    7 [label=<<font color="#ff4411" point-size="8"><sup>q6</sup></font>@e<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r1</sup></font>:acc+<font color="#3311ff" point-size="8"><sup>Bin3</sup></font>@d>];
-    3 [label=<<font color="#ff4411" point-size="8"><sup>q4</sup></font>a64<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r3</sup></font>:a[]>];
-    4 [label=<<font color="#ff4411" point-size="8"><sup>q3</sup></font>req b[i]>];
-    3 -> 6;
-    5 -> 6;
-    6 -> 7;
-    2 -> 3 [style = solid];
-    4 -> 5 [style = solid];
+    label = <Block0<br/>(acc&lt;a&gt;<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>,i&lt;a&gt;<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>=&gt;acc&lt;a&gt;<font color="#00aa11" point-size="8"><sup>S64</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>,i&lt;a&gt;<font color="#00aa11" point-size="8"><sup>U10</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>,@b&lt;a&gt;<font color="#00aa11" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>)>;
+    1 [label=<<font color="#ff4411" point-size="8"><sup>q1</sup></font>@b&lt;a&gt;<font color="#00aa11" point-size="8"><sup>U1</sup></font><font color="#3311ff" point-size="8"><sup>r?</sup></font>:i&lt;a&gt;==<font color="#3311ff" point-size="8"><sup>?</sup></font>1000<font color="#00aa11" point-size="8"><sup>U10</sup></font>>];
   }
 }

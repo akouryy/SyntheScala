@@ -27,39 +27,46 @@ object Main:
     val (typeEnv1, kProg) = KNormalizer(prog).normalize
     // PP.pprintln(kProg)
     print(fansi.Color.Full(69)(s"SP; "))
-    val graph = cdfg.Specializer()(kProg)
+    val graph1 = cdfg.Specializer()(kProg)
     // PP.pprintln(graph)
     print(fansi.Color.Full(69)(s"IO; "))
-    cdfg.Liveness.insertInOuts(graph)
+    cdfg.Liveness.insertInOuts(graph1)
     // PP.pprintln(graph)
     print(fansi.Color.Full(69)(s"CO; "))
-    cdfg.optimize.Optimizer(graph, typeEnv1)
-    // PP.pprintln(graph)
+    cdfg.optimize.Optimizer(graph1, typeEnv1)
+    PP.pprintln(graph1)
     print(fansi.Color.Full(69)(s"SC; "))
-    val schedule1 = cdfg.schedule.GorgeousScheduler(graph).schedule
+    val schedule1 = cdfg.schedule.GorgeousScheduler(graph1).schedule
     // PP.pprintln(schedule)
     print(fansi.Color.Full(69)(s"SO; "))
-    val (typeEnv2, schedule2) = cdfg.optimize.ScheduledOptimizer(graph, typeEnv1, schedule1)
-    // PP.pprintln(graph)
+    val (graph2, typeEnv2, schedule2) =
+      cdfg.optimize.ScheduledOptimizer(graph1, typeEnv1, schedule1)
+    PP.pprintln(graph2)
+    PP.pprintln(schedule2)
+    Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
+      cdfg.GraphDrawer(graph2, typeEnv2, schedule2)
+          .draw.getBytes(StandardCharsets.UTF_8),
+    )
+
     print(fansi.Color.Full(69)(s"RA; "))
-    val regAlloc = cdfg.bind.RegisterAllocator(graph, schedule2).allocate(graph.main)
+    val regAlloc = cdfg.bind.RegisterAllocator(graph2, schedule2).allocate(graph2.main)
     // PP.pprintln(regAlloc)
     print(fansi.Color.Full(69)(s"BI; "))
-    val bindings = cdfg.bind.AllocatingBinder(graph, typeEnv2, schedule2).bind
+    val bindings = cdfg.bind.AllocatingBinder(graph2, typeEnv2, schedule2).bind
     // PP.pprintln(bindings)
     try
       Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
-        cdfg.GraphDrawer(graph, typeEnv2, schedule2, regAlloc, bindings)
+        cdfg.GraphDrawer(graph2, typeEnv2, schedule2, regAlloc, bindings)
             .draw.getBytes(StandardCharsets.UTF_8),
       )
     catch err =>
       System.err.print(fansi.Color.Red(s"\n[GD] "))
       err.printStackTrace()
     print(fansi.Color.Full(69)(s"CP; "))
-    val fd = fsmd.Composer(graph, schedule2, regAlloc, bindings).compose
+    val fd = fsmd.Composer(graph2, schedule2, regAlloc, bindings).compose
     // PP.pprintln(fd)
     print(fansi.Color.Full(69)(s"EM; "))
-    val sv = emit.Emitter(graph, regAlloc, bindings, fd).emit
+    val sv = emit.Emitter(graph2, regAlloc, bindings, fd).emit
     // println(sv)
     Files.write(Paths.get(s"dist/${prog.main.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))
 
