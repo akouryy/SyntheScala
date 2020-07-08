@@ -1,9 +1,9 @@
 `default_nettype none
 module main (
   input wire clk, r_enable, controlArr,
-  input wire[5:0] init_n,
-  input wire[31:0] init_a,
-  input wire[31:0] init_b,
+  input wire[5:0] init_n_t_a,
+  input wire[31:0] init_a_t_a,
+  input wire[31:0] init_b_t_a,
   output reg w_enable,
   output reg[31:0] result
 );
@@ -29,34 +29,37 @@ module main (
   wire[5:0] out0_Bin2 = in0_Bin2 - in1_Bin2;
 
   assign in0_Bin1 =
-    stateR == 3'd3 ? reg1[31:0] :
+    stateR == 3'd2 ? reg1[31:0] :
     'x;
   assign in1_Bin1 =
-    stateR == 3'd3 ? reg2[31:0] :
+    stateR == 3'd2 ? reg2[31:0] :
     'x;
   assign in0_Bin2 =
-    stateR == 3'd3 ? reg0[5:0] :
+    stateR == 3'd2 ? reg0[5:0] :
     'x;
   assign in1_Bin2 =
-    stateR == 3'd3 ? 1'd1 :
+    stateR == 3'd2 ? 1'd1 :
     'x;
   assign in0_Bin0 =
     stateR == 3'd1 ? reg0[5:0] :
+    stateR == 3'd3 ? reg2[5:0] :
     'x;
   assign in1_Bin0 =
     stateR == 3'd1 ? 1'd0 :
+    stateR == 3'd3 ? 1'd0 :
     'x;
 
   assign stationReg0 =
-    stateR == 3'd3 ? {32'd0, out0_Bin1} :
+    stateR == 3'd2 ? {32'd0, out0_Bin1} :
     reg0;
   assign stationReg1 =
     reg1;
   assign stationReg2 =
-    stateR == 3'd3 ? {58'd0, out0_Bin2} :
+    stateR == 3'd2 ? {58'd0, out0_Bin2} :
     reg2;
   assign stationReg3 =
     stateR == 3'd1 ? {63'd0, out0_Bin0} :
+    stateR == 3'd3 ? {63'd0, out0_Bin0} :
     reg3;
 
   always @(posedge clk) begin
@@ -64,9 +67,9 @@ module main (
       stateR <= '0;
       linkreg <= '1;
       w_enable <= 1'd0;
-      reg0 <= {58'd0, init_n};
-      reg1 <= {32'd0, init_a};
-      reg2 <= {32'd0, init_b};
+      reg0 <= {58'd0, init_n_t_a};
+      reg1 <= {32'd0, init_a_t_a};
+      reg2 <= {32'd0, init_b_t_a};
     end else begin
       case(stateR)
         '1: begin
@@ -74,13 +77,14 @@ module main (
           result <= reg0[31:0];
         end
         3'd0: stateR <= 3'd1;
-        3'd1: stateR <= (stationReg3) ? 3'd2 : 3'd3;
-        3'd2: stateR <= linkreg;
-        3'd3: stateR <= 3'd0;
+        3'd1: stateR <= (stationReg3) ? 3'd5 : 3'd2;
+        3'd2: stateR <= 3'd3;
+        3'd3: stateR <= (stationReg3) ? 3'd5 : 3'd2;
+        3'd5: stateR <= linkreg;
       endcase
       case(stateR)
-        3'd2: reg0 <= stationReg1;
         3'd3: reg0 <= stationReg2;
+        3'd5: reg0 <= stationReg1;
         default: reg0 <= stationReg0;
       endcase
       case(stateR)
@@ -92,6 +96,7 @@ module main (
         default: reg2 <= stationReg2;
       endcase
       case(stateR)
+        3'd3: reg3 <= stationReg3;
         default: reg3 <= stationReg3;
       endcase
     end

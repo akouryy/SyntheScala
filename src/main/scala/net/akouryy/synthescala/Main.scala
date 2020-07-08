@@ -10,7 +10,9 @@ object Main:
     Examples.map:
       prog =>
         try
-          f(prog)
+          f(prog, true)
+          println()
+          f(prog, false)
           println()
           ok += 1
         catch err =>
@@ -19,8 +21,9 @@ object Main:
           ng += 1
     println(s"$ok succeeded, $ng failed.")
 
-  private def f(prog: Program): Unit =
-    print(fansi.Color.Full(214)(s"[${prog.main.name}] "))
+  private def f(prog: Program, srp: Boolean): Unit =
+    val srpSuffix = if srp then ".srp" else ""
+    print(fansi.Color.Full(214)(s"[${prog.main.name}$srpSuffix] "))
     reset()
     // PP.pprintln(prog)
     print(fansi.Color.Full(69)(s"KN; "))
@@ -40,7 +43,10 @@ object Main:
     // PP.pprintln(schedule)
     print(fansi.Color.Full(69)(s"SO; "))
     val (graph2, typeEnv2, schedule2) =
-      cdfg.optimize.ScheduledOptimizer(graph1, typeEnv1, schedule1)
+      if srp
+        cdfg.optimize.ScheduledOptimizer(graph1, typeEnv1, schedule1)
+      else
+        (graph1, typeEnv1, schedule1)
     // PP.pprintln(graph2)
     // PP.pprintln(schedule2)
     if graph1 ne graph2
@@ -54,7 +60,7 @@ object Main:
     val bindings = cdfg.bind.AllocatingBinder(graph2, typeEnv2, schedule2).bind
     // PP.pprintln(bindings)
     try
-      Files.write(Paths.get(s"dist/${prog.main.name}.dot"),
+      Files.write(Paths.get(s"dist/${prog.main.name}$srpSuffix.dot"),
         cdfg.GraphDrawer(graph2, typeEnv2, schedule2, regAlloc, bindings)
             .draw.getBytes(StandardCharsets.UTF_8),
       )
@@ -67,7 +73,7 @@ object Main:
     print(fansi.Color.Full(69)(s"EM; "))
     val sv = emit.Emitter(graph2, regAlloc, bindings, fd).emit
     // println(sv)
-    Files.write(Paths.get(s"dist/${prog.main.name}.sv"), sv.getBytes(StandardCharsets.UTF_8))
+    Files.write(Paths.get(s"dist/${prog.main.name}$srpSuffix.sv"), sv.getBytes(StandardCharsets.UTF_8))
 
   private def reset(): Unit =
     Label.reset()

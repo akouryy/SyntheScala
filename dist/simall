@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -eu #x
+
+shopt -s extglob
+
+for x in *.dot; do
+  echo ⭐️${x%.dot}
+  ./sim ${x%.dot} || :
+done

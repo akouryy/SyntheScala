@@ -123,9 +123,7 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
             .map(sche.nodeStates)
           ++ Option.when(param == pack.branch.cond)(sche.jumpStates(pack.branch.i)(pack.prim.i))
         ).min
-        val diff = states.getIndexOf(defState).get - states.getIndexOf(firstUseState).get
-        println(("param", param, diff))
-        diff
+        states.getIndexOf(defState).get - states.getIndexOf(firstUseState).get + 1
     ).iterator ++ {
       val arrAccesses = immutable.MultiDict.from:
         for
@@ -141,10 +139,8 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
         accessStates = arrAccesses.get(arr).map(sche.nodeStates)
         if accessStates.nonEmpty
       yield
-        val diff = states.getIndexOf(accessStates.last).get - states.getIndexOf(accessStates.head).get + 1
-        println((arr, diff))
-        diff
-    }).max.clamp(pack.prim.states.size + 1, Int.MaxValue)
+        states.getIndexOf(accessStates.max).get - states.getIndexOf(accessStates.min).get + 1
+    }).max.clamp(pack.prim.states.size, Int.MaxValue)
 
   /**
     並列化後の `(

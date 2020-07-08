@@ -2,9 +2,9 @@
 module top();
 
   reg clk, r_enable, controlArr;
-  wire[5:0] init_n = 6'd40;
-  wire[31:0] init_a = 32'd1;
-  wire[31:0] init_b = 32'd0;
+  wire[5:0] init_n_t_a = 6'd40;
+  wire[31:0] init_a_t_a = 32'd1;
+  wire[31:0] init_b_t_a = 32'd0;
   wire w_enable;
   wire[31:0] result;
 
@@ -12,7 +12,7 @@ module top();
 
   longint clkcnt = 0;
   initial begin
-    $dumpfile("fib.vcd");
+    $dumpfile("fib.srp.vcd");
     $dumpvars(0, main);
 
     clk = 0;
@@ -30,7 +30,7 @@ module top();
   end
 
   always @(posedge w_enable) begin
-    $write("fib(%d) = 165580141, result = %d\n", init_n, result);
+    $write("fib(%d) = 165580141, result = %d\n", init_n_t_a, result);
     $write("time = %d\n", clkcnt);
     $finish;
   end
