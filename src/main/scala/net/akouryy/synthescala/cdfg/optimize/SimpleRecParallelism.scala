@@ -42,6 +42,9 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
     given pack as BlockPack = detectProperPath(oldFn).getOrElse:
       throw CancelOptimizationException("detect")
 
+    if pack.prim.nodes.isEmpty then throw CancelOptimizationException("empty_prim")
+    if pack.seco.nodes.isEmpty then throw CancelOptimizationException("empty_seco")
+
     val interval = intervalFromBlocks(oldFn)
     val (primPSS, rounds) = parallelizedStates(
       interval, pack.prim.states, pack.seco.states,
@@ -51,12 +54,20 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
     PP.pprintln(primPSS)
     PP.pprintln(rounds)
 
-    given NewLabs = Map.from:
+    given NewLabs = locally:
+      val newLabs = mutable.Map.empty[(Label, Int), Label]
       for
         i <- 0 to rounds.length
-        lab <- oldFn.params.map(_.name) ++ pack.prim.defs ++ pack.seco.defs
-      yield
-        (lab, i) -> Label.generate(lab)
+        params = oldFn.params.map(_.name)
+        lab <- params ++ pack.prim.defs ++ pack.seco.defs
+      do
+        newLabs(lab -> i) =
+          params.getIndexOf(lab) match
+            case Some(idx) if i > 0 =>
+              newLabs(pack.rec.args(idx) -> (i - 1))
+            case _ =>
+              Label.generate(lab)
+      newLabs.toMap
 
     rewriteTyps()
     buildNewGraph(oldFn, newFn, primPSS, rounds)
@@ -191,33 +202,47 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
 
   private def buildNewMiddleJump(oldFn: CDFGFun, newFn: CDFGFun, round: Round, ri: Int)
   (using pack: BlockPack, newLabs: NewLabs): Unit =
+
+    val inputBI = if ri == 0 then pack.prim.i else secoIndices(ri - 1)
     val exitBI = BlockIndex.generate(pack.exit.i)
 
     newFn.jumps(branchIndices(ri)) = Jump.Branch(
-      branchIndices(ri), newLabs(pack.branch.cond, ri),
-      if ri == 0 then pack.prim.i else secoIndices(ri - 1),
+      branchIndices(ri), newLabs(pack.branch.cond, ri), inputBI,
       if pack.isSecoTruBody then secoIndices(ri) else exitBI,
       if pack.isSecoTruBody then exitBI else secoIndices(ri),
     )
+    addJumpState(branchIndices(ri), inputBI, newNodeStates(newFn(inputBI).nodes.last._1))
 
     buildNewExit(oldFn, newFn, round, ri, exitBI)
   end buildNewMiddleJump
 
   private def buildNewLastJump(oldFn: CDFGFun, newFn: CDFGFun, round: Round, ri: Int)
   (using pack: BlockPack, newLabs: NewLabs): Unit =
+
+    val inputBI = if ri == 0 then pack.prim.i else secoIndices(ri - 1)
     val exitBI = BlockIndex.generate(pack.exit.i)
+
+    val names =
+      for
+        (origLab -> rj, topLab) <- newLabs.toIndexedSeq
+        bottomLab <- newLabs.get(origLab -> (rj + 1))
+      yield
+        topLab -> bottomLab
 
     newFn.jumps(branchIndices(ri)) = Jump.ForLoopTop(
       branchIndices(ri), branchIndices(ri + 1), newLabs(pack.branch.cond, ri),
-      pack.isSecoTruBody,
-      if ri == 0 then pack.prim.i else secoIndices(ri - 1),
+      pack.isSecoTruBody, inputBI,
       secoIndices(ri), exitBI,
-      IndexedSeq.empty, // TODO
+      names.map(_._1), // FIXME: 未使用変数は？
     )
+    addJumpState(branchIndices(ri), inputBI, newNodeStates(newFn(inputBI).nodes.last._1))
 
     newFn.jumps(branchIndices(ri + 1)) = Jump.ForLoopBottom(
       branchIndices(ri + 1), branchIndices(ri), secoIndices(ri),
-      IndexedSeq.empty, // TODO
+      names.map(_._2),
+    )
+    addJumpState(branchIndices(ri + 1), secoIndices(ri),
+      newNodeStates(newFn(secoIndices(ri)).nodes.last._1),
     )
 
     buildNewExit(oldFn, newFn, round, ri, exitBI)
@@ -244,8 +269,13 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
         newNodes(newID) = node.copyWithID(newID).mapLabel(l => newLabs(l, ri))
 
       val newJI = JumpIndex.generate(oldBlock.outJump)
-      newFn.blocks(newBI) = Block(
+      val newBlock = Block(
         newBI, Nil, Nil, newNodes.toMap, UnweightedGraph(), newParentJI, newJI,
+      )
+      newFn.blocks(newBI) = newBlock
+      addJumpState(newJI, newBI,
+        if newNodes.isEmpty then newJumpStates(newParentJI).soleElement._2
+        else newNodeStates(newNodes.last._1),
       )
       oldFn(oldBlock.outJump) match
         case Jump.Return(_, value, _) =>

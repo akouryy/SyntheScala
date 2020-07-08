@@ -17,6 +17,9 @@ class GraphDrawer(
 
   private def e(str: String) = unsafeEscape(str)
 
+  private def sub(color: String, escapedText: Any): String =
+    s"""<font color="$color" point-size="8"><sub>$escapedText</sub></font>"""
+
   private def sup(color: String, escapedText: Any): String =
     s"""<font color="$color" point-size="8"><sup>$escapedText</sup></font>"""
 
@@ -26,12 +29,18 @@ class GraphDrawer(
       case Some(state: collection.Set[?]) => sup("#ff4411", state.mkString("|"))
       case None => sup("#ff4411", "q?")
 
+  private def baseLabStr(id: Label): String =
+    """&lt;(\w+)&gt;""".r.replaceAllIn(
+      unsafeEscape(id.str),
+      matc => sub("#999999", matc.group(1)),
+    )
+
   private def idStr(id: Label): String =
-    unsafeEscape(id.str) +
+    baseLabStr(id) +
       typeEnv.get(id).fold("")(t => sup("#00aa11", unsafeEscape(t.toString))) +
       sup("#3311ff", unsafeEscape(regs.getOrElse(id, "r?").toString))
 
-  private def vcStr(vc: VC): String = vc.fold(v => unsafeEscape(v.str)):
+  private def vcStr(vc: VC): String = vc.fold(v => baseLabStr(v)):
     (c, typ) => unsafeEscape(c.toString) + sup("#00aa11", unsafeEscape(typ.toString))
 
   private def (s: String).singleLine: String = s"""\n *""".r.replaceAllIn(s, "")
@@ -59,9 +68,9 @@ class GraphDrawer(
             r ++= s"$i -> $ob;"
           case Jump.Return(i, v, ib) =>
             r ++= s"$i[label = <$label>; shape = lpromoter];"
-            r ++= s"""$ib -> $i [label="${v.str}"];"""
+            r ++= s"""$ib -> $i [label=<${baseLabStr(v)}>];"""
           case Jump.TailCall(i, fn, args, ib) =>
-            r ++= s"$i[label = <$label<br/>$fn(${args.map(_.str).mkString(",")})>; " +
+            r ++= s"$i[label = <$label<br/>$fn(${args.map(baseLabStr).mkString(",")})>; " +
                    "shape = component];"
             r ++= s"$ib -> $i;"
           case Jump.Branch(i, cond, ib, tob, fob) =>
@@ -69,34 +78,33 @@ class GraphDrawer(
               r ++= s"label = <$label>;"
               r ++= s"shape = trapezium; style = rounded;"
             r ++= s"$ib -> $i;"
-            r ++= s"""$i -> $tob [label="${cond.str}"];"""
-            r ++= s"""$i -> $fob [label="!${cond.str}"];"""
+            r ++= s"""$i -> $tob [label=<${baseLabStr(cond)}>];"""
+            r ++= s"""$i -> $fob [label=<!${baseLabStr(cond)}>];"""
           case Jump.Merge(i, ibs, inss, ob, ons) =>
             r ++= s"$i[label = <$label>; shape = invtrapezium; style = rounded];"
             for (ib, ins) <- ibs.zip(inss) do
-              r ++= s"""$ib -> $i [label="${ins.map(_.str).mkString(",")}"];"""
-            r ++= s"""$i -> $ob [label="${ons.map(_.str).mkString(",")}"];"""
+              r ++= s"""$ib -> $i [label=<${ins.map(baseLabStr).mkString(",")}>];"""
+            r ++= s"""$i -> $ob [label=<${ons.map(baseLabStr).mkString(",")}>];"""
           case Jump.ForLoopTop(i, bottom, cond, isSecoTru, ibi, sbi, xbi, names) =>
             forColors(i) = forColors.size % 5 + 1
-            val secoStr = if isSecoTru then cond.str else s"!${cond.str}"
-            val exitStr = if isSecoTru then s"!${cond.str}" else cond.str
-            val namesStr = names.map(_.str).mkString(", ")
+            val secoStr = if isSecoTru then baseLabStr(cond) else s"!${baseLabStr(cond)}"
+            val exitStr = if isSecoTru then s"!${baseLabStr(cond)}" else baseLabStr(cond)
+            val namesStr = names.map(baseLabStr).mkString(",")
             r.indent(s"$i[", "];"):
               r ++= s"""label = <$label>;"""
               r ++= "shape = house; style = filled;"
               r ++= s"fillcolor = ${forColors(i)};"
-            r ++= s"""$ibi -> $i [label = "$namesStr"];"""
-            r ++= s"""$i -> $sbi [label = "$secoStr"];"""
+            r ++= s"""$ibi -> $i [label=<$namesStr>; fontcolor=${forColors(i)}];"""
+            r ++= s"""$i -> $sbi [label = <$secoStr>];"""
             r ++= s"""$bottom -> $i [constraint = false; color = ${forColors(i)}];"""
-            r ++= s"""$i -> $xbi [label = "$exitStr"];"""
+            r ++= s"""$i -> $xbi [label = <$exitStr>];"""
           case Jump.ForLoopBottom(i, top, ibi, names) =>
-            val namesStr = names.map(_.str).mkString(", ")
-
+            val namesStr = names.map(baseLabStr).mkString(",")
             r.indent(s"$i[", "];"):
               r ++= s"""label = <$label>"""
               r ++= "shape = invhouse; style = filled;"
               r ++= s"fillcolor = ${forColors(top)};"
-            r ++= s"""$ibi -> $i [label = "$namesStr"];"""
+            r ++= s"""$ibi -> $i [label=<$namesStr>; fontcolor=${forColors(top)}];"""
       end for
 
       for Block(i, _, _, nodes, _, _, _) <- graph.main.blocks.valuesIterator do
@@ -125,13 +133,13 @@ class GraphDrawer(
                 ))
                 s"""${idStr(a)}:${vcStr(l)}${unsafeEscape(op.operatorString)}$bound${vcStr(r)}"""
               case Node.Call(_, fn, args, ret) =>
-                s"""${idStr(ret)}:$fn(${args.map(a => e(a.str)).mkString(",")})"""
+                s"""${idStr(ret)}:$fn(${args.map(baseLabStr).mkString(",")})"""
               case Node.GetReq(_, _, arr, index) =>
-                s"""req ${e(arr.str)}[${e(index.str)}]"""
+                s"""req ${baseLabStr(arr)}[${baseLabStr(index)}&#93;"""
               case Node.GetAwa(_, _, arr, ret) =>
-                s"""${idStr(ret)}:${e(arr.str)}[]"""
+                s"""${idStr(ret)}:${baseLabStr(arr)}[&#93;"""
               case Node.Put(_, arr, index, value) =>
-                s"""${e(arr.str)}[${e(index.str)}]=${e(value.str)}"""
+                s"""${baseLabStr(arr)}[${baseLabStr(index)}&#93;=${baseLabStr(value)}"""
 
             r ++=
               s"""${nd.id} [label=<

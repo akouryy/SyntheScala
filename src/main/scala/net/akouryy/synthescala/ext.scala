@@ -9,7 +9,9 @@ def [A, B, CC[_], C](iter: collection.IterableOps[A, CC, C]).zipStrict
   assert(iter.sizeCompare(that) == 0)
   iter.zip(that)
 
-def [A](seq: collection.Seq[A]).getIndexOf(elem: A, from: Int = 0): Option[Int] =
+def [A](seq: collection.Seq[A]).getIndexOf(elem: A): Option[Int] = seq.getIndexOf(elem, 0)
+
+def [A](seq: collection.Seq[A]).getIndexOf(elem: A, from: Int): Option[Int] =
   val i = seq.indexOf(elem, from)
   Option.when(i >= 0)(i)
 
