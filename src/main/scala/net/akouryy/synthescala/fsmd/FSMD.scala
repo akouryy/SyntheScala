@@ -25,7 +25,7 @@ enum ConnPort:
   case ArrReadValue(arr: Label) extends ConnPort with ConnPort.Src
   case ArrWriteValue(arr: Label) extends ConnPort with ConnPort.Dst
   case Reg(reg: Register) extends ConnPort with ConnPort.Dst with ConnPort.Src
-  case RegStation(reg: Register) extends ConnPort with ConnPort.Src
+  case RegStation(reg: Register) extends ConnPort with ConnPort.Dst with ConnPort.Src
   case Const(num: Long) extends ConnPort with ConnPort.Src
   case Inherit extends ConnPort with ConnPort.Src
 
@@ -35,5 +35,4 @@ object ConnPort:
 
 case class Datapath(
   map: collection.Map[ConnPort.Dst, collection.SortedMap[State, Source]],
-  merges: collection.Map[Register, collection.SortedMap[State, ConnPort.RegStation]],
 )

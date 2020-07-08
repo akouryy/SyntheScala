@@ -63,7 +63,6 @@ module main (
   assign stationReg0 =
     stateR == 3'd4 ? 64'd2 :
     stateR == 3'd5 ? {62'd0, out0_Bin1} :
-    stateR == 3'd6 ? reg0 :
     reg0;
   assign stationReg1 =
     stateR == 3'd1 ? 64'd1 :
@@ -99,6 +98,7 @@ module main (
       case(stateR)
         3'd3: reg0 <= stationReg3;
         3'd4: reg0 <= stationReg0;
+        3'd6: reg0 <= reg0;
         default: reg0 <= stationReg0;
       endcase
       case(stateR)

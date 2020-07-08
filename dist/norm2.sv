@@ -81,14 +81,11 @@ module main (
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
   assign stationReg0 =
-    stateR == 4'd3 ? reg1 :
     stateR == 4'd5 ? {{37{arrRData_a[26]}}, arrRData_a} :
     stateR == 4'd7 ? out0_Bin2 :
-    stateR == 4'd9 ? reg2 :
     reg0;
   assign stationReg1 =
     stateR == 4'd8 ? out0_Bin3 :
-    stateR == 4'd9 ? reg1 :
     reg1;
   assign stationReg2 =
     stateR == 4'd1 ? {63'd0, out0_Bin0} :
@@ -123,9 +120,12 @@ module main (
         4'd9: stateR <= 4'd0;
       endcase
       case(stateR)
+        4'd3: reg0 <= reg1;
+        4'd9: reg0 <= reg2;
         default: reg0 <= stationReg0;
       endcase
       case(stateR)
+        4'd9: reg1 <= reg1;
         default: reg1 <= stationReg1;
       endcase
       case(stateR)

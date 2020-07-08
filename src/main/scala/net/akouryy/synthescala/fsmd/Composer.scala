@@ -10,12 +10,11 @@ class Composer(
 ):
   val fsm = mutable.SortedMap.empty[State, Transition]
   val datapath = mutable.Map.empty[ConnPort.Dst, mutable.SortedMap[State, Source]]
-  val merges = mutable.Map.empty[Register, mutable.SortedMap[State, ConnPort.RegStation]]
 
   def compose: FSMD =
     composeDatapath(graph.main)
     composeFSM(graph.main)
-    FSMD(fsm, Datapath(datapath, merges))
+    FSMD(fsm, Datapath(datapath))
 
   private def blockFirstState(fn: CDFGFun, bi: cdfg.BlockIndex): State =
     val b = fn.blocks(bi)
@@ -56,11 +55,14 @@ class Composer(
             blockFirstState(fn, if isSecoTru then sbi else xbi),
             blockFirstState(fn, if isSecoTru then xbi else sbi),
           )
-        case Jump.ForLoopBottom(ji, topJI, ibi, _) =>
+        case Jump.ForLoopBottom(ji, topJI, ibi, bottomNames) =>
           val top = fn(topJI).asInstanceOf[Jump.ForLoopTop]
           val q1 = sche.jumpStates(ji)(ibi)
+          val cond = top.topNames.getIndexOf(top.cond) match
+            case Some(i) => bottomNames(i)
+            case _ => top.cond
           fsm(q1) = Transition.Conditional(
-            Source.Always(new ConnPort.RegStation(regs(top.cond))),
+            Source.Always(new ConnPort.RegStation(regs(cond))),
             new ConnPort.Reg(regs(top.cond)),
             blockFirstState(fn, if top.isSecoTru then top.seco else top.exit),
             blockFirstState(fn, if top.isSecoTru then top.exit else top.seco),
@@ -70,8 +72,6 @@ class Composer(
   private def mergeDatapath(pin: ConnPort.Dst, q: State, src: Source): Unit =
     import ConnPort._
     import Source._
-
-    println((fansi.Color.Red("md"), pin, q, src))
 
     val newSrc =
       (datapath.getOrElseUpdate(pin, mutable.SortedMap.empty).get(q), src): @unchecked match
@@ -86,10 +86,6 @@ class Composer(
     datapath(pin)(q) = newSrc
   end mergeDatapath
 
-  private def mergeMerge(to: Register, q: State, from: Register): Unit =
-    merges.getOrElseUpdate(to, mutable.SortedMap.empty)(q) = new ConnPort.RegStation(from)
-  end mergeMerge
-
   private def vc2connSrc(vc: VC): ConnPort.Src = vc match
     case VC.V(v) => new ConnPort.Reg(regs(v))
     case VC.C(c, _) => new ConnPort.Const(c)
@@ -100,14 +96,13 @@ class Composer(
     do
       import cdfg.Node._
       def q = sche.nodeStates(nid)
-      println((fansi.Color.Full(100)("b"), q, node))
 
       node match
         case Nop(_) =>
         case Const(_, num, ident) =>
           import Jump._
           mergeDatapath(
-            new ConnPort.Reg(regs(ident)),
+            new ConnPort.RegStation(regs(ident)),
             q,
             Source.Always(new ConnPort.Const(num))
           )
@@ -122,7 +117,7 @@ class Composer(
             Source.Always(vc2connSrc(r)),
           )
           mergeDatapath(
-            new ConnPort.Reg(regs(a)), q,
+            new ConnPort.RegStation(regs(a)), q,
             Source.Always(new ConnPort.CalcOut(calc.id, 0)),
           )
         case GetReq(_, _, arr, index) =>
@@ -136,7 +131,7 @@ class Composer(
           )
         case GetAwa(_, _, arr, res) =>
           mergeDatapath(
-            new ConnPort.Reg(regs(res)), q,
+            new ConnPort.RegStation(regs(res)), q,
             Source.Always(new ConnPort.ArrReadValue(arr)),
           )
         case Put(_, arr, index, value) =>
@@ -156,15 +151,17 @@ class Composer(
     end for
 
     for j <- fn.jumps.valuesIterator do
-      println((fansi.Color.Full(100)("j"), sche.jumpStates(j.i), j))
-
       j match
         case Jump.Merge(ji, ibis, inLabss, _, outLabs) =>
           for
             (ibi, inLabs) <- ibis.zipStrict(inLabss)
             (inLab, outLab) <- inLabs.zipStrict(outLabs)
           do
-            mergeMerge(regs(outLab), sche.jumpStates(ji)(ibi), regs(inLab))
+            mergeDatapath(
+              new ConnPort.Reg(regs(outLab)),
+              sche.jumpStates(ji)(ibi),
+              Source.Always(new ConnPort.RegStation(regs(inLab))),
+            )
         case Jump.ForLoopBottom(bottomJI, topJI, ibi, bottomNames) =>
           val top = fn(topJI).asInstanceOf[Jump.ForLoopTop]
           for

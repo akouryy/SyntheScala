@@ -79,7 +79,7 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
     case ConnPort.ArrWriteEnable(arr) => writeEnable(arr) :> reqTyp
     case ConnPort.ArrIndex(arr) => index(arr)
     case ConnPort.ArrWriteValue(arr) => writeData(arr)
-    case dest: ConnPort.Reg => connSrc2sv(dest, dest, reqTyp)
+    case dest: (ConnPort.Reg | ConnPort.RegStation) => connSrc2sv(dest, dest, reqTyp)
 
   private def source2sv(source: Source, dst: ConnPort.Dst, reqTyp: Option[Type]): String =
     source match
@@ -97,6 +97,10 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
 
     val regDatapath = immutable.SortedMap.from:
       for (ConnPort.Reg(reg), paths) <- fsmd.datapath.map
+      yield (reg, paths)
+
+    val regStationDatapath = immutable.SortedMap.from:
+      for (ConnPort.RegStation(reg), paths) <- fsmd.datapath.map
       yield (reg, paths)
 
     // header
@@ -200,7 +204,8 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
       if cdfg.arrayDefs.nonEmpty then r ++= ""
 
       // register station selectors
-      for (reg, paths) <- regDatapath do
+      for reg <- regSet do
+        val paths = regStationDatapath.getOrElse(reg, Nil)
         val name = reg2svStation(reg)
         val typ = Some(varTyps(name))
         r.indent(s"assign $name =", ""):
@@ -235,13 +240,14 @@ class Emitter(cdfg: CDFG, regs: Allocations, bindings: Bindings, fsmd: FSMD):
                   "linkreg;"
 
           // registers form stations
-          for (reg, _) <- regDatapath do
+          for reg <- regSet do
+            val paths = regDatapath.getOrElse(reg, Nil)
+            val name = reg2sv(reg)
+            val typ = Some(varTyps(name))
             r.indent(s"case(${reg2sv(Register.STATE)})", "endcase"):
-              for
-                merges <- fsmd.datapath.merges.get(reg)
-                (q1 -> station) <- merges
-              do
-                r ++= s"${state2sv(q1)}: ${reg2sv(reg)} <= ${reg2svStation(station.reg)};"
+              for (state -> source) <- paths do
+                r ++= s"${state2sv(state)}: " +
+                      s"$name <= ${source2sv(source, new ConnPort.RegStation(reg), typ)};"
               r ++= s"default: ${reg2sv(reg)} <= ${reg2svStation(reg)};"
 
     // array modules

@@ -51,20 +51,15 @@ module main (
 
   assign stationReg0 =
     stateR == 4'd2 ? {58'd0, out0_Bin1} :
-    stateR == 4'd4 ? reg0 :
-    stateR == 4'd7 ? reg1 :
     reg0;
   assign stationReg1 =
-    stateR == 4'd4 ? reg2 :
     reg1;
   assign stationReg2 =
     stateR == 4'd2 ? {32'd0, out0_Bin2} :
-    stateR == 4'd4 ? reg1 :
     reg2;
   assign stationReg3 =
     stateR == 4'd1 ? {63'd0, out0_Bin0} :
     stateR == 4'd3 ? {63'd0, out0_Bin0} :
-    stateR == 4'd4 ? reg3 :
     reg3;
 
   always @(posedge clk) begin
@@ -90,15 +85,20 @@ module main (
         4'd7: stateR <= linkreg;
       endcase
       case(stateR)
+        4'd4: reg0 <= reg0;
+        4'd7: reg0 <= reg1;
         default: reg0 <= stationReg0;
       endcase
       case(stateR)
+        4'd4: reg1 <= reg2;
         default: reg1 <= stationReg1;
       endcase
       case(stateR)
+        4'd4: reg2 <= reg1;
         default: reg2 <= stationReg2;
       endcase
       case(stateR)
+        4'd4: reg3 <= reg3;
         default: reg3 <= stationReg3;
       endcase
     end

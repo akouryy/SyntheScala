@@ -34,11 +34,10 @@ val PP: PPrinter = pprint.copy(additionalHandlers = { obj =>
   case Node.Call(_, fn, args, ret) =>
     Infix(Literal(ret.str), "=C", Apply(fn, args.iterator.map(PP.treeify)))
 
-  case fsmd.Datapath(map, merges) =>
+  case fsmd.Datapath(map) =>
     Apply(
       "Datapath",
-      map.iterator.map((k, v) => Infix(PP.treeify(k), ":=", PP.treeify(v))) ++
-      merges.iterator.map((k, v) => Infix(PP.treeify(k), ":=", PP.treeify(v))),
+      map.iterator.map((k, v) => Infix(PP.treeify(k), ":=", PP.treeify(v))),
     )
 
 }: PartialFunction[Any, Tree])

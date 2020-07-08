@@ -10,7 +10,6 @@ class RegisterAllocator(graph: CDFG, sche: Schedule):
 
   val interferenceGraph: IGraph =
     val liveInsForState = Liveness.liveInsForState(graph.main, sche)
-    PP.pprintln(liveInsForState)
 
     mutable.MultiDict.from((
       for
