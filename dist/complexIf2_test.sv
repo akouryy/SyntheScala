@@ -20,7 +20,7 @@ module top();
   );
 
   initial begin
-    $dumpfile("complexIf.vcd");
+    $dumpfile("complexIf2.vcd");
     $dumpvars(0, main1);
     $dumpvars(0, main2);
 
@@ -36,11 +36,11 @@ module top();
   end
 
   always @(posedge w_enable1) begin
-    $write("ans1 = 3, result1 = %d\n", result1);
+    $write("ans1 = 2, result1 = %d\n", result1);
   end
 
   always @(posedge w_enable2) begin
-    $write("ans2 = 2, result2 = %d\n", result2);
+    $write("ans2 = 3, result2 = %d\n", result2);
   end
 
   always @(negedge clk) begin

@@ -13,7 +13,7 @@ class KNormalizer(prog: Program):
     import Expr._
     def insert(typ: Type)(expr: Expr): (Type, Expr) =
       expr match
-        case Ref(x) => kont(x)
+        // case Ref(x) => kont(x)
         case _ =>
           val x = lab.getOrElse(Label.temp())
           val typ2 = types.getOrElseUpdate(x, typ)

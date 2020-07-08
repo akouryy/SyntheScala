@@ -312,11 +312,11 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       newFn.blocks(newBI) = newBlock
 
       val oldJump = oldFn(oldBlock.outJump)
-      var jumpState = oldJump match
-        case _: (Jump.StartFun | Jump.Branch | Jump.Merge | Jump.ForLoopBottom) =>
-          maxStateOf(newBI, newFn)
-        case _ =>
+      var jumpState =
+        if oldJump.occupiesState
           generateState()
+        else
+          maxStateOf(newBI, newFn)
       addJumpState(newJI, newBI, jumpState)
       oldJump match
         case Jump.Return(_, value, _) =>

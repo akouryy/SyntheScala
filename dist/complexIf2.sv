@@ -52,7 +52,7 @@ module main (
     1'd0;
   assign arrAddr_a =
     controlArr ? controlArrAddr_a :
-    stateR == 3'd3 ? reg2[0:0] :
+    stateR == 3'd3 ? reg3[0:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
@@ -61,7 +61,6 @@ module main (
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
   assign stationReg0 =
-    stateR == 3'd4 ? 64'd2 :
     stateR == 3'd5 ? {62'd0, out0_Bin1} :
     reg0;
   assign stationReg1 =
@@ -69,10 +68,10 @@ module main (
     reg1;
   assign stationReg2 =
     stateR == 3'd1 ? {63'd0, out0_Bin0} :
-    stateR == 3'd2 ? 64'd0 :
+    stateR == 3'd2 ? 64'd2 :
     reg2;
   assign stationReg3 =
-    stateR == 3'd2 ? 64'd1 :
+    stateR == 3'd2 ? 64'd0 :
     reg3;
 
   always @(posedge clk) begin
@@ -95,7 +94,7 @@ module main (
         3'd5: stateR <= linkreg;
       endcase
       case(stateR)
-        3'd3: reg0 <= stationReg3;
+        3'd3: reg0 <= stationReg2;
         3'd4: reg0 <= stationReg0;
         3'd5: reg0 <= stationReg0;
         default: reg0 <= stationReg0;

@@ -45,76 +45,76 @@ module main (
 
   assign in0_Bin1 =
     stateR == 4'd2 ? reg0[9:0] :
-    stateR == 4'd6 ? reg4[9:0] :
+    stateR == 4'd5 ? reg4[9:0] :
     'x;
   assign in1_Bin1 =
     stateR == 4'd2 ? 1'd1 :
-    stateR == 4'd6 ? 1'd1 :
+    stateR == 4'd5 ? 1'd1 :
     'x;
   assign in0_Bin2 =
-    stateR == 4'd6 ? reg1 :
-    stateR == 4'd8 ? reg1 :
+    stateR == 4'd5 ? reg1 :
+    stateR == 4'd7 ? reg1 :
     'x;
   assign in1_Bin2 =
-    stateR == 4'd6 ? reg5 :
-    stateR == 4'd8 ? reg5 :
+    stateR == 4'd5 ? reg6 :
+    stateR == 4'd7 ? reg6 :
     'x;
   assign in0_Bin0 =
     stateR == 4'd1 ? reg0[9:0] :
     stateR == 4'd3 ? reg4[9:0] :
-    stateR == 4'd7 ? reg1[9:0] :
+    stateR == 4'd6 ? reg1[9:0] :
     'x;
   assign in1_Bin0 =
     stateR == 4'd1 ? 10'd1000 :
     stateR == 4'd3 ? 10'd1000 :
-    stateR == 4'd7 ? 10'd1000 :
+    stateR == 4'd6 ? 10'd1000 :
     'x;
 
   assign arrWEnable_a =
     controlArr ? controlArrWEnable_a :
     stateR == 4'd2 ? 1'd0 :
-    stateR == 4'd6 ? 1'd0 :
-    stateR == 4'd7 ? 1'd1 :
-    stateR == 4'd9 ? 1'd1 :
+    stateR == 4'd5 ? 1'd0 :
+    stateR == 4'd6 ? 1'd1 :
+    stateR == 4'd8 ? 1'd1 :
     1'd0;
   assign arrAddr_a =
     controlArr ? controlArrAddr_a :
     stateR == 4'd2 ? reg0[9:0] :
-    stateR == 4'd6 ? reg4[9:0] :
-    stateR == 4'd7 ? reg0[9:0] :
-    stateR == 4'd9 ? reg0[9:0] :
+    stateR == 4'd5 ? reg4[9:0] :
+    stateR == 4'd6 ? reg0[9:0] :
+    stateR == 4'd8 ? reg0[9:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
-    stateR == 4'd7 ? reg3 :
-    stateR == 4'd9 ? reg3 :
+    stateR == 4'd6 ? reg3 :
+    stateR == 4'd8 ? reg3 :
     'x;
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
   assign stationReg0 =
     stateR == 4'd4 ? 64'd0 :
-    stateR == 4'd7 ? arrRData_a :
-    stateR == 4'd10 ? 64'd0 :
+    stateR == 4'd6 ? {63'd0, out0_Bin0} :
+    stateR == 4'd9 ? 64'd0 :
     reg0;
   assign stationReg1 =
-    stateR == 4'd6 ? {54'd0, out0_Bin1} :
+    stateR == 4'd5 ? {54'd0, out0_Bin1} :
     reg1;
   assign stationReg2 =
     reg2;
   assign stationReg3 =
     stateR == 4'd1 ? {63'd0, out0_Bin0} :
-    stateR == 4'd6 ? out0_Bin2 :
-    stateR == 4'd8 ? out0_Bin2 :
+    stateR == 4'd5 ? out0_Bin2 :
+    stateR == 4'd7 ? out0_Bin2 :
     reg3;
   assign stationReg4 =
     stateR == 4'd2 ? {54'd0, out0_Bin1} :
     reg4;
   assign stationReg5 =
-    stateR == 4'd3 ? arrRData_a :
-    stateR == 4'd7 ? {63'd0, out0_Bin0} :
+    stateR == 4'd3 ? {63'd0, out0_Bin0} :
     reg5;
   assign stationReg6 =
-    stateR == 4'd3 ? {63'd0, out0_Bin0} :
+    stateR == 4'd3 ? arrRData_a :
+    stateR == 4'd6 ? arrRData_a :
     reg6;
 
   always @(posedge clk) begin
@@ -133,43 +133,41 @@ module main (
         4'd0: stateR <= 4'd1;
         4'd1: stateR <= (stationReg3) ? 4'd4 : 4'd2;
         4'd2: stateR <= 4'd3;
-        4'd3: stateR <= (stationReg6) ? 4'd8 : 4'd6;
-        4'd4: stateR <= 4'd5;
-        4'd5: stateR <= linkreg;
-        4'd6: stateR <= 4'd7;
-        4'd7: stateR <= (stationReg5) ? 4'd8 : 4'd6;
+        4'd3: stateR <= (stationReg5) ? 4'd7 : 4'd5;
+        4'd4: stateR <= linkreg;
+        4'd5: stateR <= 4'd6;
+        4'd6: stateR <= (stationReg0) ? 4'd7 : 4'd5;
+        4'd7: stateR <= 4'd8;
         4'd8: stateR <= 4'd9;
-        4'd9: stateR <= 4'd10;
-        4'd10: stateR <= 4'd11;
-        4'd11: stateR <= linkreg;
+        4'd9: stateR <= linkreg;
       endcase
       case(stateR)
-        4'd5: reg0 <= reg0;
-        4'd7: reg0 <= stationReg4;
-        4'd11: reg0 <= reg0;
+        4'd4: reg0 <= stationReg0;
+        4'd6: reg0 <= stationReg4;
+        4'd9: reg0 <= stationReg0;
         default: reg0 <= stationReg0;
       endcase
       case(stateR)
-        4'd7: reg1 <= stationReg3;
+        4'd6: reg1 <= stationReg3;
         default: reg1 <= stationReg1;
       endcase
       case(stateR)
         default: reg2 <= stationReg2;
       endcase
       case(stateR)
-        4'd7: reg3 <= stationReg6;
+        4'd6: reg3 <= stationReg5;
         default: reg3 <= stationReg3;
       endcase
       case(stateR)
-        4'd7: reg4 <= stationReg1;
+        4'd6: reg4 <= stationReg1;
         default: reg4 <= stationReg4;
       endcase
       case(stateR)
-        4'd7: reg5 <= stationReg0;
+        4'd6: reg5 <= stationReg0;
         default: reg5 <= stationReg5;
       endcase
       case(stateR)
-        4'd7: reg6 <= stationReg5;
+        4'd6: reg6 <= stationReg6;
         default: reg6 <= stationReg6;
       endcase
     end

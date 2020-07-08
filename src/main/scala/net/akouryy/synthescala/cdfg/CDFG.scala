@@ -230,4 +230,6 @@ enum Jump:
     case j: Branch => j.copy(cond = fn(j.cond))
     case j: Merge => j.copy(inNames = j.inNames.map(_.map(fn)), outNames = j.outNames.map(fn))
 
+  def occupiesState: Boolean = false //this.isInstanceOf[TailCall]
+
 end Jump

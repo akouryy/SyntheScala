@@ -41,16 +41,16 @@ module main (
   arr_a arr_a(.*);
 
   assign in0_Bin1 =
-    stateR == 4'd4 ? reg0[9:0] :
+    stateR == 4'd3 ? reg0[9:0] :
     'x;
   assign in1_Bin1 =
-    stateR == 4'd4 ? 1'd1 :
+    stateR == 4'd3 ? 1'd1 :
     'x;
   assign in0_Bin2 =
-    stateR == 4'd7 ? reg3 :
+    stateR == 4'd6 ? reg3 :
     'x;
   assign in1_Bin2 =
-    stateR == 4'd7 ? {reg0[63], reg0[26:0]} :
+    stateR == 4'd6 ? {reg0[63], reg0[26:0]} :
     'x;
   assign in0_Bin0 =
     stateR == 4'd1 ? reg0[9:0] :
@@ -59,21 +59,21 @@ module main (
     stateR == 4'd1 ? 10'd1000 :
     'x;
   assign in0_Bin3 =
-    stateR == 4'd8 ? reg1 :
+    stateR == 4'd7 ? reg1 :
     'x;
   assign in1_Bin3 =
-    stateR == 4'd8 ? reg0 :
+    stateR == 4'd7 ? reg0 :
     'x;
 
   assign arrWEnable_a =
     controlArr ? controlArrWEnable_a :
+    stateR == 4'd3 ? 1'd0 :
     stateR == 4'd4 ? 1'd0 :
-    stateR == 4'd5 ? 1'd0 :
     1'd0;
   assign arrAddr_a =
     controlArr ? controlArrAddr_a :
+    stateR == 4'd3 ? reg0[9:0] :
     stateR == 4'd4 ? reg0[9:0] :
-    stateR == 4'd5 ? reg0[9:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
@@ -81,18 +81,18 @@ module main (
   assign controlArrRData_a = controlArr ? arrRData_a : 'x;
 
   assign stationReg0 =
-    stateR == 4'd5 ? {{37{arrRData_a[26]}}, arrRData_a} :
-    stateR == 4'd7 ? out0_Bin2 :
+    stateR == 4'd4 ? {{37{arrRData_a[26]}}, arrRData_a} :
+    stateR == 4'd6 ? out0_Bin2 :
     reg0;
   assign stationReg1 =
-    stateR == 4'd8 ? out0_Bin3 :
+    stateR == 4'd7 ? out0_Bin3 :
     reg1;
   assign stationReg2 =
     stateR == 4'd1 ? {63'd0, out0_Bin0} :
-    stateR == 4'd4 ? {54'd0, out0_Bin1} :
+    stateR == 4'd3 ? {54'd0, out0_Bin1} :
     reg2;
   assign stationReg3 =
-    stateR == 4'd6 ? {{37{arrRData_a[26]}}, arrRData_a} :
+    stateR == 4'd5 ? {{37{arrRData_a[26]}}, arrRData_a} :
     reg3;
 
   always @(posedge clk) begin
@@ -109,23 +109,21 @@ module main (
           result <= reg0;
         end
         4'd0: stateR <= 4'd1;
-        4'd1: stateR <= (stationReg2) ? 4'd2 : 4'd4;
-        4'd2: stateR <= 4'd3;
-        4'd3: stateR <= linkreg;
+        4'd1: stateR <= (stationReg2) ? 4'd2 : 4'd3;
+        4'd2: stateR <= linkreg;
+        4'd3: stateR <= 4'd4;
         4'd4: stateR <= 4'd5;
         4'd5: stateR <= 4'd6;
         4'd6: stateR <= 4'd7;
-        4'd7: stateR <= 4'd8;
-        4'd8: stateR <= 4'd9;
-        4'd9: stateR <= 4'd0;
+        4'd7: stateR <= 4'd0;
       endcase
       case(stateR)
-        4'd3: reg0 <= reg1;
-        4'd9: reg0 <= reg2;
+        4'd2: reg0 <= stationReg1;
+        4'd7: reg0 <= stationReg2;
         default: reg0 <= stationReg0;
       endcase
       case(stateR)
-        4'd9: reg1 <= reg1;
+        4'd7: reg1 <= stationReg1;
         default: reg1 <= stationReg1;
       endcase
       case(stateR)

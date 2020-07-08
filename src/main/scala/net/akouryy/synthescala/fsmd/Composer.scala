@@ -178,13 +178,13 @@ class Composer(
             mergeDatapath(
               new ConnPort.Reg(Register(i)),
               sche.jumpStates(ji)(ibi),
-              Source.Always(new ConnPort.Reg(regs(param))),
+              Source.Always(new ConnPort.RegStation(regs(param))),
             )
         case Jump.Return(ji, ident, ibi) =>
           mergeDatapath(
             new ConnPort.Reg(Register(0)),
             sche.jumpStates(ji)(ibi),
-            Source.Always(new ConnPort.Reg(regs(ident))),
+            Source.Always(new ConnPort.RegStation(regs(ident))),
           )
         case _ =>
   end composeDatapath

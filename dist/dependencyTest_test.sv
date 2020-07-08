@@ -14,6 +14,9 @@ module top();
   main main(.*);
 
   initial begin
+    $dumpfile("dependencyTest.vcd");
+    $dumpvars(0, main);
+
     clk = 0;
     controlArr = 0;
     forever #2 clk = ~clk;

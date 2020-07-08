@@ -11,7 +11,6 @@ object TastyReflector:
 
   def reflectImpl(expr: Expr[Any])(using QuoteContext): Expr[Program] =
     import qctx.tasty._
-    // PP.pprintln(expr.unseal)
 
     def us(kind: "U" | "S", width: Int) =
       if kind == "U"

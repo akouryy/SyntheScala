@@ -121,13 +121,12 @@ module main (
         5'd13: stateR <= 5'd14;
         5'd14: stateR <= 5'd15;
         5'd15: stateR <= 5'd16;
-        5'd16: stateR <= 5'd17;
-        5'd17: stateR <= linkreg;
+        5'd16: stateR <= linkreg;
       endcase
       case(stateR)
         5'd10: reg0 <= stationReg0;
         5'd13: reg0 <= stationReg0;
-        5'd17: reg0 <= reg0;
+        5'd16: reg0 <= stationReg0;
         default: reg0 <= stationReg0;
       endcase
       case(stateR)

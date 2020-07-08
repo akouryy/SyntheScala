@@ -94,9 +94,8 @@ class GorgeousScheduler(graph: CDFG) extends Scheduler:
   private def scheduleJump(fn: CDFGFun, ibi: BlockIndex, ji: JumpIndex): Unit =
     val jump = fn.jumps(ji)
     jumpStates.getOrElseUpdate(ji, mutable.Map.empty)
-    jump match
-      case _: (Jump.StartFun | Jump.Branch | Jump.Merge | Jump.ForLoopBottom) =>
-      case _ => maxState = maxState.succ
+    if jump.occupiesState
+      maxState = maxState.succ
     jumpStates(ji)(ibi) = maxState
     if jump.inBlocks.forall(visited)
       jump.outBlocks.foreach(scheduleBlock(fn, _))
