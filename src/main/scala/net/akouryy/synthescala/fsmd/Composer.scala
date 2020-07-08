@@ -63,7 +63,7 @@ class Composer(
             case _ => top.cond
           fsm(q1) = Transition.Conditional(
             Source.Always(new ConnPort.RegStation(regs(cond))),
-            new ConnPort.Reg(regs(top.cond)),
+            new ConnPort.Reg(regs(cond)),
             blockFirstState(fn, if top.isSecoTru then top.seco else top.exit),
             blockFirstState(fn, if top.isSecoTru then top.exit else top.seco),
           )
@@ -168,11 +168,10 @@ class Composer(
             (tn, bn) <- top.topNames.zipStrict(bottomNames)
             if regs.contains(tn) && regs.contains(bn)
           do
-            // mergeMerge(regs(tn), sche.jumpStates(bottomJI)(ibi), regs(bn)) // TODO: FLB-occupied
             mergeDatapath(
               new ConnPort.Reg(regs(tn)),
               sche.jumpStates(bottomJI)(ibi),
-              Source.Always(new ConnPort.Reg(regs(bn))),
+              Source.Always(new ConnPort.RegStation(regs(bn))),
             )
         case Jump.TailCall(ji, _, params, ibi) =>
           for (param, i) <- params.zipWithIndex do

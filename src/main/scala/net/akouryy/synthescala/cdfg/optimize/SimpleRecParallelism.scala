@@ -269,13 +269,13 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       secoBI, exitBI,
       names.map(_._1), // FIXME: 未使用変数は？
     )
-    addJumpState(branchIndices(ri), inputBI, newNodeStates(newFn(inputBI).nodes.last._1))
+    addJumpState(branchIndices(ri), inputBI, maxStateOf(inputBI, newFn))
 
     newFn.jumps(branchIndices(ri + 1)) = Jump.ForLoopBottom(
       branchIndices(ri + 1), branchIndices(ri), secoBI,
       names.map(_._2),
     )
-    addJumpState(branchIndices(ri + 1), secoBI, generateState())
+    addJumpState(branchIndices(ri + 1), secoBI, maxStateOf(secoBI, newFn))
 
     buildNewExit(oldFn, newFn, round, ri, exitBI)
   end buildNewLastJump
@@ -311,15 +311,12 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
       )
       newFn.blocks(newBI) = newBlock
 
-      var jumpState =
-        if newNodes.isEmpty
-          newJumpStates(newParentJI).soleElement._2
-        else
-          newNodeStates(newNodes.last._1)
       val oldJump = oldFn(oldBlock.outJump)
-      oldJump match
-        case _: (Jump.StartFun | Jump.Branch | Jump.Merge) =>
-        case _ => jumpState = generateState()
+      var jumpState = oldJump match
+        case _: (Jump.StartFun | Jump.Branch | Jump.Merge | Jump.ForLoopBottom) =>
+          maxStateOf(newBI, newFn)
+        case _ =>
+          generateState()
       addJumpState(newJI, newBI, jumpState)
       oldJump match
         case Jump.Return(_, value, _) =>
@@ -400,6 +397,9 @@ final class SimpleRecParallelism(graph: CDFG, typEnv: toki.TypeEnv)(using sche: 
           newNode.copy(id = awaID, req = oldReqIDToNewReqID(newNode.req))
         case newNode => newNode
   end registerFromParallelState
+
+  private def maxStateOf(bi: BlockIndex, newFn: CDFGFun): State =
+    newFn(bi).nodes.map(n => newNodeStates(n._1)).max
 end SimpleRecParallelism
 
 object SimpleRecParallelism:
