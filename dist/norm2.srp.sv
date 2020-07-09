@@ -67,18 +67,18 @@ module main (
   assign in0_Bin1 =
     stateR == 5'd2 ? reg0[9:0] :
     stateR == 5'd6 ? reg7[9:0] :
-    stateR == 5'd12 ? reg11[9:0] :
+    stateR == 5'd12 ? reg10[9:0] :
     'x;
   assign in1_Bin2 =
     stateR == 5'd7 ? {reg9[63], reg9[26:0]} :
     stateR == 5'd9 ? {reg9[63], reg9[26:0]} :
-    stateR == 5'd13 ? {reg13[63], reg13[26:0]} :
-    stateR == 5'd15 ? {reg13[63], reg13[26:0]} :
+    stateR == 5'd13 ? {reg14[63], reg14[26:0]} :
+    stateR == 5'd15 ? {reg14[63], reg14[26:0]} :
     'x;
   assign in0_Bin0 =
     stateR == 5'd1 ? reg0[9:0] :
     stateR == 5'd3 ? reg7[9:0] :
-    stateR == 5'd7 ? reg11[9:0] :
+    stateR == 5'd7 ? reg10[9:0] :
     stateR == 5'd13 ? reg6[9:0] :
     'x;
   assign in0_Bin3 =
@@ -88,10 +88,10 @@ module main (
     stateR == 5'd16 ? reg1 :
     'x;
   assign in1_Bin3 =
-    stateR == 5'd10 ? reg14 :
-    stateR == 5'd12 ? reg14 :
-    stateR == 5'd14 ? reg14 :
-    stateR == 5'd16 ? reg10 :
+    stateR == 5'd10 ? reg13 :
+    stateR == 5'd12 ? reg13 :
+    stateR == 5'd14 ? reg13 :
+    stateR == 5'd16 ? reg9 :
     'x;
   assign in1_Bin1 =
     stateR == 5'd2 ? 1'd1 :
@@ -99,8 +99,8 @@ module main (
     stateR == 5'd12 ? 1'd1 :
     'x;
   assign in0_Bin2 =
-    stateR == 5'd7 ? reg10 :
-    stateR == 5'd9 ? reg10 :
+    stateR == 5'd7 ? reg11 :
+    stateR == 5'd9 ? reg11 :
     stateR == 5'd13 ? reg0 :
     stateR == 5'd15 ? reg0 :
     'x;
@@ -126,8 +126,8 @@ module main (
     stateR == 5'd3 ? reg0[9:0] :
     stateR == 5'd6 ? reg7[9:0] :
     stateR == 5'd7 ? reg7[9:0] :
-    stateR == 5'd12 ? reg11[9:0] :
-    stateR == 5'd13 ? reg11[9:0] :
+    stateR == 5'd12 ? reg10[9:0] :
+    stateR == 5'd13 ? reg10[9:0] :
     'x;
   assign arrWData_a =
     controlArr ? controlArrWData_a :
@@ -163,27 +163,27 @@ module main (
     reg8;
   assign stationReg9 =
     stateR == 5'd3 ? {{37{arrRData_a[26]}}, arrRData_a} :
-    stateR == 5'd13 ? {63'd0, out0_Bin0} :
-    reg9;
-  assign stationReg10 =
-    stateR == 5'd6 ? {{37{arrRData_a[26]}}, arrRData_a} :
-    stateR == 5'd8 ? {{37{arrRData_a[26]}}, arrRData_a} :
     stateR == 5'd13 ? out0_Bin2 :
     stateR == 5'd15 ? out0_Bin2 :
+    reg9;
+  assign stationReg10 =
+    stateR == 5'd6 ? {54'd0, out0_Bin1} :
     reg10;
   assign stationReg11 =
-    stateR == 5'd6 ? {54'd0, out0_Bin1} :
+    stateR == 5'd6 ? {{37{arrRData_a[26]}}, arrRData_a} :
+    stateR == 5'd8 ? {{37{arrRData_a[26]}}, arrRData_a} :
+    stateR == 5'd13 ? {{37{arrRData_a[26]}}, arrRData_a} :
     reg11;
   assign stationReg12 =
     stateR == 5'd7 ? {63'd0, out0_Bin0} :
     reg12;
   assign stationReg13 =
-    stateR == 5'd7 ? {{37{arrRData_a[26]}}, arrRData_a} :
-    reg13;
-  assign stationReg14 =
     stateR == 5'd7 ? out0_Bin2 :
     stateR == 5'd9 ? out0_Bin2 :
-    stateR == 5'd13 ? {{37{arrRData_a[26]}}, arrRData_a} :
+    stateR == 5'd13 ? {63'd0, out0_Bin0} :
+    reg13;
+  assign stationReg14 =
+    stateR == 5'd7 ? {{37{arrRData_a[26]}}, arrRData_a} :
     reg14;
   assign stationReg15 =
     stateR == 5'd16 ? out0_Bin3 :
@@ -213,7 +213,7 @@ module main (
         5'd9: stateR <= 5'd10;
         5'd10: stateR <= linkreg;
         5'd12: stateR <= 5'd13;
-        5'd13: stateR <= (stationReg9) ? 5'd14 : 5'd12;
+        5'd13: stateR <= (stationReg13) ? 5'd14 : 5'd12;
         5'd14: stateR <= 5'd15;
         5'd15: stateR <= 5'd16;
         5'd16: stateR <= linkreg;
@@ -247,7 +247,7 @@ module main (
         default: reg6 <= stationReg6;
       endcase
       case(stateR)
-        5'd13: reg7 <= stationReg11;
+        5'd13: reg7 <= stationReg10;
         default: reg7 <= stationReg7;
       endcase
       case(stateR)
@@ -255,27 +255,27 @@ module main (
         default: reg8 <= stationReg8;
       endcase
       case(stateR)
-        5'd13: reg9 <= stationReg13;
+        5'd13: reg9 <= stationReg14;
         default: reg9 <= stationReg9;
       endcase
       case(stateR)
-        5'd13: reg10 <= stationReg0;
+        5'd13: reg10 <= stationReg6;
         default: reg10 <= stationReg10;
       endcase
       case(stateR)
-        5'd13: reg11 <= stationReg6;
+        5'd13: reg11 <= stationReg0;
         default: reg11 <= stationReg11;
       endcase
       case(stateR)
-        5'd13: reg12 <= stationReg9;
+        5'd13: reg12 <= stationReg13;
         default: reg12 <= stationReg12;
       endcase
       case(stateR)
-        5'd13: reg13 <= stationReg14;
+        5'd13: reg13 <= stationReg9;
         default: reg13 <= stationReg13;
       endcase
       case(stateR)
-        5'd13: reg14 <= stationReg10;
+        5'd13: reg14 <= stationReg11;
         default: reg14 <= stationReg14;
       endcase
       case(stateR)
@@ -293,12 +293,12 @@ module arr_a (
   input wire signed[26:0] arrWData_a
 );
   reg[9:0] delayedRAddr;
-  reg signed[26:0] mem [0:999];
+  reg signed[26:0] mem [0:1023];
   always @(posedge clk) begin
     if(arrWEnable_a) begin
       mem[arrAddr_a] <= arrWData_a;
     end
-    delayedRAddr <= arrWEnable_a ? 'x : arrAddr_a;
+    delayedRAddr <= arrAddr_a;
   end
   assign arrRData_a = mem[delayedRAddr];
 endmodule

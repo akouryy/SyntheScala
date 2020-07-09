@@ -133,12 +133,12 @@ module arr_a (
   input wire signed[63:0] arrWData_a
 );
   reg[9:0] delayedRAddr;
-  reg signed[63:0] mem [0:999];
+  reg signed[63:0] mem [0:1023];
   always @(posedge clk) begin
     if(arrWEnable_a) begin
       mem[arrAddr_a] <= arrWData_a;
     end
-    delayedRAddr <= arrWEnable_a ? 'x : arrAddr_a;
+    delayedRAddr <= arrAddr_a;
   end
   assign arrRData_a = mem[delayedRAddr];
 endmodule

@@ -21,28 +21,28 @@ module main (
   wire[5:0] in0_Bin0;
   wire in1_Bin0;
   wire out0_Bin0 = in0_Bin0 == in1_Bin0;
-  wire[31:0] in0_Bin1;
-  wire[31:0] in1_Bin1;
-  wire[31:0] out0_Bin1 = in0_Bin1 + in1_Bin1;
-  wire[5:0] in0_Bin2;
-  wire in1_Bin2;
-  wire[5:0] out0_Bin2 = in0_Bin2 - in1_Bin2;
+  wire[5:0] in0_Bin1;
+  wire in1_Bin1;
+  wire[5:0] out0_Bin1 = in0_Bin1 - in1_Bin1;
+  wire[31:0] in0_Bin2;
+  wire[31:0] in1_Bin2;
+  wire[31:0] out0_Bin2 = in0_Bin2 + in1_Bin2;
 
   assign in0_Bin1 =
-    stateR == 3'd2 ? reg1[31:0] :
-    'x;
-  assign in1_Bin1 =
-    stateR == 3'd2 ? reg2[31:0] :
-    'x;
-  assign in0_Bin2 =
     stateR == 3'd2 ? reg0[5:0] :
     'x;
-  assign in1_Bin2 =
+  assign in1_Bin1 =
     stateR == 3'd2 ? 1'd1 :
+    'x;
+  assign in0_Bin2 =
+    stateR == 3'd2 ? reg1[31:0] :
+    'x;
+  assign in1_Bin2 =
+    stateR == 3'd2 ? reg2[31:0] :
     'x;
   assign in0_Bin0 =
     stateR == 3'd1 ? reg0[5:0] :
-    stateR == 3'd3 ? reg2[5:0] :
+    stateR == 3'd3 ? reg0[5:0] :
     'x;
   assign in1_Bin0 =
     stateR == 3'd1 ? 1'd0 :
@@ -50,12 +50,12 @@ module main (
     'x;
 
   assign stationReg0 =
-    stateR == 3'd2 ? {32'd0, out0_Bin1} :
+    stateR == 3'd2 ? {58'd0, out0_Bin1} :
     reg0;
   assign stationReg1 =
     reg1;
   assign stationReg2 =
-    stateR == 3'd2 ? {58'd0, out0_Bin2} :
+    stateR == 3'd2 ? {32'd0, out0_Bin2} :
     reg2;
   assign stationReg3 =
     stateR == 3'd1 ? {63'd0, out0_Bin0} :
@@ -83,12 +83,12 @@ module main (
         3'd5: stateR <= linkreg;
       endcase
       case(stateR)
-        3'd3: reg0 <= stationReg2;
+        3'd3: reg0 <= stationReg0;
         3'd5: reg0 <= stationReg1;
         default: reg0 <= stationReg0;
       endcase
       case(stateR)
-        3'd3: reg1 <= stationReg0;
+        3'd3: reg1 <= stationReg2;
         default: reg1 <= stationReg1;
       endcase
       case(stateR)

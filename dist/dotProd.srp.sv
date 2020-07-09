@@ -64,21 +64,21 @@ module main (
     stateR == 4'd6 ? reg5[9:0] :
     'x;
   assign in1_Bin2 =
-    stateR == 4'd6 ? {reg7[63], reg7[26:0]} :
-    stateR == 4'd8 ? {reg7[63], reg7[26:0]} :
+    stateR == 4'd6 ? {reg8[63], reg8[26:0]} :
+    stateR == 4'd8 ? {reg8[63], reg8[26:0]} :
     'x;
   assign in0_Bin0 =
     stateR == 4'd1 ? reg0[9:0] :
     stateR == 4'd3 ? reg5[9:0] :
-    stateR == 4'd7 ? reg0[9:0] :
+    stateR == 4'd7 ? reg4[9:0] :
     'x;
   assign in0_Bin3 =
     stateR == 4'd7 ? reg1 :
     stateR == 4'd9 ? reg1 :
     'x;
   assign in1_Bin3 =
-    stateR == 4'd7 ? reg4 :
-    stateR == 4'd9 ? reg4 :
+    stateR == 4'd7 ? reg0 :
+    stateR == 4'd9 ? reg0 :
     'x;
   assign in1_Bin1 =
     stateR == 4'd2 ? 1'd1 :
@@ -124,7 +124,10 @@ module main (
   assign controlArrRData_b = controlArr ? arrRData_b : 'x;
 
   assign stationReg0 =
-    stateR == 4'd6 ? {54'd0, out0_Bin1} :
+    stateR == 4'd6 ? out0_Bin2 :
+    stateR == 4'd7 ? out0_Bin3 :
+    stateR == 4'd8 ? out0_Bin2 :
+    stateR == 4'd9 ? out0_Bin3 :
     reg0;
   assign stationReg1 =
     stateR == 4'd7 ? {{37{arrRData_b[26]}}, arrRData_b} :
@@ -135,10 +138,7 @@ module main (
     reg3;
   assign stationReg4 =
     stateR == 4'd1 ? {63'd0, out0_Bin0} :
-    stateR == 4'd6 ? out0_Bin2 :
-    stateR == 4'd7 ? out0_Bin3 :
-    stateR == 4'd8 ? out0_Bin2 :
-    stateR == 4'd9 ? out0_Bin3 :
+    stateR == 4'd6 ? {54'd0, out0_Bin1} :
     reg4;
   assign stationReg5 =
     stateR == 4'd2 ? {54'd0, out0_Bin1} :
@@ -148,11 +148,11 @@ module main (
     stateR == 4'd7 ? {{37{arrRData_a[26]}}, arrRData_a} :
     reg6;
   assign stationReg7 =
-    stateR == 4'd3 ? {{37{arrRData_b[26]}}, arrRData_b} :
-    stateR == 4'd7 ? {63'd0, out0_Bin0} :
+    stateR == 4'd3 ? {63'd0, out0_Bin0} :
     reg7;
   assign stationReg8 =
-    stateR == 4'd3 ? {63'd0, out0_Bin0} :
+    stateR == 4'd3 ? {{37{arrRData_b[26]}}, arrRData_b} :
+    stateR == 4'd7 ? {63'd0, out0_Bin0} :
     reg8;
 
   always @(posedge clk) begin
@@ -171,21 +171,21 @@ module main (
         4'd0: stateR <= 4'd1;
         4'd1: stateR <= (stationReg4) ? 4'd5 : 4'd2;
         4'd2: stateR <= 4'd3;
-        4'd3: stateR <= (stationReg8) ? 4'd8 : 4'd6;
+        4'd3: stateR <= (stationReg7) ? 4'd8 : 4'd6;
         4'd5: stateR <= linkreg;
         4'd6: stateR <= 4'd7;
-        4'd7: stateR <= (stationReg7) ? 4'd8 : 4'd6;
+        4'd7: stateR <= (stationReg8) ? 4'd8 : 4'd6;
         4'd8: stateR <= 4'd9;
         4'd9: stateR <= linkreg;
       endcase
       case(stateR)
         4'd5: reg0 <= stationReg1;
         4'd7: reg0 <= stationReg5;
-        4'd9: reg0 <= stationReg4;
+        4'd9: reg0 <= stationReg0;
         default: reg0 <= stationReg0;
       endcase
       case(stateR)
-        4'd7: reg1 <= stationReg4;
+        4'd7: reg1 <= stationReg0;
         default: reg1 <= stationReg1;
       endcase
       case(stateR)
@@ -195,11 +195,11 @@ module main (
         default: reg3 <= stationReg3;
       endcase
       case(stateR)
-        4'd7: reg4 <= stationReg8;
+        4'd7: reg4 <= stationReg7;
         default: reg4 <= stationReg4;
       endcase
       case(stateR)
-        4'd7: reg5 <= stationReg0;
+        4'd7: reg5 <= stationReg4;
         default: reg5 <= stationReg5;
       endcase
       case(stateR)
@@ -207,11 +207,11 @@ module main (
         default: reg6 <= stationReg6;
       endcase
       case(stateR)
-        4'd7: reg7 <= stationReg1;
+        4'd7: reg7 <= stationReg8;
         default: reg7 <= stationReg7;
       endcase
       case(stateR)
-        4'd7: reg8 <= stationReg7;
+        4'd7: reg8 <= stationReg1;
         default: reg8 <= stationReg8;
       endcase
     end
@@ -225,12 +225,12 @@ module arr_a (
   input wire signed[26:0] arrWData_a
 );
   reg[9:0] delayedRAddr;
-  reg signed[26:0] mem [0:999];
+  reg signed[26:0] mem [0:1023];
   always @(posedge clk) begin
     if(arrWEnable_a) begin
       mem[arrAddr_a] <= arrWData_a;
     end
-    delayedRAddr <= arrWEnable_a ? 'x : arrAddr_a;
+    delayedRAddr <= arrAddr_a;
   end
   assign arrRData_a = mem[delayedRAddr];
 endmodule
@@ -242,12 +242,12 @@ module arr_b (
   input wire signed[26:0] arrWData_b
 );
   reg[9:0] delayedRAddr;
-  reg signed[26:0] mem [0:999];
+  reg signed[26:0] mem [0:1023];
   always @(posedge clk) begin
     if(arrWEnable_b) begin
       mem[arrAddr_b] <= arrWData_b;
     end
-    delayedRAddr <= arrWEnable_b ? 'x : arrAddr_b;
+    delayedRAddr <= arrAddr_b;
   end
   assign arrRData_b = mem[delayedRAddr];
 endmodule
